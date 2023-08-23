@@ -1,0 +1,8 @@
+###replenish
+POST http://localhost:8080/accounts
+Content-Type: application/json
+
+{
+  "account_recipient_id": "0J2O 6O3P 1CUB VZUT 91SJ X3FU MUR4",
+  "money": 1200
+}

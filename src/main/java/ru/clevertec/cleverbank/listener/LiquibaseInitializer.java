@@ -35,7 +35,7 @@ public class LiquibaseInitializer implements ServletContextListener {
                     .addArgumentValue("database", database)
                     .execute();
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            log.error(e.getMessage());
         }
     }
 
@@ -45,7 +45,7 @@ public class LiquibaseInitializer implements ServletContextListener {
             try {
                 database.close();
             } catch (DatabaseException e) {
-                log.error(e.getMessage(), e);
+                log.error(e.getMessage());
             }
         }
     }
@@ -59,7 +59,7 @@ public class LiquibaseInitializer implements ServletContextListener {
             Class.forName("org.postgresql.Driver").getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException |
                  ClassNotFoundException e) {
-            log.error(e.getMessage(), e);
+            log.error(e.getMessage());
         }
         return DriverManager.getConnection(url, user, password);
     }
