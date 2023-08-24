@@ -5,19 +5,19 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import ru.clevertec.cleverbank.dto.BalanceChangeRequest;
-import ru.clevertec.cleverbank.dto.BalanceChangeResponse;
-import ru.clevertec.cleverbank.service.AccountService;
-import ru.clevertec.cleverbank.service.impl.AccountServiceImpl;
+import ru.clevertec.cleverbank.dto.TransactionRequest;
+import ru.clevertec.cleverbank.dto.TransactionResponse;
+import ru.clevertec.cleverbank.service.TransactionService;
+import ru.clevertec.cleverbank.service.impl.TransactionServiceImpl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 
 @WebServlet(urlPatterns = "/accounts")
-public class AccountServlet extends HttpServlet {
+public class TransactionServlet extends HttpServlet {
 
-    private final transient AccountService accountService = new AccountServiceImpl();
+    private final transient TransactionService transactionService = new TransactionServiceImpl();
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -28,8 +28,8 @@ public class AccountServlet extends HttpServlet {
             result.append(line);
         }
 
-        BalanceChangeRequest request = new Gson().fromJson(result.toString(), BalanceChangeRequest.class);
-        BalanceChangeResponse response = accountService.replenish(request);
+        TransactionRequest request = new Gson().fromJson(result.toString(), TransactionRequest.class);
+        TransactionResponse response = transactionService.replenish(request);
         String transactionJson = new Gson().toJson(response);
 
         resp.setStatus(201);

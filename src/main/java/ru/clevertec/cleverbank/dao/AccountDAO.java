@@ -8,4 +8,6 @@ public interface AccountDAO {
 
     Optional<Account> findById(String id);
 
+    Account update(Account account);
+
 }

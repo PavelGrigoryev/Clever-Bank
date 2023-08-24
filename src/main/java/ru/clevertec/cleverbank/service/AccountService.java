@@ -1,12 +1,13 @@
 package ru.clevertec.cleverbank.service;
 
-import ru.clevertec.cleverbank.dto.BalanceChangeRequest;
-import ru.clevertec.cleverbank.dto.BalanceChangeResponse;
+import ru.clevertec.cleverbank.model.Account;
+
+import java.math.BigDecimal;
 
 public interface AccountService {
 
-    BalanceChangeResponse replenish(BalanceChangeRequest request);
+    Account findById(String id);
 
-    BalanceChangeResponse withdraw(BalanceChangeRequest request);
+    Account updateBalanceById(String id, BigDecimal balance);
 
 }

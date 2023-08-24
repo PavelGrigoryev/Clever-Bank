@@ -11,6 +11,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Optional;
 
 @Slf4j
@@ -39,6 +40,28 @@ public class AccountDAOImpl implements AccountDAO {
         return account;
     }
 
+    @Override
+    public Account update(Account account) {
+        String sql = """
+                UPDATE accounts
+                SET currency = ?, balance = ?, opening_date = ?, closing_date = ?, bank_id = ?, user_id = ?
+                WHERE id = ?
+                """;
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            setAccountValuesInStatement(preparedStatement, account);
+            preparedStatement.setString(7, account.getId());
+            preparedStatement.executeUpdate();
+            ResultSet resultSet = preparedStatement.getGeneratedKeys();
+            if (resultSet.next()) {
+                String id = resultSet.getString(1);
+                account.setId(id);
+            }
+        } catch (SQLException e) {
+            log.error(e.getMessage());
+        }
+        return account;
+    }
+
     private Account getAccountFromResultSet(ResultSet resultSet) throws SQLException {
         Date closingDate = resultSet.getDate("closing_date");
         return Account.builder()
@@ -53,13 +76,12 @@ public class AccountDAOImpl implements AccountDAO {
     }
 
     private void setAccountValuesInStatement(PreparedStatement preparedStatement, Account account) throws SQLException {
-        preparedStatement.setString(1, account.getId());
-        preparedStatement.setString(2, String.valueOf(account.getCurrency()));
-        preparedStatement.setBigDecimal(3, account.getBalance());
-        preparedStatement.setObject(4, account.getOpeningDate());
-        preparedStatement.setObject(5, account.getClosingDate());
-        preparedStatement.setLong(6, account.getBankId());
-        preparedStatement.setLong(7, account.getUserId());
+        preparedStatement.setString(1, String.valueOf(account.getCurrency()));
+        preparedStatement.setBigDecimal(2, account.getBalance());
+        preparedStatement.setObject(3, account.getOpeningDate());
+        preparedStatement.setObject(4, account.getClosingDate());
+        preparedStatement.setLong(5, account.getBankId());
+        preparedStatement.setLong(6, account.getUserId());
     }
 
 }
