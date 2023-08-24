@@ -29,7 +29,7 @@ public class TransactionServlet extends HttpServlet {
         }
 
         TransactionRequest request = new Gson().fromJson(result.toString(), TransactionRequest.class);
-        TransactionResponse response = transactionService.replenish(request);
+        TransactionResponse response = transactionService.changeBalance(request);
         String transactionJson = new Gson().toJson(response);
 
         resp.setStatus(201);

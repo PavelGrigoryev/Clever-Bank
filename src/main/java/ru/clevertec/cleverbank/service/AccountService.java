@@ -8,6 +8,6 @@ public interface AccountService {
 
     Account findById(String id);
 
-    Account updateBalanceById(String id, BigDecimal balance);
+    Account updateBalance(Account account, BigDecimal balance);
 
 }

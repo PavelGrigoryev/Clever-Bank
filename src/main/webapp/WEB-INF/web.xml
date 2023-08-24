@@ -10,4 +10,8 @@
         <exception-type>ru.clevertec.cleverbank.exception.NotFoundException</exception-type>
         <location>/exception_handler</location>
     </error-page>
+    <error-page>
+        <exception-type>ru.clevertec.cleverbank.exception.BadRequestException</exception-type>
+        <location>/exception_handler</location>
+    </error-page>
 </web-app>

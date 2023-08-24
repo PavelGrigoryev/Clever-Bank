@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import ru.clevertec.cleverbank.exception.NotFoundException;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -20,9 +21,14 @@ public class ExceptionHandlerServlet extends HttpServlet {
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
-        resp.setStatus(404);
 
         Exception exception = (Exception) req.getAttribute(ERROR_EXCEPTION);
+        if (exception instanceof NotFoundException) {
+            resp.setStatus(404);
+        } else {
+            resp.setStatus(400);
+        }
+
         log.error(exception.getMessage());
         ExceptionResponse response = new ExceptionResponse(exception.getMessage());
         String json = new Gson().toJson(response);

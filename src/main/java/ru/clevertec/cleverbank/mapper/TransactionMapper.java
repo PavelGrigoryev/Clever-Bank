@@ -12,18 +12,18 @@ import java.time.LocalTime;
 @Mapper
 public interface TransactionMapper {
 
-    default Transaction toReplenishTransaction(String recipientsBank, String recipientsAccount, BigDecimal sum) {
+    default Transaction createTransaction(Type type, String recipientsBank, String recipientsAccount, BigDecimal sum) {
         return Transaction.builder()
                 .date(LocalDate.now())
                 .time(LocalTime.now())
-                .type(Type.REPLENISHMENT)
+                .type(type)
                 .recipientsBank(recipientsBank)
                 .recipientsAccount(recipientsAccount)
                 .sum(sum)
                 .build();
     }
 
-    default TransactionResponse toReplenishResponse(Transaction transaction, BigDecimal oldBalance, BigDecimal newBalance) {
+    default TransactionResponse createResponse(Transaction transaction, BigDecimal oldBalance, BigDecimal newBalance) {
         return new TransactionResponse(transaction.getId(),
                 transaction.getDate(),
                 transaction.getTime().withNano(0),

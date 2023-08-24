@@ -23,9 +23,8 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Account updateBalanceById(String id, BigDecimal balance) {
-        Account account = findById(id);
-        account.setBalance(account.getBalance().add(balance));
+    public Account updateBalance(Account account, BigDecimal balance) {
+        account.setBalance(balance);
         return accountDAO.update(account);
     }
 

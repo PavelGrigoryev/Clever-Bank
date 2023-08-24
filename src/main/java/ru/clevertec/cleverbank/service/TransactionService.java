@@ -5,8 +5,6 @@ import ru.clevertec.cleverbank.dto.TransactionResponse;
 
 public interface TransactionService {
 
-    TransactionResponse replenish(TransactionRequest request);
-
-    TransactionResponse withdraw(TransactionRequest request);
+    TransactionResponse changeBalance(TransactionRequest request);
 
 }
