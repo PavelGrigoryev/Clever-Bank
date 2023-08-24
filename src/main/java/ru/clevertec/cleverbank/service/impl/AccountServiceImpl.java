@@ -10,6 +10,8 @@ import ru.clevertec.cleverbank.dao.impl.TransactionDAOImpl;
 import ru.clevertec.cleverbank.dao.impl.UserDAOImpl;
 import ru.clevertec.cleverbank.dto.BalanceChangeRequest;
 import ru.clevertec.cleverbank.dto.BalanceChangeResponse;
+import ru.clevertec.cleverbank.exception.AccountNotFoundException;
+import ru.clevertec.cleverbank.exception.BankNotFoundException;
 import ru.clevertec.cleverbank.model.Account;
 import ru.clevertec.cleverbank.model.Bank;
 import ru.clevertec.cleverbank.model.Transaction;
@@ -36,9 +38,9 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public BalanceChangeResponse replenish(BalanceChangeRequest request) {
         Account accountRecipient = accountDAO.findById(request.accountRecipientId())
-                .orElseThrow(() -> new RuntimeException("!!!"));
+                .orElseThrow(() -> new AccountNotFoundException("!!!"));
         Bank bankRecipient = bankDAO.findById(accountRecipient.getBankId())
-                .orElseThrow(() -> new RuntimeException("!!!"));
+                .orElseThrow(() -> new BankNotFoundException("!!!"));
 
         Transaction transaction = Transaction.builder()
                 .date(LocalDate.now())
