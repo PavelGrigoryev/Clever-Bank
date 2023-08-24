@@ -1,4 +1,4 @@
-package ru.clevertec.cleverbank.adapter;
+package ru.clevertec.cleverbank.dto.adapter;
 
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
@@ -11,7 +11,7 @@ public class LocalTimeAdapter extends TypeAdapter<LocalTime> {
 
     @Override
     public void write(JsonWriter out, LocalTime value) throws IOException {
-        out.value(value.toString());
+        out.value(value.withNano(0).toString());
     }
 
     @Override

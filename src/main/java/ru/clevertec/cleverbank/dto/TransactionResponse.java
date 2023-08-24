@@ -2,8 +2,8 @@ package ru.clevertec.cleverbank.dto;
 
 import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
-import ru.clevertec.cleverbank.adapter.LocalDateAdapter;
-import ru.clevertec.cleverbank.adapter.LocalTimeAdapter;
+import ru.clevertec.cleverbank.dto.adapter.LocalDateAdapter;
+import ru.clevertec.cleverbank.dto.adapter.LocalTimeAdapter;
 import ru.clevertec.cleverbank.model.Type;
 
 import java.math.BigDecimal;
@@ -27,7 +27,7 @@ public record TransactionResponse(@SerializedName("transaction_id")
                                   @SerializedName("recipient_account_id")
                                   String recipientAccountId,
 
-                                  BigDecimal money,
+                                  BigDecimal sum,
 
                                   @SerializedName("old_balance")
                                   BigDecimal oldBalance,

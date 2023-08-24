@@ -1,6 +1,7 @@
 package ru.clevertec.cleverbank.mapper;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import ru.clevertec.cleverbank.dto.TransactionResponse;
 import ru.clevertec.cleverbank.model.Transaction;
 import ru.clevertec.cleverbank.model.Type;
@@ -23,16 +24,9 @@ public interface TransactionMapper {
                 .build();
     }
 
-    default TransactionResponse createResponse(Transaction transaction, BigDecimal oldBalance, BigDecimal newBalance) {
-        return new TransactionResponse(transaction.getId(),
-                transaction.getDate(),
-                transaction.getTime().withNano(0),
-                transaction.getType(),
-                transaction.getRecipientsBank(),
-                transaction.getRecipientsAccount(),
-                transaction.getSum(),
-                oldBalance,
-                newBalance);
-    }
+    @Mapping(target = "transactionId", source = "transaction.id")
+    @Mapping(target = "recipientBankName", source = "transaction.recipientsBank")
+    @Mapping(target = "recipientAccountId", source = "transaction.recipientsAccount")
+    TransactionResponse createResponse(Transaction transaction, BigDecimal oldBalance, BigDecimal newBalance);
 
 }

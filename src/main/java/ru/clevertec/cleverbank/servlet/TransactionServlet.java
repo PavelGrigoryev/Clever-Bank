@@ -5,7 +5,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import ru.clevertec.cleverbank.dto.TransactionRequest;
+import ru.clevertec.cleverbank.dto.ChangeBalanceRequest;
 import ru.clevertec.cleverbank.dto.TransactionResponse;
 import ru.clevertec.cleverbank.service.TransactionService;
 import ru.clevertec.cleverbank.service.impl.TransactionServiceImpl;
@@ -28,7 +28,7 @@ public class TransactionServlet extends HttpServlet {
             result.append(line);
         }
 
-        TransactionRequest request = new Gson().fromJson(result.toString(), TransactionRequest.class);
+        ChangeBalanceRequest request = new Gson().fromJson(result.toString(), ChangeBalanceRequest.class);
         TransactionResponse response = transactionService.changeBalance(request);
         String transactionJson = new Gson().toJson(response);
 

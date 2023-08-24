@@ -1,4 +1,4 @@
-package ru.clevertec.cleverbank.adapter;
+package ru.clevertec.cleverbank.dto.adapter;
 
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
