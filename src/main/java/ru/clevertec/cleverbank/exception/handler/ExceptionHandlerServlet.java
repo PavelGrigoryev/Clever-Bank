@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import ru.clevertec.cleverbank.exception.internalservererror.InternalServerErrorException;
 import ru.clevertec.cleverbank.exception.notfound.NotFoundException;
 
 import java.io.IOException;
@@ -25,6 +26,8 @@ public class ExceptionHandlerServlet extends HttpServlet {
         Exception exception = (Exception) req.getAttribute(ERROR_EXCEPTION);
         if (exception instanceof NotFoundException) {
             resp.setStatus(404);
+        } else if (exception instanceof InternalServerErrorException) {
+            resp.setStatus(500);
         } else {
             resp.setStatus(400);
         }

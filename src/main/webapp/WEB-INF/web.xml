@@ -14,4 +14,8 @@
         <exception-type>ru.clevertec.cleverbank.exception.badrequest.BadRequestException</exception-type>
         <location>/exception_handler</location>
     </error-page>
+    <error-page>
+        <exception-type>ru.clevertec.cleverbank.exception.internalservererror.InternalServerErrorException</exception-type>
+        <location>/exception_handler</location>
+    </error-page>
 </web-app>

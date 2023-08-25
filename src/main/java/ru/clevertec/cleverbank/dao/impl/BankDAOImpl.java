@@ -3,6 +3,7 @@ package ru.clevertec.cleverbank.dao.impl;
 import lombok.extern.slf4j.Slf4j;
 import ru.clevertec.cleverbank.config.ConnectionManager;
 import ru.clevertec.cleverbank.dao.BankDAO;
+import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
 import ru.clevertec.cleverbank.model.Bank;
 
 import java.sql.Connection;
@@ -33,6 +34,7 @@ public class BankDAOImpl implements BankDAO {
             }
         } catch (SQLException e) {
             log.error(e.getMessage());
+            throw new JDBCConnectionException();
         }
         return bank;
     }

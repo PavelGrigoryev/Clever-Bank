@@ -99,7 +99,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     private static void checkAccountForSufficientBalance(Type type, BigDecimal sum, BigDecimal oldBalance) {
         if (type != Type.REPLENISHMENT && oldBalance.compareTo(sum) < 0) {
-            throw new InsufficientFundsException("Insufficient funds in the account! You want to withdrawal "
+            throw new InsufficientFundsException("Insufficient funds in the account! You want to withdrawal/transfer "
                                                  + sum + ", but you have only " + oldBalance);
         }
     }

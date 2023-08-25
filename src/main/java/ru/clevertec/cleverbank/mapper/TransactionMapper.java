@@ -9,25 +9,16 @@ import ru.clevertec.cleverbank.model.Transaction;
 import ru.clevertec.cleverbank.model.Type;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Mapper
 public interface TransactionMapper {
 
-    default Transaction createChangeTransaction(Type type,
-                                                String recipientsBank,
-                                                String recipientsAccount,
-                                                BigDecimal sum) {
-        return Transaction.builder()
-                .date(LocalDate.now())
-                .time(LocalTime.now())
-                .type(type)
-                .recipientsBank(recipientsBank)
-                .recipientsAccount(recipientsAccount)
-                .sum(sum)
-                .build();
-    }
+    @Mapping(target = "date", expression = "java(LocalDate.now())")
+    @Mapping(target = "time", expression = "java(LocalTime.now())")
+    Transaction createChangeTransaction(Type type,
+                                        String recipientsBank,
+                                        String recipientsAccount,
+                                        BigDecimal sum);
 
     @Mapping(target = "transactionId", source = "transaction.id")
     @Mapping(target = "recipientBankName", source = "transaction.recipientsBank")
@@ -37,23 +28,14 @@ public interface TransactionMapper {
                                                BigDecimal oldBalance,
                                                BigDecimal newBalance);
 
-    default Transaction createTransferTransaction(Type type,
-                                                  String sendersBank,
-                                                  String recipientsBank,
-                                                  String sendersAccount,
-                                                  String recipientsAccount,
-                                                  BigDecimal sum) {
-        return Transaction.builder()
-                .date(LocalDate.now())
-                .time(LocalTime.now())
-                .type(type)
-                .sendersBank(sendersBank)
-                .recipientsBank(recipientsBank)
-                .recipientsAccount(sendersAccount)
-                .recipientsAccount(recipientsAccount)
-                .sum(sum)
-                .build();
-    }
+    @Mapping(target = "date", expression = "java(LocalDate.now())")
+    @Mapping(target = "time", expression = "java(LocalTime.now())")
+    Transaction createTransferTransaction(Type type,
+                                          String sendersBank,
+                                          String recipientsBank,
+                                          String sendersAccount,
+                                          String recipientsAccount,
+                                          BigDecimal sum);
 
     @Mapping(target = "transactionId", source = "transaction.id")
     @Mapping(target = "senderBankName", source = "transaction.sendersBank")

@@ -3,6 +3,7 @@ package ru.clevertec.cleverbank.dao.impl;
 import lombok.extern.slf4j.Slf4j;
 import ru.clevertec.cleverbank.config.ConnectionManager;
 import ru.clevertec.cleverbank.dao.UserDAO;
+import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
 import ru.clevertec.cleverbank.model.User;
 
 import java.sql.Connection;
@@ -33,6 +34,7 @@ public class UserDAOImpl implements UserDAO {
             }
         } catch (SQLException e) {
             log.error(e.getMessage());
+            throw new JDBCConnectionException();
         }
         return user;
     }

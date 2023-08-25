@@ -2,6 +2,7 @@ package ru.clevertec.cleverbank.config;
 
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
 import ru.clevertec.cleverbank.util.YamlUtil;
 
 import java.lang.reflect.InvocationTargetException;
@@ -16,7 +17,7 @@ public class ConnectionManager {
 
     private Connection connection;
 
-    public static Connection getJDBCConnection() {
+    public Connection getJDBCConnection() {
         if (connection == null) {
             Map<String, String> postgresqlMap = new YamlUtil().getYamlMap().get("postgresql");
             String url = postgresqlMap.get("url");
@@ -29,6 +30,7 @@ public class ConnectionManager {
                      NoSuchMethodException |
                      ClassNotFoundException | SQLException e) {
                 log.error(e.getMessage());
+                throw new JDBCConnectionException();
             }
         }
         return connection;
