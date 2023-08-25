@@ -1,12 +1,15 @@
 package ru.clevertec.cleverbank.servlet;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.clevertec.cleverbank.dto.ChangeBalanceRequest;
-import ru.clevertec.cleverbank.dto.TransactionResponse;
+import ru.clevertec.cleverbank.dto.ChangeBalanceResponse;
+import ru.clevertec.cleverbank.dto.TransferBalanceRequest;
+import ru.clevertec.cleverbank.dto.TransferBalanceResponse;
 import ru.clevertec.cleverbank.service.TransactionService;
 import ru.clevertec.cleverbank.service.impl.TransactionServiceImpl;
 
@@ -14,7 +17,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-@WebServlet(urlPatterns = "/accounts")
+@WebServlet(urlPatterns = "/transactions")
 public class TransactionServlet extends HttpServlet {
 
     private final transient TransactionService transactionService = new TransactionServiceImpl();
@@ -28,9 +31,18 @@ public class TransactionServlet extends HttpServlet {
             result.append(line);
         }
 
-        ChangeBalanceRequest request = new Gson().fromJson(result.toString(), ChangeBalanceRequest.class);
-        TransactionResponse response = transactionService.changeBalance(request);
-        String transactionJson = new Gson().toJson(response);
+        Gson gson = new Gson();
+        String transactionJson;
+        JsonObject jsonObject = gson.fromJson(result.toString(), JsonObject.class);
+        if (jsonObject.has("type")) {
+            ChangeBalanceRequest request = gson.fromJson(jsonObject.toString(), ChangeBalanceRequest.class);
+            ChangeBalanceResponse response = transactionService.changeBalance(request);
+            transactionJson = gson.toJson(response);
+        } else {
+            TransferBalanceRequest request = gson.fromJson(jsonObject.toString(), TransferBalanceRequest.class);
+            TransferBalanceResponse response = transactionService.transferBalance(request);
+            transactionJson = gson.toJson(response);
+        }
 
         resp.setStatus(201);
         PrintWriter printWriter = resp.getWriter();

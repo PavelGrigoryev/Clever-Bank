@@ -1,4 +1,4 @@
-package ru.clevertec.cleverbank.exception;
+package ru.clevertec.cleverbank.exception.badrequest;
 
 public abstract class BadRequestException extends RuntimeException {
 

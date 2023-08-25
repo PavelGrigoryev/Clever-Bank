@@ -1,4 +1,4 @@
-package ru.clevertec.cleverbank.exception;
+package ru.clevertec.cleverbank.exception.notfound;
 
 public class AccountNotFoundException extends NotFoundException {
 

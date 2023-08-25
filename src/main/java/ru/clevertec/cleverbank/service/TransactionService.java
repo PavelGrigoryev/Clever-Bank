@@ -1,13 +1,14 @@
 package ru.clevertec.cleverbank.service;
 
 import ru.clevertec.cleverbank.dto.ChangeBalanceRequest;
-import ru.clevertec.cleverbank.dto.TransactionResponse;
+import ru.clevertec.cleverbank.dto.ChangeBalanceResponse;
 import ru.clevertec.cleverbank.dto.TransferBalanceRequest;
+import ru.clevertec.cleverbank.dto.TransferBalanceResponse;
 
 public interface TransactionService {
 
-    TransactionResponse changeBalance(ChangeBalanceRequest request);
+    ChangeBalanceResponse changeBalance(ChangeBalanceRequest request);
 
-    TransactionResponse transferBalance(TransferBalanceRequest request);
+    TransferBalanceResponse transferBalance(TransferBalanceRequest request);
 
 }

@@ -2,7 +2,7 @@ package ru.clevertec.cleverbank.service.impl;
 
 import ru.clevertec.cleverbank.dao.BankDAO;
 import ru.clevertec.cleverbank.dao.impl.BankDAOImpl;
-import ru.clevertec.cleverbank.exception.BankNotFoundException;
+import ru.clevertec.cleverbank.exception.notfound.BankNotFoundException;
 import ru.clevertec.cleverbank.model.Bank;
 import ru.clevertec.cleverbank.service.BankService;
 
