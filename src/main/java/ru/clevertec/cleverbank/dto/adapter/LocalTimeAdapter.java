@@ -6,12 +6,13 @@ import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 public class LocalTimeAdapter extends TypeAdapter<LocalTime> {
 
     @Override
     public void write(JsonWriter out, LocalTime value) throws IOException {
-        out.value(value.withNano(0).toString());
+        out.value(value.format(DateTimeFormatter.ofPattern("HH:mm:ss")));
     }
 
     @Override
