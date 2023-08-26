@@ -3,7 +3,7 @@ POST http://localhost:8080/transactions
 Content-Type: application/json
 
 {
-  "recipient_account_id": "0J2O 6O3P 1CUB VZUT 91SJ X3FU MUR",
+  "recipient_account_id": "0J2O 6O3P 1CUB VZUT 91SJ X3FU MUR4",
   "sum": 1200,
   "type": "REPLENISHMENT"
 }

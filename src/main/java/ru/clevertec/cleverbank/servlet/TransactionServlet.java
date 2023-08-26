@@ -10,12 +10,14 @@ import ru.clevertec.cleverbank.dto.ChangeBalanceRequest;
 import ru.clevertec.cleverbank.dto.ChangeBalanceResponse;
 import ru.clevertec.cleverbank.dto.TransferBalanceRequest;
 import ru.clevertec.cleverbank.dto.TransferBalanceResponse;
+import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
 import ru.clevertec.cleverbank.service.TransactionService;
 import ru.clevertec.cleverbank.service.impl.TransactionServiceImpl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 
 @WebServlet(urlPatterns = "/transactions")
 public class TransactionServlet extends HttpServlet {
@@ -40,7 +42,12 @@ public class TransactionServlet extends HttpServlet {
             transactionJson = gson.toJson(response);
         } else {
             TransferBalanceRequest request = gson.fromJson(jsonObject.toString(), TransferBalanceRequest.class);
-            TransferBalanceResponse response = transactionService.transferBalance(request);
+            TransferBalanceResponse response;
+            try {
+                response = transactionService.transferBalance(request);
+            } catch (SQLException e) {
+                throw new JDBCConnectionException();
+            }
             transactionJson = gson.toJson(response);
         }
 

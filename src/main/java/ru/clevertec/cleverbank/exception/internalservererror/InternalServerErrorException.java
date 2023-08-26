@@ -8,4 +8,8 @@ public abstract class InternalServerErrorException extends RuntimeException {
         super(MESSAGE);
     }
 
+    protected InternalServerErrorException(String message) {
+        super(message);
+    }
+
 }
