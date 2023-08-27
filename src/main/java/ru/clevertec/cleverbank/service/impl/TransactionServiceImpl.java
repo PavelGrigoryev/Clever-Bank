@@ -20,8 +20,8 @@ import ru.clevertec.cleverbank.model.Currency;
 import ru.clevertec.cleverbank.model.Transaction;
 import ru.clevertec.cleverbank.model.Type;
 import ru.clevertec.cleverbank.service.AccountService;
-import ru.clevertec.cleverbank.service.BankCheckService;
 import ru.clevertec.cleverbank.service.BankService;
+import ru.clevertec.cleverbank.service.CheckService;
 import ru.clevertec.cleverbank.service.TransactionService;
 import ru.clevertec.cleverbank.service.UploadFileService;
 
@@ -37,7 +37,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final BankService bankService;
     private final TransactionDAO transactionDAO;
     private final TransactionMapper transactionMapper;
-    private final BankCheckService bankCheckService;
+    private final CheckService checkService;
     private final UploadFileService uploadFileService;
     private final Connection connection;
 
@@ -46,7 +46,7 @@ public class TransactionServiceImpl implements TransactionService {
         bankService = new BankServiceImpl();
         transactionDAO = new TransactionDAOImpl();
         transactionMapper = Mappers.getMapper(TransactionMapper.class);
-        bankCheckService = new BankCheckServiceImpl();
+        checkService = new CheckServiceImpl();
         uploadFileService = new UploadFileServiceImpl();
         connection = ConnectionManager.getJDBCConnection();
     }
@@ -71,9 +71,9 @@ public class TransactionServiceImpl implements TransactionService {
 
         ChangeBalanceResponse response = transactionMapper
                 .createChangeResponse(savedTransaction, updatedAccount.getCurrency(), oldBalance, newBalance);
-        String check = bankCheckService.createChangeBalanceCheck(response);
+        String check = checkService.createChangeBalanceCheck(response);
         uploadFileService.uploadCheck(check);
-        log.info(check);
+        log.info("Change balance:{}", check);
         return response;
     }
 
@@ -103,8 +103,13 @@ public class TransactionServiceImpl implements TransactionService {
             Transaction savedTransaction = transactionDAO.save(transaction);
 
             connection.commit();
-            return transactionMapper.createTransferResponse(savedTransaction, accountSender.getCurrency(),
-                    senderOldBalance, senderNewBalance, recipientOldBalance, recipientNewBalance);
+
+            TransferBalanceResponse response = transactionMapper.createTransferResponse(savedTransaction,
+                    accountSender.getCurrency(), senderOldBalance, senderNewBalance, recipientOldBalance, recipientNewBalance);
+            String check = checkService.createTransferBalanceCheck(response);
+            uploadFileService.uploadCheck(check);
+            log.info("Transfer balance:{}", check);
+            return response;
         } catch (Exception e) {
             log.error(e.getMessage());
             connection.rollback();
