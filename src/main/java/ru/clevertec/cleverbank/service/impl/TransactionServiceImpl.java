@@ -111,7 +111,6 @@ public class TransactionServiceImpl implements TransactionService {
             log.info("Transfer balance:{}", check);
             return response;
         } catch (Exception e) {
-            log.error(e.getMessage());
             connection.rollback();
             throw new TransactionException("Transaction rollback, cause: " + e.getMessage());
         } finally {
