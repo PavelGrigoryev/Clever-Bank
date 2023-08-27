@@ -7,6 +7,7 @@ import ru.clevertec.cleverbank.model.Account;
 import ru.clevertec.cleverbank.service.AccountService;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class AccountServiceImpl implements AccountService {
 
@@ -26,6 +27,11 @@ public class AccountServiceImpl implements AccountService {
     public Account updateBalance(Account account, BigDecimal balance) {
         account.setBalance(balance);
         return accountDAO.update(account);
+    }
+
+    @Override
+    public List<Account> findAll() {
+        return accountDAO.findAll();
     }
 
 }

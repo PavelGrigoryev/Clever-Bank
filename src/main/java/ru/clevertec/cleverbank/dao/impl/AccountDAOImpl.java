@@ -13,6 +13,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -63,6 +65,24 @@ public class AccountDAOImpl implements AccountDAO {
             throw new JDBCConnectionException();
         }
         return account;
+    }
+
+    @Override
+    public List<Account> findAll() {
+        List<Account> accounts = new ArrayList<>();
+        String sql = "SELECT * FROM accounts";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    Account account = getAccountFromResultSet(resultSet);
+                    accounts.add(account);
+                }
+            }
+        } catch (SQLException e) {
+            log.error(e.getMessage());
+            throw new JDBCConnectionException();
+        }
+        return accounts;
     }
 
     private Account getAccountFromResultSet(ResultSet resultSet) throws SQLException {

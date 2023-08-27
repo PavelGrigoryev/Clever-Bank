@@ -55,11 +55,10 @@ public class TransactionServlet extends HttpServlet {
                 PrintWriter printWriter = response.getWriter();
                 printWriter.print(transactionJson);
                 printWriter.flush();
-
-                asyncContext.complete();
             } catch (Exception e) {
                 req.setAttribute(ERROR_EXCEPTION, e);
                 asyncContext.dispatch("/exception_handler");
+            } finally {
                 asyncContext.complete();
             }
         });
