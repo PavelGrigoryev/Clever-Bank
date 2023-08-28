@@ -1,9 +1,9 @@
 package ru.clevertec.cleverbank.service;
 
-import ru.clevertec.cleverbank.dto.ChangeBalanceRequest;
-import ru.clevertec.cleverbank.dto.ChangeBalanceResponse;
-import ru.clevertec.cleverbank.dto.TransferBalanceRequest;
-import ru.clevertec.cleverbank.dto.TransferBalanceResponse;
+import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceRequest;
+import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceResponse;
+import ru.clevertec.cleverbank.dto.transaction.TransferBalanceRequest;
+import ru.clevertec.cleverbank.dto.transaction.TransferBalanceResponse;
 
 import java.sql.SQLException;
 

@@ -2,8 +2,8 @@ package ru.clevertec.cleverbank.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import ru.clevertec.cleverbank.dto.ChangeBalanceResponse;
-import ru.clevertec.cleverbank.dto.TransferBalanceResponse;
+import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceResponse;
+import ru.clevertec.cleverbank.dto.transaction.TransferBalanceResponse;
 import ru.clevertec.cleverbank.model.Currency;
 import ru.clevertec.cleverbank.model.Transaction;
 import ru.clevertec.cleverbank.model.Type;

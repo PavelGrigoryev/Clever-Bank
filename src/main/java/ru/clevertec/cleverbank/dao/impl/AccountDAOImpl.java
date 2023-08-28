@@ -6,6 +6,7 @@ import ru.clevertec.cleverbank.dao.AccountDAO;
 import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
 import ru.clevertec.cleverbank.model.Account;
 import ru.clevertec.cleverbank.model.Currency;
+import ru.clevertec.cleverbank.util.RandomStringGenerator;
 
 import java.sql.Connection;
 import java.sql.Date;
@@ -45,6 +46,46 @@ public class AccountDAOImpl implements AccountDAO {
     }
 
     @Override
+    public List<Account> findAll() {
+        List<Account> accounts = new ArrayList<>();
+        String sql = "SELECT * FROM accounts";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    Account account = getAccountFromResultSet(resultSet);
+                    accounts.add(account);
+                }
+            }
+        } catch (SQLException e) {
+            log.error(e.getMessage());
+            throw new JDBCConnectionException();
+        }
+        return accounts;
+    }
+
+    @Override
+    public Account save(Account account) {
+        String sql = """
+                INSERT INTO accounts (currency, balance, opening_date, closing_date, bank_id, user_id, id)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                """;
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            setAccountValuesInStatement(preparedStatement, account);
+            preparedStatement.setString(7, RandomStringGenerator.generateRandomString());
+            preparedStatement.executeUpdate();
+            ResultSet resultSet = preparedStatement.getGeneratedKeys();
+            if (resultSet.next()) {
+                String id = resultSet.getString(1);
+                account.setId(id);
+            }
+        } catch (SQLException e) {
+            log.error(e.getMessage());
+            throw new JDBCConnectionException();
+        }
+        return account;
+    }
+
+    @Override
     public Account update(Account account) {
         String sql = """
                 UPDATE accounts
@@ -68,21 +109,21 @@ public class AccountDAOImpl implements AccountDAO {
     }
 
     @Override
-    public List<Account> findAll() {
-        List<Account> accounts = new ArrayList<>();
-        String sql = "SELECT * FROM accounts";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                while (resultSet.next()) {
-                    Account account = getAccountFromResultSet(resultSet);
-                    accounts.add(account);
-                }
+    public Optional<Account> delete(String id) {
+        String sql = "DELETE FROM accounts WHERE id = ?";
+        Optional<Account> account = Optional.empty();
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            preparedStatement.setString(1, id);
+            preparedStatement.executeUpdate();
+            ResultSet resultSet = preparedStatement.getGeneratedKeys();
+            if (resultSet.next()) {
+                account = Optional.of(getAccountFromResultSet(resultSet));
             }
         } catch (SQLException e) {
             log.error(e.getMessage());
             throw new JDBCConnectionException();
         }
-        return accounts;
+        return account;
     }
 
     private Account getAccountFromResultSet(ResultSet resultSet) throws SQLException {

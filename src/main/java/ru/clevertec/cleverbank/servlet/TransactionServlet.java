@@ -8,10 +8,10 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import ru.clevertec.cleverbank.dto.ChangeBalanceRequest;
-import ru.clevertec.cleverbank.dto.ChangeBalanceResponse;
-import ru.clevertec.cleverbank.dto.TransferBalanceRequest;
-import ru.clevertec.cleverbank.dto.TransferBalanceResponse;
+import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceRequest;
+import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceResponse;
+import ru.clevertec.cleverbank.dto.transaction.TransferBalanceRequest;
+import ru.clevertec.cleverbank.dto.transaction.TransferBalanceResponse;
 import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
 import ru.clevertec.cleverbank.service.TransactionService;
 import ru.clevertec.cleverbank.service.impl.TransactionServiceImpl;
@@ -28,6 +28,7 @@ import static jakarta.servlet.RequestDispatcher.ERROR_EXCEPTION;
 public class TransactionServlet extends HttpServlet {
 
     private final transient TransactionService transactionService = new TransactionServiceImpl();
+    private final transient Gson gson = new Gson();
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
@@ -41,7 +42,6 @@ public class TransactionServlet extends HttpServlet {
                     result.append(line);
                 }
 
-                Gson gson = new Gson();
                 String transactionJson;
                 JsonObject jsonObject = gson.fromJson(result.toString(), JsonObject.class);
                 if (jsonObject.has("type")) {

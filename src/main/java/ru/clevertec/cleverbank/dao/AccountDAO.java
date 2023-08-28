@@ -9,8 +9,12 @@ public interface AccountDAO {
 
     Optional<Account> findById(String id);
 
+    List<Account> findAll();
+
+    Account save(Account account);
+
     Account update(Account account);
 
-    List<Account> findAll();
+    Optional<Account> delete(String id);
 
 }

@@ -1,7 +1,7 @@
 package ru.clevertec.cleverbank.service.impl;
 
-import ru.clevertec.cleverbank.dto.ChangeBalanceResponse;
-import ru.clevertec.cleverbank.dto.TransferBalanceResponse;
+import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceResponse;
+import ru.clevertec.cleverbank.dto.transaction.TransferBalanceResponse;
 import ru.clevertec.cleverbank.service.CheckService;
 
 import java.time.format.DateTimeFormatter;

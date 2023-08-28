@@ -1,4 +1,4 @@
-package ru.clevertec.cleverbank.dto;
+package ru.clevertec.cleverbank.dto.transaction;
 
 import com.google.gson.annotations.SerializedName;
 import ru.clevertec.cleverbank.model.Type;
