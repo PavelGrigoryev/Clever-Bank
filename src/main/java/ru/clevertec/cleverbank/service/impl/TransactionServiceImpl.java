@@ -7,12 +7,14 @@ import ru.clevertec.cleverbank.dao.TransactionDAO;
 import ru.clevertec.cleverbank.dao.impl.TransactionDAOImpl;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceRequest;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceResponse;
+import ru.clevertec.cleverbank.dto.transaction.TransactionResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransferBalanceRequest;
 import ru.clevertec.cleverbank.dto.transaction.TransferBalanceResponse;
 import ru.clevertec.cleverbank.exception.badrequest.AccountClosedException;
 import ru.clevertec.cleverbank.exception.badrequest.BadCurrencyException;
 import ru.clevertec.cleverbank.exception.badrequest.InsufficientFundsException;
 import ru.clevertec.cleverbank.exception.internalservererror.TransactionException;
+import ru.clevertec.cleverbank.exception.notfound.TransactionNotFoundException;
 import ru.clevertec.cleverbank.mapper.TransactionMapper;
 import ru.clevertec.cleverbank.model.Account;
 import ru.clevertec.cleverbank.model.Bank;
@@ -29,6 +31,7 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.List;
 
 @Slf4j
 public class TransactionServiceImpl implements TransactionService {
@@ -66,11 +69,11 @@ public class TransactionServiceImpl implements TransactionService {
         Bank bankRecipient = bankService.findById(accountRecipient.getBankId());
 
         Transaction transaction = transactionMapper
-                .createChangeTransaction(request.type(), bankRecipient.getName(), updatedAccount.getId(), request.sum());
+                .toChangeTransaction(request.type(), bankRecipient.getName(), updatedAccount.getId(), request.sum());
         Transaction savedTransaction = transactionDAO.save(transaction);
 
         ChangeBalanceResponse response = transactionMapper
-                .createChangeResponse(savedTransaction, updatedAccount.getCurrency(), oldBalance, newBalance);
+                .toChangeResponse(savedTransaction, updatedAccount.getCurrency(), oldBalance, newBalance);
         String check = checkService.createChangeBalanceCheck(response);
         uploadFileService.uploadCheck(check);
         log.info("Change balance:{}", check);
@@ -98,13 +101,13 @@ public class TransactionServiceImpl implements TransactionService {
             Account updatedRecipientAccount = accountService.updateBalance(accountRecipient, recipientNewBalance);
             Bank bankRecipient = bankService.findById(accountRecipient.getBankId());
 
-            Transaction transaction = transactionMapper.createTransferTransaction(Type.TRANSFER, bankSender.getName(),
+            Transaction transaction = transactionMapper.toTransferTransaction(Type.TRANSFER, bankSender.getName(),
                     bankRecipient.getName(), updatedSenderAccount.getId(), updatedRecipientAccount.getId(), request.sum());
             Transaction savedTransaction = transactionDAO.save(transaction);
 
             connection.commit();
 
-            TransferBalanceResponse response = transactionMapper.createTransferResponse(savedTransaction,
+            TransferBalanceResponse response = transactionMapper.toTransferResponse(savedTransaction,
                     accountSender.getCurrency(), senderOldBalance, senderNewBalance, recipientOldBalance, recipientNewBalance);
             String check = checkService.createTransferBalanceCheck(response);
             uploadFileService.uploadCheck(check);
@@ -116,6 +119,23 @@ public class TransactionServiceImpl implements TransactionService {
         } finally {
             connection.setAutoCommit(true);
         }
+    }
+
+    @Override
+    public TransactionResponse findById(Long id) {
+        return transactionDAO.findById(id)
+                .map(transactionMapper::toResponse)
+                .orElseThrow(() -> new TransactionNotFoundException("Transaction with ID " + id + " is not found!"));
+    }
+
+    @Override
+    public List<TransactionResponse> findAllBySendersAccountId(String id) {
+        return transactionMapper.toResponseList(transactionDAO.findAllBySendersAccountId(id));
+    }
+
+    @Override
+    public List<TransactionResponse> findAllByRecipientAccountId(String id) {
+        return transactionMapper.toResponseList(transactionDAO.findAllByRecipientAccountId(id));
     }
 
     private static void checkAccountForClosingDate(LocalDate closingDate, String accountId) {

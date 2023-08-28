@@ -13,6 +13,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 public class TransactionDAOImpl implements TransactionDAO {
@@ -21,6 +24,38 @@ public class TransactionDAOImpl implements TransactionDAO {
 
     public TransactionDAOImpl() {
         connection = ConnectionManager.getJDBCConnection();
+    }
+
+    @Override
+    public Optional<Transaction> findById(Long id) {
+        String sql = "SELECT * FROM transactions WHERE id = ?";
+        Optional<Transaction> transaction = Optional.empty();
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setLong(1, id);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    transaction = Optional.of(getTransactionFromResultSet(resultSet));
+                }
+            }
+        } catch (SQLException e) {
+            log.error(e.getMessage());
+            throw new JDBCConnectionException();
+        }
+        return transaction;
+    }
+
+    @Override
+    public List<Transaction> findAllBySendersAccountId(String id) {
+        List<Transaction> transactions = new ArrayList<>();
+        String sql = "SELECT * FROM transactions WHERE senders_account = ?";
+        return findAll(sql, id, transactions);
+    }
+
+    @Override
+    public List<Transaction> findAllByRecipientAccountId(String id) {
+        List<Transaction> transactions = new ArrayList<>();
+        String sql = "SELECT * FROM transactions WHERE recipients_account = ?";
+        return findAll(sql, id, transactions);
     }
 
     @Override
@@ -43,6 +78,22 @@ public class TransactionDAOImpl implements TransactionDAO {
             throw new JDBCConnectionException();
         }
         return transaction;
+    }
+
+    private List<Transaction> findAll(String sql, String id, List<Transaction> transactions) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setString(1, id);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    Transaction transaction = getTransactionFromResultSet(resultSet);
+                    transactions.add(transaction);
+                }
+            }
+        } catch (SQLException e) {
+            log.error(e.getMessage());
+            throw new JDBCConnectionException();
+        }
+        return transactions;
     }
 
     private Transaction getTransactionFromResultSet(ResultSet resultSet) throws SQLException {
