@@ -1,0 +1,31 @@
+###найти банк по id
+GET http://localhost:8080/banks?id=1
+Accept: application/json
+
+###найти все банки
+GET http://localhost:8080/banks
+Accept: application/json
+
+###сохранить банк
+POST http://localhost:8080/banks
+Content-Type: application/json
+
+{
+  "name": "Супер-Банк",
+  "address": "ул. Гвардейская, 9",
+  "phone_number": "+7 (495) 123-45-67"
+}
+
+###обновить банк по id
+PUT http://localhost:8080/banks?id=7
+Content-Type: application/json
+
+{
+  "name": "Биг-Банк",
+  "address": "ул. Амнезии, 17",
+  "phone_number": "+7 (495) 321-54-76"
+}
+
+###удалить банк по id
+DELETE http://localhost:8080/banks?id=8
+Content-Type: application/json

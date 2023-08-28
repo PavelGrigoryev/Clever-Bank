@@ -6,20 +6,20 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.clevertec.cleverbank.dto.DeleteResponse;
-import ru.clevertec.cleverbank.dto.account.AccountRequest;
-import ru.clevertec.cleverbank.dto.account.AccountResponse;
-import ru.clevertec.cleverbank.service.AccountService;
-import ru.clevertec.cleverbank.service.impl.AccountServiceImpl;
+import ru.clevertec.cleverbank.dto.bank.BankRequest;
+import ru.clevertec.cleverbank.dto.bank.BankResponse;
+import ru.clevertec.cleverbank.service.BankService;
+import ru.clevertec.cleverbank.service.impl.BankServiceImpl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
-@WebServlet(urlPatterns = "/accounts")
-public class AccountServlet extends HttpServlet {
+@WebServlet(urlPatterns = "/banks")
+public class BankServlet extends HttpServlet {
 
-    private final transient AccountService accountService = new AccountServiceImpl();
+    private final transient BankService bankService = new BankServiceImpl();
     private final transient Gson gson = new Gson();
 
     @Override
@@ -35,31 +35,26 @@ public class AccountServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        BufferedReader reader = req.getReader();
-        StringBuilder result = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null) {
-            result.append(line);
-        }
-
-        AccountRequest request = gson.fromJson(result.toString(), AccountRequest.class);
-        AccountResponse response = accountService.save(request);
-        String accountJson = gson.toJson(response);
+        BankRequest request = gson.fromJson(extractJsonFromBody(req), BankRequest.class);
+        BankResponse response = bankService.save(request);
+        String bankJson = gson.toJson(response);
 
         PrintWriter printWriter = resp.getWriter();
         resp.setStatus(201);
-        printWriter.print(accountJson);
+        printWriter.print(bankJson);
         printWriter.flush();
     }
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String id = req.getParameter("id");
+        BankRequest request = gson.fromJson(extractJsonFromBody(req), BankRequest.class);
+        BankResponse response = bankService.update(Long.valueOf(id), request);
+        String bankJson = gson.toJson(response);
+
         PrintWriter printWriter = resp.getWriter();
-        AccountResponse response = accountService.closeAccount(id);
-        String accountJson = gson.toJson(response);
         resp.setStatus(201);
-        printWriter.print(accountJson);
+        printWriter.print(bankJson);
         printWriter.flush();
     }
 
@@ -67,24 +62,34 @@ public class AccountServlet extends HttpServlet {
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String id = req.getParameter("id");
         PrintWriter printWriter = resp.getWriter();
-        DeleteResponse response = accountService.delete(id);
+        DeleteResponse response = bankService.delete(Long.valueOf(id));
         String deleteJson = gson.toJson(response);
         printWriter.print(deleteJson);
         printWriter.flush();
     }
 
     private void findById(String id, PrintWriter printWriter) {
-        AccountResponse response = accountService.findByIdResponse(id);
-        String accountJson = gson.toJson(response);
-        printWriter.print(accountJson);
+        BankResponse response = bankService.findByIdResponse(Long.valueOf(id));
+        String bankJson = gson.toJson(response);
+        printWriter.print(bankJson);
         printWriter.flush();
     }
 
     private void findAll(PrintWriter printWriter) {
-        List<AccountResponse> responses = accountService.findAllResponses();
-        String accountsJson = gson.toJson(responses);
-        printWriter.print(accountsJson);
+        List<BankResponse> responses = bankService.findAll();
+        String banksJson = gson.toJson(responses);
+        printWriter.print(banksJson);
         printWriter.flush();
+    }
+
+    private String extractJsonFromBody(HttpServletRequest req) throws IOException {
+        BufferedReader reader = req.getReader();
+        StringBuilder result = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            result.append(line);
+        }
+        return result.toString();
     }
 
 }
