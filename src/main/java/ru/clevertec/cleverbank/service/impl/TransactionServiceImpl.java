@@ -7,6 +7,9 @@ import ru.clevertec.cleverbank.dao.impl.TransactionDAOImpl;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceRequest;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransactionResponse;
+import ru.clevertec.cleverbank.dto.transaction.TransactionStatement;
+import ru.clevertec.cleverbank.dto.transaction.TransactionStatementRequest;
+import ru.clevertec.cleverbank.dto.transaction.TransactionStatementResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransferBalanceRequest;
 import ru.clevertec.cleverbank.dto.transaction.TransferBalanceResponse;
 import ru.clevertec.cleverbank.exception.internalservererror.TransactionException;
@@ -16,11 +19,13 @@ import ru.clevertec.cleverbank.model.Account;
 import ru.clevertec.cleverbank.model.Bank;
 import ru.clevertec.cleverbank.model.Transaction;
 import ru.clevertec.cleverbank.model.Type;
+import ru.clevertec.cleverbank.model.User;
 import ru.clevertec.cleverbank.service.AccountService;
 import ru.clevertec.cleverbank.service.BankService;
 import ru.clevertec.cleverbank.service.CheckService;
 import ru.clevertec.cleverbank.service.TransactionService;
 import ru.clevertec.cleverbank.service.UploadFileService;
+import ru.clevertec.cleverbank.service.UserService;
 import ru.clevertec.cleverbank.service.ValidationService;
 import ru.clevertec.cleverbank.util.ConnectionManager;
 
@@ -34,6 +39,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     private final AccountService accountService;
     private final BankService bankService;
+    private final UserService userService;
     private final TransactionDAO transactionDAO;
     private final TransactionMapper transactionMapper;
     private final CheckService checkService;
@@ -44,6 +50,7 @@ public class TransactionServiceImpl implements TransactionService {
     public TransactionServiceImpl() {
         accountService = new AccountServiceImpl();
         bankService = new BankServiceImpl();
+        userService = new UserServiceImpl();
         transactionDAO = new TransactionDAOImpl();
         transactionMapper = Mappers.getMapper(TransactionMapper.class);
         checkService = new CheckServiceImpl();
@@ -117,6 +124,18 @@ public class TransactionServiceImpl implements TransactionService {
         } finally {
             connection.setAutoCommit(true);
         }
+    }
+
+    @Override
+    public TransactionStatementResponse findAllByPeriodOfDateAndAccountId(TransactionStatementRequest request) {
+        Account account = accountService.findById(request.accountId());
+        Bank bank = bankService.findById(account.getBankId());
+        User user = userService.findById(account.getUserId());
+        //TODO
+        List<Transaction> transactions = transactionDAO
+                .findAllByPeriodOfDateAndAccountId(request.from(), request.to(), account.getId());
+        List<TransactionStatement> transactionStatements = transactionMapper.toTransactionStatementList(transactions);
+        return transactionMapper.toStatementResponse(bank.getName(), user, account, request, transactionStatements);
     }
 
     @Override

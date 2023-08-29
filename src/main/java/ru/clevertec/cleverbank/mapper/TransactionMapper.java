@@ -4,10 +4,15 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransactionResponse;
+import ru.clevertec.cleverbank.dto.transaction.TransactionStatement;
+import ru.clevertec.cleverbank.dto.transaction.TransactionStatementRequest;
+import ru.clevertec.cleverbank.dto.transaction.TransactionStatementResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransferBalanceResponse;
+import ru.clevertec.cleverbank.model.Account;
 import ru.clevertec.cleverbank.model.Currency;
 import ru.clevertec.cleverbank.model.Transaction;
 import ru.clevertec.cleverbank.model.Type;
+import ru.clevertec.cleverbank.model.User;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -54,5 +59,15 @@ public interface TransactionMapper {
     TransactionResponse toResponse(Transaction transaction);
 
     List<TransactionResponse> toResponseList(List<Transaction> transactions);
+
+    List<TransactionStatement> toTransactionStatementList(List<Transaction> transaction);
+
+    @Mapping(target = "formationDate", expression = "java(LocalDate.now())")
+    @Mapping(target = "formationTime", expression = "java(LocalTime.now())")
+    TransactionStatementResponse toStatementResponse(String bankName,
+                                                     User user,
+                                                     Account account,
+                                                     TransactionStatementRequest request,
+                                                     List<TransactionStatement> transactions);
 
 }

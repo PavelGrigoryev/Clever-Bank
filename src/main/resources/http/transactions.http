@@ -18,6 +18,16 @@ Content-Type: application/json
   "sum": 1200
 }
 
+###формирования выписки по транзакциям пользователя за период времени
+POST http://localhost:8080/transactions
+Content-Type: application/json
+
+{
+  "from": "2023-08-28",
+  "to": "2023-08-29",
+  "account_id": "G5QZ 6B43 A6XG AHNK CO6S PSO6 718Q"
+}
+
 ###найти транзакцию по id
 GET http://localhost:8080/transactions?id=3
 Accept: application/json

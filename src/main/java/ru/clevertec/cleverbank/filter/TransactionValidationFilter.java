@@ -10,6 +10,7 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceRequest;
+import ru.clevertec.cleverbank.dto.transaction.TransactionStatementRequest;
 import ru.clevertec.cleverbank.dto.transaction.TransferBalanceRequest;
 import ru.clevertec.cleverbank.exception.conflict.ValidationException;
 import ru.clevertec.cleverbank.exception.handler.ValidationResponse;
@@ -39,8 +40,10 @@ public class TransactionValidationFilter implements Filter {
 
             if (jsonObject.has("type")) {
                 validateChangeBalanceRequest(req, jsonObject);
-            } else {
+            } else if (jsonObject.has("sender_account_id")) {
                 validateTransferBalanceRequest(req, jsonObject);
+            } else {
+                validateStatementRequest(req, jsonObject);
             }
         }
         chain.doFilter(request, response);
@@ -77,6 +80,12 @@ public class TransactionValidationFilter implements Filter {
         }
 
         req.setAttribute("transferBalanceRequest", request);
+    }
+
+    private void validateStatementRequest(HttpServletRequest req, JsonObject jsonObject) {
+        TransactionStatementRequest request = gson.fromJson(jsonObject.toString(), TransactionStatementRequest.class);
+        //todo
+        req.setAttribute("statementRequest", request);
     }
 
     private String extractJsonFromBody(HttpServletRequest req) throws IOException {

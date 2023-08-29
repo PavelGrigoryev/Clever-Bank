@@ -2,6 +2,7 @@ package ru.clevertec.cleverbank.dao;
 
 import ru.clevertec.cleverbank.model.Transaction;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,5 +15,7 @@ public interface TransactionDAO {
     List<Transaction> findAllByRecipientAccountId(String id);
 
     Transaction save(Transaction transaction);
+
+    List<Transaction> findAllByPeriodOfDateAndAccountId(LocalDate from, LocalDate to, String id);
 
 }

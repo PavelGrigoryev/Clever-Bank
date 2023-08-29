@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceRequest;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransactionResponse;
+import ru.clevertec.cleverbank.dto.transaction.TransactionStatementRequest;
+import ru.clevertec.cleverbank.dto.transaction.TransactionStatementResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransferBalanceRequest;
 import ru.clevertec.cleverbank.dto.transaction.TransferBalanceResponse;
 import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
@@ -39,12 +41,16 @@ public class TransactionServlet extends HttpServlet {
                 String transactionJson;
                 ChangeBalanceRequest changeRequest = (ChangeBalanceRequest) asyncContext.getRequest()
                         .getAttribute("changeBalanceRequest");
+                TransferBalanceRequest transferRequest = (TransferBalanceRequest) asyncContext.getRequest()
+                        .getAttribute("transferBalanceRequest");
                 if (changeRequest != null) {
                     transactionJson = changeBalance(gson, changeRequest);
-                } else {
-                    TransferBalanceRequest transferRequest = (TransferBalanceRequest) asyncContext.getRequest()
-                            .getAttribute("transferBalanceRequest");
+                } else if (transferRequest != null) {
                     transactionJson = transferBalance(gson, transferRequest);
+                } else {
+                    TransactionStatementRequest statementRequest = (TransactionStatementRequest) asyncContext.getRequest()
+                            .getAttribute("statementRequest");
+                    transactionJson = transactionStatement(gson, statementRequest);
                 }
 
                 HttpServletResponse response = (HttpServletResponse) asyncContext.getResponse();
@@ -59,6 +65,21 @@ public class TransactionServlet extends HttpServlet {
                 asyncContext.complete();
             }
         });
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        String id = req.getParameter("id");
+        String senderAccountId = req.getParameter("sender_account_id");
+        String recipientAccountId = req.getParameter("recipient_account_id");
+        PrintWriter printWriter = resp.getWriter();
+        if (id != null) {
+            findById(id, printWriter);
+        } else if (senderAccountId != null) {
+            findAllBySendersAccountId(senderAccountId, printWriter);
+        } else {
+            findAllByRecipientAccountId(recipientAccountId, printWriter);
+        }
     }
 
     private String changeBalance(Gson gson, ChangeBalanceRequest request) {
@@ -77,19 +98,9 @@ public class TransactionServlet extends HttpServlet {
         return gson.toJson(response);
     }
 
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String id = req.getParameter("id");
-        String senderAccountId = req.getParameter("sender_account_id");
-        String recipientAccountId = req.getParameter("recipient_account_id");
-        PrintWriter printWriter = resp.getWriter();
-        if (id != null) {
-            findById(id, printWriter);
-        } else if (senderAccountId != null) {
-            findAllBySendersAccountId(senderAccountId, printWriter);
-        } else {
-            findAllByRecipientAccountId(recipientAccountId, printWriter);
-        }
+    private String transactionStatement(Gson gson, TransactionStatementRequest request) {
+        TransactionStatementResponse response = transactionService.findAllByPeriodOfDateAndAccountId(request);
+        return gson.toJson(response);
     }
 
     private void findById(String id, PrintWriter printWriter) {

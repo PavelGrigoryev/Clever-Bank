@@ -1,11 +1,11 @@
 package ru.clevertec.cleverbank.dao.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.clevertec.cleverbank.util.ConnectionManager;
 import ru.clevertec.cleverbank.dao.TransactionDAO;
 import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
 import ru.clevertec.cleverbank.model.Transaction;
 import ru.clevertec.cleverbank.model.Type;
+import ru.clevertec.cleverbank.util.ConnectionManager;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -13,6 +13,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -78,6 +79,32 @@ public class TransactionDAOImpl implements TransactionDAO {
             throw new JDBCConnectionException();
         }
         return transaction;
+    }
+
+    @Override
+    public List<Transaction> findAllByPeriodOfDateAndAccountId(LocalDate from, LocalDate to, String id) {
+        List<Transaction> transactions = new ArrayList<>();
+        String sql = """
+                SELECT * FROM transactions
+                WHERE date BETWEEN ? AND ?
+                AND (senders_account = ? OR recipients_account = ?)
+                """;
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setObject(1, from);
+            preparedStatement.setObject(2, to);
+            preparedStatement.setString(3, id);
+            preparedStatement.setString(4, id);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    Transaction transaction = getTransactionFromResultSet(resultSet);
+                    transactions.add(transaction);
+                }
+            }
+        } catch (SQLException e) {
+            log.error(e.getMessage());
+            throw new JDBCConnectionException();
+        }
+        return transactions;
     }
 
     private List<Transaction> findAll(String sql, String id, List<Transaction> transactions) {
