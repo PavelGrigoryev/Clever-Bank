@@ -37,6 +37,12 @@ public class UserValidationFilter implements Filter {
     private void validateUserRequest(HttpServletRequest req) throws IOException {
         UserRequest request = gson.fromJson(extractJsonFromBody(req), UserRequest.class);
         List<Violation> violations = new ArrayList<>();
+        if (request == null) {
+            Violation violation = new Violation("User", "User can not be null");
+            violations.add(violation);
+            String validationJson = gson.toJson(new ValidationResponse(violations));
+            throw new ValidationException(validationJson);
+        }
 
         validateFieldByPattern(request.lastname(), "lastname", "^[a-zA-Zа-яА-ЯёЁ]+$", violations);
         validateFieldByPattern(request.firstname(), "firstname", "^[a-zA-Zа-яА-ЯёЁ]+$", violations);
@@ -63,11 +69,16 @@ public class UserValidationFilter implements Filter {
     }
 
     private void validateFieldByPattern(String field, String fieldName, String patternString, List<Violation> violations) {
-        Pattern pattern = Pattern.compile(patternString);
-        Matcher matcher = pattern.matcher(field);
-        if (!matcher.matches()) {
-            Violation violation = new Violation(fieldName, "Field is out of pattern: " + patternString);
+        if (field == null) {
+            Violation violation = new Violation(fieldName, "Field can not be null");
             violations.add(violation);
+        } else {
+            Pattern pattern = Pattern.compile(patternString);
+            Matcher matcher = pattern.matcher(field);
+            if (!matcher.matches()) {
+                Violation violation = new Violation(fieldName, "Field is out of pattern: " + patternString);
+                violations.add(violation);
+            }
         }
     }
 

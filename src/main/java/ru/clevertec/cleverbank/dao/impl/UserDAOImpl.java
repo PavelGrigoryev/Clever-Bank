@@ -63,7 +63,7 @@ public class UserDAOImpl implements UserDAO {
     @Override
     public User save(User user) {
         String sql = """
-                INSERT INTO users (lastname, firstname, surname, birthdate, mobile_number)
+                INSERT INTO users (lastname, firstname, surname, register_date, mobile_number)
                 VALUES (?, ?, ?, ?, ?)
                 """;
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -85,7 +85,7 @@ public class UserDAOImpl implements UserDAO {
     public User update(User user) {
         String sql = """
                 UPDATE users
-                SET lastname = ?, firstname = ?, surname = ?, birthdate = ?, mobile_number = ?
+                SET lastname = ?, firstname = ?, surname = ?, register_date = ?, mobile_number = ?
                 WHERE id = ?
                 """;
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -140,7 +140,7 @@ public class UserDAOImpl implements UserDAO {
                 .lastname(resultSet.getString("lastname"))
                 .firstname(resultSet.getString("firstname"))
                 .surname(resultSet.getString("surname"))
-                .birthdate(resultSet.getDate("birthdate").toLocalDate())
+                .registerDate(resultSet.getDate("register_date").toLocalDate())
                 .mobileNumber(resultSet.getString("mobile_number"))
                 .build();
     }
@@ -149,7 +149,7 @@ public class UserDAOImpl implements UserDAO {
         preparedStatement.setString(1, user.getLastname());
         preparedStatement.setString(2, user.getFirstname());
         preparedStatement.setString(3, user.getSurname());
-        preparedStatement.setObject(4, user.getBirthdate());
+        preparedStatement.setObject(4, user.getRegisterDate());
         preparedStatement.setString(5, user.getMobileNumber());
     }
 

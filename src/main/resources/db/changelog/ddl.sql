@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS users
     lastname      VARCHAR(40)        NOT NULL,
     firstname     VARCHAR(40)        NOT NULL,
     surname       VARCHAR(40)        NOT NULL,
-    birthdate     DATE               NOT NULL,
+    register_date DATE               NOT NULL,
     mobile_number varchar(40) UNIQUE NOT NULL
 );
 

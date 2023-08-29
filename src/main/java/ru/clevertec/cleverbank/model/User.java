@@ -17,7 +17,7 @@ public class User {
     private String lastname;
     private String firstname;
     private String surname;
-    private LocalDate birthdate;
+    private LocalDate registerDate;
     private String mobileNumber;
 
 }

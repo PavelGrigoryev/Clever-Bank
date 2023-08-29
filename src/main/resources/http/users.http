@@ -14,7 +14,6 @@ Content-Type: application/json
   "lastname": "Алексеев",
   "firstname": "Алексей",
   "surname": "Алексеевич",
-  "birthdate": "1987-10-07",
   "mobile_number": "+7 (495) 555-11-94"
 }
 
@@ -26,7 +25,6 @@ Content-Type: application/json
   "lastname": "Сидорович",
   "firstname": "Сидр",
   "surname": "Сидорович",
-  "birthdate": "1985-02-03",
   "mobile_number": "+7 (495) 444-45-66"
 }
 

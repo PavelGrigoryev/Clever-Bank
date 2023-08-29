@@ -13,6 +13,7 @@ import ru.clevertec.cleverbank.mapper.UserMapper;
 import ru.clevertec.cleverbank.model.User;
 import ru.clevertec.cleverbank.service.UserService;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public class UserServiceImpl implements UserService {
@@ -44,6 +45,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse save(UserRequest request) {
         User user = userMapper.fromRequest(request);
+        user.setRegisterDate(LocalDate.now());
         User savedUser;
         try {
             savedUser = userDAO.save(user);
@@ -55,9 +57,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse update(Long id, UserRequest request) {
-        findById(id);
+        User userById = findById(id);
         User user = userMapper.fromRequest(request);
-        user.setId(id);
+        user.setId(userById.getId());
+        user.setRegisterDate(userById.getRegisterDate());
         User updatedUser = userDAO.update(user);
         return userMapper.toResponse(updatedUser);
     }
