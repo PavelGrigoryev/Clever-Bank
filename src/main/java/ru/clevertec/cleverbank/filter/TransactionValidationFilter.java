@@ -15,7 +15,8 @@ import ru.clevertec.cleverbank.exception.conflict.ValidationException;
 import ru.clevertec.cleverbank.exception.handler.ValidationResponse;
 import ru.clevertec.cleverbank.exception.handler.Violation;
 import ru.clevertec.cleverbank.model.Type;
-import ru.clevertec.cleverbank.util.RequestValidator;
+import ru.clevertec.cleverbank.service.ValidationService;
+import ru.clevertec.cleverbank.service.impl.ValidationServiceImpl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -26,6 +27,7 @@ import java.util.List;
 public class TransactionValidationFilter implements Filter {
 
     private final Gson gson = new Gson();
+    private final ValidationService validationService = new ValidationServiceImpl();
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -33,7 +35,7 @@ public class TransactionValidationFilter implements Filter {
         if ("POST".equalsIgnoreCase(req.getMethod())) {
             JsonObject jsonObject = gson.fromJson(extractJsonFromBody(req), JsonObject.class);
 
-            RequestValidator.validateRequestForNull(jsonObject, "Transaction", gson);
+            validationService.validateRequestForNull(jsonObject, "Transaction", gson);
 
             if (jsonObject.has("type")) {
                 validateChangeBalanceRequest(req, jsonObject);
@@ -53,7 +55,7 @@ public class TransactionValidationFilter implements Filter {
             violations.add(violation);
         }
 
-        RequestValidator.validateBigDecimalFieldForPositive(request.sum(), "sum", violations);
+        validationService.validateBigDecimalFieldForPositive(request.sum(), "sum", violations);
 
         if (!violations.isEmpty()) {
             String validationJson = gson.toJson(new ValidationResponse(violations));
@@ -67,7 +69,7 @@ public class TransactionValidationFilter implements Filter {
         TransferBalanceRequest request = gson.fromJson(jsonObject.toString(), TransferBalanceRequest.class);
         List<Violation> violations = new ArrayList<>();
 
-        RequestValidator.validateBigDecimalFieldForPositive(request.sum(), "sum", violations);
+        validationService.validateBigDecimalFieldForPositive(request.sum(), "sum", violations);
 
         if (!violations.isEmpty()) {
             String validationJson = gson.toJson(new ValidationResponse(violations));

@@ -12,7 +12,8 @@ import ru.clevertec.cleverbank.dto.bank.BankRequest;
 import ru.clevertec.cleverbank.exception.conflict.ValidationException;
 import ru.clevertec.cleverbank.exception.handler.ValidationResponse;
 import ru.clevertec.cleverbank.exception.handler.Violation;
-import ru.clevertec.cleverbank.util.RequestValidator;
+import ru.clevertec.cleverbank.service.ValidationService;
+import ru.clevertec.cleverbank.service.impl.ValidationServiceImpl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,6 +24,7 @@ import java.util.List;
 public class BankValidationFilter implements Filter {
 
     private final Gson gson = new Gson();
+    private final ValidationService validationService = new ValidationServiceImpl();
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -37,12 +39,12 @@ public class BankValidationFilter implements Filter {
         BankRequest request = gson.fromJson(extractJsonFromBody(req), BankRequest.class);
         List<Violation> violations = new ArrayList<>();
 
-        RequestValidator.validateRequestForNull(request, "Bank", gson);
-        RequestValidator.validateFieldByPattern(request.name(), "name",
+        validationService.validateRequestForNull(request, "Bank", gson);
+        validationService.validateFieldByPattern(request.name(), "name",
                 "^[a-zA-Zа-яА-ЯёЁ @_-]+$", violations);
-        RequestValidator.validateFieldByPattern(request.address(), "address",
+        validationService.validateFieldByPattern(request.address(), "address",
                 "^[a-zA-Zа-яА-ЯёЁ0-9 .,-]+$", violations);
-        RequestValidator.validateFieldByPattern(request.phoneNumber(), "phone_number",
+        validationService.validateFieldByPattern(request.phoneNumber(), "phone_number",
                 "^\\+\\d{1,3} \\(\\d{1,3}\\) \\d{3}-\\d{2}-\\d{2}$", violations);
 
         if (!violations.isEmpty()) {

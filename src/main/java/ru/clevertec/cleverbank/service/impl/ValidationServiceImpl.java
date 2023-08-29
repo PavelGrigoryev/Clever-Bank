@@ -1,19 +1,48 @@
-package ru.clevertec.cleverbank.util;
+package ru.clevertec.cleverbank.service.impl;
 
 import com.google.gson.Gson;
-import lombok.experimental.UtilityClass;
+import ru.clevertec.cleverbank.exception.badrequest.AccountClosedException;
+import ru.clevertec.cleverbank.exception.badrequest.BadCurrencyException;
+import ru.clevertec.cleverbank.exception.badrequest.InsufficientFundsException;
 import ru.clevertec.cleverbank.exception.conflict.ValidationException;
 import ru.clevertec.cleverbank.exception.handler.ValidationResponse;
 import ru.clevertec.cleverbank.exception.handler.Violation;
+import ru.clevertec.cleverbank.model.Currency;
+import ru.clevertec.cleverbank.model.Type;
+import ru.clevertec.cleverbank.service.ValidationService;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@UtilityClass
-public class RequestValidator {
+public class ValidationServiceImpl implements ValidationService {
 
+    @Override
+    public void validateAccountForClosingDate(LocalDate closingDate, String accountId) {
+        if (closingDate != null) {
+            throw new AccountClosedException("Account with ID " + accountId + " is closed since " + closingDate);
+        }
+    }
+
+    @Override
+    public void validateAccountForCurrency(Currency senderCurrency, Currency resipientCurrency) {
+        if (!senderCurrency.equals(resipientCurrency)) {
+            throw new BadCurrencyException("Your currency is " + resipientCurrency
+                                           + ", but account currency is " + senderCurrency);
+        }
+    }
+
+    @Override
+    public void validateAccountForSufficientBalance(Type type, BigDecimal sum, BigDecimal oldBalance) {
+        if (type != Type.REPLENISHMENT && oldBalance.compareTo(sum) < 0) {
+            throw new InsufficientFundsException("Insufficient funds in the account! You want to withdrawal/transfer "
+                                                 + sum + ", but you have only " + oldBalance);
+        }
+    }
+
+    @Override
     public void validateFieldByPattern(String field, String fieldName, String patternString, List<Violation> violations) {
         if (field == null) {
             Violation violation = new Violation(fieldName, "Field can not be null");
@@ -28,6 +57,7 @@ public class RequestValidator {
         }
     }
 
+    @Override
     public void validateRequestForNull(Object object, String requestName, Gson gson) {
         if (object == null) {
             Violation violation = new Violation(requestName, "%s can not be null".formatted(requestName));
@@ -36,6 +66,7 @@ public class RequestValidator {
         }
     }
 
+    @Override
     public void validateBigDecimalFieldForPositive(BigDecimal field, String fieldName, List<Violation> violations) {
         if (field == null) {
             Violation violation = new Violation(fieldName, "Field can not be null");
@@ -46,6 +77,7 @@ public class RequestValidator {
         }
     }
 
+    @Override
     public void validateLongFieldForPositive(Long field, String fieldName, List<Violation> violations) {
         if (field == null) {
             Violation violation = new Violation(fieldName, "Field can not be null");

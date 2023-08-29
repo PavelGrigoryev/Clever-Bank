@@ -12,7 +12,8 @@ import ru.clevertec.cleverbank.dto.account.AccountRequest;
 import ru.clevertec.cleverbank.exception.conflict.ValidationException;
 import ru.clevertec.cleverbank.exception.handler.ValidationResponse;
 import ru.clevertec.cleverbank.exception.handler.Violation;
-import ru.clevertec.cleverbank.util.RequestValidator;
+import ru.clevertec.cleverbank.service.ValidationService;
+import ru.clevertec.cleverbank.service.impl.ValidationServiceImpl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,6 +24,7 @@ import java.util.List;
 public class AccountValidationFilter implements Filter {
 
     private final Gson gson = new Gson();
+    private final ValidationService validationService = new ValidationServiceImpl();
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -37,16 +39,16 @@ public class AccountValidationFilter implements Filter {
         AccountRequest request = gson.fromJson(extractJsonFromBody(req), AccountRequest.class);
         List<Violation> violations = new ArrayList<>();
 
-        RequestValidator.validateRequestForNull(request, "Account", gson);
+        validationService.validateRequestForNull(request, "Account", gson);
 
         if (request.currency() == null) {
             Violation violation = new Violation("currency", "Available currencies are: BYN, RUB, USD or EUR");
             violations.add(violation);
         }
 
-        RequestValidator.validateBigDecimalFieldForPositive(request.balance(), "balance", violations);
-        RequestValidator.validateLongFieldForPositive(request.bankId(), "bank_id", violations);
-        RequestValidator.validateLongFieldForPositive(request.userId(), "user_id", violations);
+        validationService.validateBigDecimalFieldForPositive(request.balance(), "balance", violations);
+        validationService.validateLongFieldForPositive(request.bankId(), "bank_id", violations);
+        validationService.validateLongFieldForPositive(request.userId(), "user_id", violations);
 
         if (!violations.isEmpty()) {
             String validationJson = gson.toJson(new ValidationResponse(violations));
