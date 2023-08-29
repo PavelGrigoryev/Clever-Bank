@@ -8,7 +8,7 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
-import ru.clevertec.cleverbank.dto.user.UserRequest;
+import ru.clevertec.cleverbank.dto.bank.BankRequest;
 import ru.clevertec.cleverbank.exception.conflict.ValidationException;
 import ru.clevertec.cleverbank.exception.handler.ValidationResponse;
 import ru.clevertec.cleverbank.exception.handler.Violation;
@@ -19,8 +19,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-@WebFilter(urlPatterns = "/users")
-public class UserValidationFilter implements Filter {
+@WebFilter(urlPatterns = "/banks")
+public class BankValidationFilter implements Filter {
 
     private final Gson gson = new Gson();
 
@@ -28,28 +28,26 @@ public class UserValidationFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
         if ("POST".equalsIgnoreCase(req.getMethod()) || "PUT".equalsIgnoreCase(req.getMethod())) {
-            validateUserRequest(req);
+            validateBankRequest(req);
         }
         chain.doFilter(request, response);
     }
 
-    private void validateUserRequest(HttpServletRequest req) throws IOException {
-        UserRequest request = gson.fromJson(extractJsonFromBody(req), UserRequest.class);
+    private void validateBankRequest(HttpServletRequest req) throws IOException {
+        BankRequest request = gson.fromJson(extractJsonFromBody(req), BankRequest.class);
         List<Violation> violations = new ArrayList<>();
         if (request == null) {
-            Violation violation = new Violation("User", "User can not be null");
+            Violation violation = new Violation("Bank", "Bank can not be null");
             violations.add(violation);
             String validationJson = gson.toJson(new ValidationResponse(violations));
             throw new ValidationException(validationJson);
         }
 
-        RequestValidator.validateFieldByPattern(request.lastname(), "lastname",
-                "^[a-zA-Zа-яА-ЯёЁ]+$", violations);
-        RequestValidator.validateFieldByPattern(request.firstname(), "firstname",
-                "^[a-zA-Zа-яА-ЯёЁ]+$", violations);
-        RequestValidator.validateFieldByPattern(request.surname(), "surname",
-                "^[a-zA-Zа-яА-ЯёЁ]+$", violations);
-        RequestValidator.validateFieldByPattern(request.mobileNumber(), "mobile_number",
+        RequestValidator.validateFieldByPattern(request.name(), "name",
+                "^[a-zA-Zа-яА-ЯёЁ @_-]+$", violations);
+        RequestValidator.validateFieldByPattern(request.address(), "address",
+                "^[a-zA-Zа-яА-ЯёЁ0-9 .,-]+$", violations);
+        RequestValidator.validateFieldByPattern(request.phoneNumber(), "phone_number",
                 "^\\+\\d{1,3} \\(\\d{1,3}\\) \\d{3}-\\d{2}-\\d{2}$", violations);
 
         if (!violations.isEmpty()) {
@@ -57,7 +55,7 @@ public class UserValidationFilter implements Filter {
             throw new ValidationException(validationJson);
         }
 
-        req.setAttribute("userRequest", request);
+        req.setAttribute("bankRequest", request);
     }
 
     private String extractJsonFromBody(HttpServletRequest req) throws IOException {

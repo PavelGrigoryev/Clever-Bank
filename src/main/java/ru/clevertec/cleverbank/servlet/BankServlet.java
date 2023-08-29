@@ -11,7 +11,6 @@ import ru.clevertec.cleverbank.dto.bank.BankResponse;
 import ru.clevertec.cleverbank.service.BankService;
 import ru.clevertec.cleverbank.service.impl.BankServiceImpl;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
@@ -35,7 +34,7 @@ public class BankServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        BankRequest request = gson.fromJson(extractJsonFromBody(req), BankRequest.class);
+        BankRequest request = (BankRequest) req.getAttribute("bankRequest");
         BankResponse response = bankService.save(request);
         String bankJson = gson.toJson(response);
 
@@ -48,7 +47,7 @@ public class BankServlet extends HttpServlet {
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String id = req.getParameter("id");
-        BankRequest request = gson.fromJson(extractJsonFromBody(req), BankRequest.class);
+        BankRequest request = (BankRequest) req.getAttribute("bankRequest");
         BankResponse response = bankService.update(Long.valueOf(id), request);
         String bankJson = gson.toJson(response);
 
@@ -80,16 +79,6 @@ public class BankServlet extends HttpServlet {
         String bankJson = gson.toJson(responses);
         printWriter.print(bankJson);
         printWriter.flush();
-    }
-
-    private String extractJsonFromBody(HttpServletRequest req) throws IOException {
-        BufferedReader reader = req.getReader();
-        StringBuilder result = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null) {
-            result.append(line);
-        }
-        return result.toString();
     }
 
 }
