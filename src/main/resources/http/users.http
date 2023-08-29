@@ -30,7 +30,6 @@ Content-Type: application/json
   "mobile_number": "+7 (495) 444-45-66"
 }
 
-
 ###удалить пользователя по id
 DELETE http://localhost:8080/users?id=1
 Content-Type: application/json

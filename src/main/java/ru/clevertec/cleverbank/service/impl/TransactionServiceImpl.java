@@ -2,7 +2,7 @@ package ru.clevertec.cleverbank.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
-import ru.clevertec.cleverbank.config.ConnectionManager;
+import ru.clevertec.cleverbank.util.ConnectionManager;
 import ru.clevertec.cleverbank.dao.TransactionDAO;
 import ru.clevertec.cleverbank.dao.impl.TransactionDAOImpl;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceRequest;

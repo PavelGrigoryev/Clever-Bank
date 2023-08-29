@@ -1,9 +1,8 @@
-package ru.clevertec.cleverbank.config;
+package ru.clevertec.cleverbank.util;
 
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
-import ru.clevertec.cleverbank.util.YamlUtil;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
