@@ -36,13 +36,8 @@ public class UserValidationFilter implements Filter {
     private void validateUserRequest(HttpServletRequest req) throws IOException {
         UserRequest request = gson.fromJson(extractJsonFromBody(req), UserRequest.class);
         List<Violation> violations = new ArrayList<>();
-        if (request == null) {
-            Violation violation = new Violation("User", "User can not be null");
-            violations.add(violation);
-            String validationJson = gson.toJson(new ValidationResponse(violations));
-            throw new ValidationException(validationJson);
-        }
 
+        RequestValidator.validateRequestForNull(request, "User", gson);
         RequestValidator.validateFieldByPattern(request.lastname(), "lastname",
                 "^[a-zA-Zа-яА-ЯёЁ]+$", violations);
         RequestValidator.validateFieldByPattern(request.firstname(), "firstname",

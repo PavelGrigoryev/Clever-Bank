@@ -36,13 +36,8 @@ public class BankValidationFilter implements Filter {
     private void validateBankRequest(HttpServletRequest req) throws IOException {
         BankRequest request = gson.fromJson(extractJsonFromBody(req), BankRequest.class);
         List<Violation> violations = new ArrayList<>();
-        if (request == null) {
-            Violation violation = new Violation("Bank", "Bank can not be null");
-            violations.add(violation);
-            String validationJson = gson.toJson(new ValidationResponse(violations));
-            throw new ValidationException(validationJson);
-        }
 
+        RequestValidator.validateRequestForNull(request, "Bank", gson);
         RequestValidator.validateFieldByPattern(request.name(), "name",
                 "^[a-zA-Zа-яА-ЯёЁ @_-]+$", violations);
         RequestValidator.validateFieldByPattern(request.address(), "address",

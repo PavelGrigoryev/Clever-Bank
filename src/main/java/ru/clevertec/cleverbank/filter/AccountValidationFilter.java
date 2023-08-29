@@ -36,12 +36,8 @@ public class AccountValidationFilter implements Filter {
     private void validateAccountRequest(HttpServletRequest req) throws IOException {
         AccountRequest request = gson.fromJson(extractJsonFromBody(req), AccountRequest.class);
         List<Violation> violations = new ArrayList<>();
-        if (request == null) {
-            Violation violation = new Violation("Account", "Account can not be null");
-            violations.add(violation);
-            String validationJson = gson.toJson(new ValidationResponse(violations));
-            throw new ValidationException(validationJson);
-        }
+
+        RequestValidator.validateRequestForNull(request, "Account", gson);
 
         if (request.currency() == null) {
             Violation violation = new Violation("currency", "Available currencies are: BYN, RUB, USD or EUR");

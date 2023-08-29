@@ -1,7 +1,6 @@
 package ru.clevertec.cleverbank.servlet;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -17,7 +16,6 @@ import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionExcep
 import ru.clevertec.cleverbank.service.TransactionService;
 import ru.clevertec.cleverbank.service.impl.TransactionServiceImpl;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
@@ -38,19 +36,15 @@ public class TransactionServlet extends HttpServlet {
         AsyncContext asyncContext = req.startAsync();
         CompletableFuture.runAsync(() -> {
             try {
-                BufferedReader reader = asyncContext.getRequest().getReader();
-                StringBuilder result = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    result.append(line);
-                }
-
                 String transactionJson;
-                JsonObject jsonObject = gson.fromJson(result.toString(), JsonObject.class);
-                if (jsonObject.has("type")) {
-                    transactionJson = changeBalance(gson, jsonObject);
+                ChangeBalanceRequest changeRequest = (ChangeBalanceRequest) asyncContext.getRequest()
+                        .getAttribute("changeBalanceRequest");
+                if (changeRequest != null) {
+                    transactionJson = changeBalance(gson, changeRequest);
                 } else {
-                    transactionJson = transferBalance(gson, jsonObject);
+                    TransferBalanceRequest transferRequest = (TransferBalanceRequest) asyncContext.getRequest()
+                            .getAttribute("transferBalanceRequest");
+                    transactionJson = transferBalance(gson, transferRequest);
                 }
 
                 HttpServletResponse response = (HttpServletResponse) asyncContext.getResponse();
@@ -65,6 +59,22 @@ public class TransactionServlet extends HttpServlet {
                 asyncContext.complete();
             }
         });
+    }
+
+    private String changeBalance(Gson gson, ChangeBalanceRequest request) {
+        ChangeBalanceResponse response = transactionService.changeBalance(request);
+        return gson.toJson(response);
+    }
+
+    private String transferBalance(Gson gson, TransferBalanceRequest request) {
+        TransferBalanceResponse response;
+        try {
+            response = transactionService.transferBalance(request);
+        } catch (SQLException e) {
+            log.error(e.getMessage());
+            throw new JDBCConnectionException();
+        }
+        return gson.toJson(response);
     }
 
     @Override
@@ -101,24 +111,6 @@ public class TransactionServlet extends HttpServlet {
         String transactionJson = gson.toJson(responses);
         printWriter.print(transactionJson);
         printWriter.flush();
-    }
-
-    private String changeBalance(Gson gson, JsonObject jsonObject) {
-        ChangeBalanceRequest request = gson.fromJson(jsonObject.toString(), ChangeBalanceRequest.class);
-        ChangeBalanceResponse response = transactionService.changeBalance(request);
-        return gson.toJson(response);
-    }
-
-    private String transferBalance(Gson gson, JsonObject jsonObject) {
-        TransferBalanceRequest request = gson.fromJson(jsonObject.toString(), TransferBalanceRequest.class);
-        TransferBalanceResponse response;
-        try {
-            response = transactionService.transferBalance(request);
-        } catch (SQLException e) {
-            log.error(e.getMessage());
-            throw new JDBCConnectionException();
-        }
-        return gson.toJson(response);
     }
 
 }

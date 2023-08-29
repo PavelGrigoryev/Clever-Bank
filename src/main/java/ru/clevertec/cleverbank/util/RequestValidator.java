@@ -1,6 +1,9 @@
 package ru.clevertec.cleverbank.util;
 
+import com.google.gson.Gson;
 import lombok.experimental.UtilityClass;
+import ru.clevertec.cleverbank.exception.conflict.ValidationException;
+import ru.clevertec.cleverbank.exception.handler.ValidationResponse;
 import ru.clevertec.cleverbank.exception.handler.Violation;
 
 import java.math.BigDecimal;
@@ -25,11 +28,19 @@ public class RequestValidator {
         }
     }
 
+    public void validateRequestForNull(Object object, String requestName, Gson gson) {
+        if (object == null) {
+            Violation violation = new Violation(requestName, "%s can not be null".formatted(requestName));
+            String validationJson = gson.toJson(new ValidationResponse(List.of(violation)));
+            throw new ValidationException(validationJson);
+        }
+    }
+
     public void validateBigDecimalFieldForPositive(BigDecimal field, String fieldName, List<Violation> violations) {
         if (field == null) {
             Violation violation = new Violation(fieldName, "Field can not be null");
             violations.add(violation);
-        } else if (field.compareTo(BigDecimal.ZERO) <= 0){
+        } else if (field.compareTo(BigDecimal.ZERO) <= 0) {
             Violation violation = new Violation(fieldName, "Field must be grater than 0");
             violations.add(violation);
         }
