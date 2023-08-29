@@ -11,7 +11,6 @@ import ru.clevertec.cleverbank.dto.account.AccountResponse;
 import ru.clevertec.cleverbank.service.AccountService;
 import ru.clevertec.cleverbank.service.impl.AccountServiceImpl;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
@@ -35,14 +34,7 @@ public class AccountServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        BufferedReader reader = req.getReader();
-        StringBuilder result = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null) {
-            result.append(line);
-        }
-
-        AccountRequest request = gson.fromJson(result.toString(), AccountRequest.class);
+        AccountRequest request = (AccountRequest) req.getAttribute("accountRequest");
         AccountResponse response = accountService.save(request);
         String accountJson = gson.toJson(response);
 
