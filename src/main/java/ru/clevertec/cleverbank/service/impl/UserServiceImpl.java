@@ -6,6 +6,8 @@ import ru.clevertec.cleverbank.dao.impl.UserDAOImpl;
 import ru.clevertec.cleverbank.dto.DeleteResponse;
 import ru.clevertec.cleverbank.dto.user.UserRequest;
 import ru.clevertec.cleverbank.dto.user.UserResponse;
+import ru.clevertec.cleverbank.exception.badrequest.UniquePhoneNumberException;
+import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
 import ru.clevertec.cleverbank.exception.notfound.UserNotFoundException;
 import ru.clevertec.cleverbank.mapper.UserMapper;
 import ru.clevertec.cleverbank.model.User;
@@ -42,7 +44,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse save(UserRequest request) {
         User user = userMapper.fromRequest(request);
-        User savedUser = userDAO.save(user);
+        User savedUser;
+        try {
+            savedUser = userDAO.save(user);
+        } catch (JDBCConnectionException e) {
+            throw new UniquePhoneNumberException("User with phone number " + request.mobileNumber() + " is already exist");
+        }
         return userMapper.toResponse(savedUser);
     }
 

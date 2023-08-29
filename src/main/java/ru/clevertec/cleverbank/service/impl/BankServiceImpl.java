@@ -6,6 +6,8 @@ import ru.clevertec.cleverbank.dao.impl.BankDAOImpl;
 import ru.clevertec.cleverbank.dto.DeleteResponse;
 import ru.clevertec.cleverbank.dto.bank.BankRequest;
 import ru.clevertec.cleverbank.dto.bank.BankResponse;
+import ru.clevertec.cleverbank.exception.badrequest.UniquePhoneNumberException;
+import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
 import ru.clevertec.cleverbank.exception.notfound.BankNotFoundException;
 import ru.clevertec.cleverbank.mapper.BankMapper;
 import ru.clevertec.cleverbank.model.Bank;
@@ -43,7 +45,12 @@ public class BankServiceImpl implements BankService {
     @Override
     public BankResponse save(BankRequest request) {
         Bank bank = bankMapper.fromRequest(request);
-        Bank savedBank = bankDAO.save(bank);
+        Bank savedBank;
+        try {
+            savedBank = bankDAO.save(bank);
+        } catch (JDBCConnectionException e) {
+            throw new UniquePhoneNumberException("Bank with phone number " + request.phoneNumber() + " is already exist");
+        }
         return bankMapper.toResponse(savedBank);
     }
 

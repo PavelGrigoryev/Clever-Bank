@@ -4,19 +4,19 @@
 CREATE TABLE IF NOT EXISTS banks
 (
     id           BIGSERIAL PRIMARY KEY,
-    name         VARCHAR(200) NOT NULL,
-    address      VARCHAR(200) NOT NULL,
-    phone_number VARCHAR(40)  NOT NULL
+    name         VARCHAR(200)       NOT NULL,
+    address      VARCHAR(200)       NOT NULL,
+    phone_number VARCHAR(40) UNIQUE NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS users
 (
     id            BIGSERIAL PRIMARY KEY,
-    lastname      VARCHAR(40) NOT NULL,
-    firstname     VARCHAR(40) NOT NULL,
-    surname       VARCHAR(40) NOT NULL,
-    birthdate     DATE        NOT NULL,
-    mobile_number varchar(40) NOT NULL
+    lastname      VARCHAR(40)        NOT NULL,
+    firstname     VARCHAR(40)        NOT NULL,
+    surname       VARCHAR(40)        NOT NULL,
+    birthdate     DATE               NOT NULL,
+    mobile_number varchar(40) UNIQUE NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS accounts
