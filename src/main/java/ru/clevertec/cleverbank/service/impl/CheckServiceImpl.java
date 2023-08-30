@@ -1,6 +1,5 @@
 package ru.clevertec.cleverbank.service.impl;
 
-import lombok.extern.slf4j.Slf4j;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransactionStatementResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransferBalanceResponse;
@@ -9,7 +8,6 @@ import ru.clevertec.cleverbank.service.CheckService;
 
 import java.time.format.DateTimeFormatter;
 
-@Slf4j
 public class CheckServiceImpl implements CheckService {
 
     @Override

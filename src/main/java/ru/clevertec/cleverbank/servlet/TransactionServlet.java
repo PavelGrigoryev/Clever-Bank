@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import ru.clevertec.cleverbank.dto.transaction.AmountOfFundsResponse;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceRequest;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransactionResponse;
@@ -68,6 +69,29 @@ public class TransactionServlet extends HttpServlet {
     }
 
     @Override
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) {
+        AsyncContext asyncContext = req.startAsync();
+        CompletableFuture.runAsync(() -> {
+            try {
+                TransactionStatementRequest statementRequest = (TransactionStatementRequest) asyncContext.getRequest()
+                        .getAttribute("amountRequest");
+                String amountJson = findSumOfFundsByPeriodOfDateAndAccountId(gson, statementRequest);
+
+                HttpServletResponse response = (HttpServletResponse) asyncContext.getResponse();
+                response.setStatus(201);
+                PrintWriter printWriter = response.getWriter();
+                printWriter.print(amountJson);
+                printWriter.flush();
+            } catch (Exception e) {
+                req.setAttribute(ERROR_EXCEPTION, e);
+                asyncContext.dispatch("/exception_handler");
+            } finally {
+                asyncContext.complete();
+            }
+        });
+    }
+
+    @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String id = req.getParameter("id");
         String senderAccountId = req.getParameter("sender_account_id");
@@ -100,6 +124,11 @@ public class TransactionServlet extends HttpServlet {
 
     private String findAllByPeriodOfDateAndAccountId(Gson gson, TransactionStatementRequest request) {
         TransactionStatementResponse response = transactionService.findAllByPeriodOfDateAndAccountId(request);
+        return gson.toJson(response);
+    }
+
+    private String findSumOfFundsByPeriodOfDateAndAccountId(Gson gson, TransactionStatementRequest request) {
+        AmountOfFundsResponse response = transactionService.findSumOfFundsByPeriodOfDateAndAccountId(request);
         return gson.toJson(response);
     }
 

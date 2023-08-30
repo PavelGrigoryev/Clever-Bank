@@ -1,5 +1,6 @@
 package ru.clevertec.cleverbank.service;
 
+import ru.clevertec.cleverbank.dto.transaction.AmountOfFundsResponse;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceRequest;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransactionResponse;
@@ -18,6 +19,8 @@ public interface TransactionService {
     TransferBalanceResponse transferBalance(TransferBalanceRequest request) throws SQLException;
 
     TransactionStatementResponse findAllByPeriodOfDateAndAccountId(TransactionStatementRequest request);
+
+    AmountOfFundsResponse findSumOfFundsByPeriodOfDateAndAccountId(TransactionStatementRequest request);
 
     TransactionResponse findById(Long id);
 

@@ -107,6 +107,55 @@ public class TransactionDAOImpl implements TransactionDAO {
         return transactions;
     }
 
+    @Override
+    public BigDecimal findSumOfSpentFundsByPeriodOfDateAndAccountId(LocalDate from, LocalDate to, String id) {
+        BigDecimal spentFunds = BigDecimal.ZERO;
+        String sql = """
+                SELECT SUM(sum) AS spent FROM transactions
+                WHERE date BETWEEN ? AND ?
+                AND ((senders_account = ? AND type = 'TRANSFER') OR (recipients_account = ? AND type = 'WITHDRAWAL'))
+                """;
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setObject(1, from);
+            preparedStatement.setObject(2, to);
+            preparedStatement.setString(3, id);
+            preparedStatement.setString(4, id);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    spentFunds = resultSet.getBigDecimal("spent");
+                }
+            }
+        } catch (SQLException e) {
+            log.error(e.getMessage());
+            throw new JDBCConnectionException();
+        }
+        return spentFunds;
+    }
+
+    @Override
+    public BigDecimal findSumOfReceivedFundsByPeriodOfDateAndAccountId(LocalDate from, LocalDate to, String id) {
+        BigDecimal receivedFunds = BigDecimal.ZERO;
+        String sql = """
+                SELECT SUM(sum) AS received FROM transactions
+                WHERE date BETWEEN ? AND ?
+                AND (recipients_account = ? AND type != 'WITHDRAWAL')
+                """;
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setObject(1, from);
+            preparedStatement.setObject(2, to);
+            preparedStatement.setString(3, id);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    receivedFunds = resultSet.getBigDecimal("received");
+                }
+            }
+        } catch (SQLException e) {
+            log.error(e.getMessage());
+            throw new JDBCConnectionException();
+        }
+        return receivedFunds;
+    }
+
     private List<Transaction> findAll(String sql, String id, List<Transaction> transactions) {
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, id);

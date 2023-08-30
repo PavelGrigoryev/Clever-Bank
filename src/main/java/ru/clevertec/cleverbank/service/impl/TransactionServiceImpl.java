@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import ru.clevertec.cleverbank.dao.TransactionDAO;
 import ru.clevertec.cleverbank.dao.impl.TransactionDAOImpl;
+import ru.clevertec.cleverbank.dto.transaction.AmountOfFundsResponse;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceRequest;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransactionResponse;
@@ -136,6 +137,10 @@ public class TransactionServiceImpl implements TransactionService {
 
         List<Transaction> transactions = transactionDAO
                 .findAllByPeriodOfDateAndAccountId(request.from(), request.to(), account.getId());
+        if (transactions.isEmpty()) {
+            throw new TransactionNotFoundException("It is not possible to create a transaction statement because" +
+                                                   " you do not have any transactions");
+        }
 
         List<TransactionStatement> transactionStatements = transactions.stream()
                 .map(transaction -> {
@@ -151,6 +156,20 @@ public class TransactionServiceImpl implements TransactionService {
         uploadFileService.uploadStatement(statement);
         log.info("Statement:{}", statement);
         return response;
+    }
+
+    @Override
+    public AmountOfFundsResponse findSumOfFundsByPeriodOfDateAndAccountId(TransactionStatementRequest request) {
+        Account account = accountService.findById(request.accountId());
+        Bank bank = bankService.findById(account.getBankId());
+        User user = userService.findById(account.getUserId());
+
+        BigDecimal spentFunds = transactionDAO
+                .findSumOfSpentFundsByPeriodOfDateAndAccountId(request.from(), request.to(), request.accountId());
+        BigDecimal receivedFunds = transactionDAO
+                .findSumOfReceivedFundsByPeriodOfDateAndAccountId(request.from(), request.to(), request.accountId());
+
+        return transactionMapper.toAmountResponse(bank.getName(), user, account, request, spentFunds, receivedFunds);
     }
 
     @Override

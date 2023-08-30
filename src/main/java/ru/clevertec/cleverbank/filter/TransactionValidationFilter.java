@@ -35,9 +35,7 @@ public class TransactionValidationFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         if ("POST".equalsIgnoreCase(req.getMethod())) {
             JsonObject jsonObject = gson.fromJson(extractJsonFromBody(req), JsonObject.class);
-
             validationService.validateRequestForNull(jsonObject, "Transaction", gson);
-
             if (jsonObject.has("type")) {
                 validateChangeBalanceRequest(req, jsonObject);
             } else if (jsonObject.has("from")) {
@@ -45,6 +43,10 @@ public class TransactionValidationFilter implements Filter {
             } else {
                 validateTransferBalanceRequest(req, jsonObject);
             }
+        } else if ("PUT".equalsIgnoreCase(req.getMethod())) {
+            JsonObject jsonObject = gson.fromJson(extractJsonFromBody(req), JsonObject.class);
+            validationService.validateRequestForNull(jsonObject, "Transaction", gson);
+            validateAmountRequest(req, jsonObject);
         }
         chain.doFilter(request, response);
     }
@@ -85,6 +87,11 @@ public class TransactionValidationFilter implements Filter {
     private void validateStatementRequest(HttpServletRequest req, JsonObject jsonObject) {
         TransactionStatementRequest request = gson.fromJson(jsonObject.toString(), TransactionStatementRequest.class);
         req.setAttribute("statementRequest", request);
+    }
+
+    private void validateAmountRequest(HttpServletRequest req, JsonObject jsonObject) {
+        TransactionStatementRequest request = gson.fromJson(jsonObject.toString(), TransactionStatementRequest.class);
+        req.setAttribute("amountRequest", request);
     }
 
     private String extractJsonFromBody(HttpServletRequest req) throws IOException {
