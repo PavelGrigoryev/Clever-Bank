@@ -145,7 +145,12 @@ public class TransactionServiceImpl implements TransactionService {
                 })
                 .toList();
 
-        return transactionMapper.toStatementResponse(bank.getName(), user, account, request, transactionStatements);
+        TransactionStatementResponse response = transactionMapper
+                .toStatementResponse(bank.getName(), user, account, request, transactionStatements);
+        String statement = checkService.createTransactionStatement(response);
+        uploadFileService.uploadStatement(statement);
+        log.info("Statement:{}", statement);
+        return response;
     }
 
     @Override

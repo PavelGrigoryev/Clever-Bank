@@ -18,23 +18,33 @@ public class UploadFileServiceImpl implements UploadFileService {
 
     @Override
     public void uploadCheck(String check) {
-        Path path = Paths.get(findPaths());
+        Path path = Paths.get(findPaths("BankCheck.txt"));
+        writeFile(check, path);
+    }
+
+    @Override
+    public void uploadStatement(String statement) {
+        Path path = Paths.get(findPaths("TransactionStatement.txt"));
+        writeFile(statement, path);
+    }
+
+    private static void writeFile(String statement, Path path) {
         log.info("File download link: {}", path);
         try {
-            Files.write(path, check.getBytes(), StandardOpenOption.APPEND, StandardOpenOption.CREATE);
+            Files.write(path, statement.getBytes(), StandardOpenOption.APPEND, StandardOpenOption.CREATE);
         } catch (IOException e) {
             log.error(e.getMessage());
             throw new UploadFileException("Sorry! We got Server upload file problems");
         }
     }
 
-    private static String findPaths() {
+    private static String findPaths(String fileName) {
         URL pdfURL = UploadFileServiceImpl.class.getResource("/check");
         if (pdfURL == null) {
             throw new UploadFileException("Can not find a way to upload a txt file");
         }
         return URLDecoder.decode(pdfURL.getPath(), StandardCharsets.UTF_8)
-                .concat("BankCheck.txt")
+                .concat(fileName)
                 .substring(1);
     }
 

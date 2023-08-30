@@ -4,4 +4,6 @@ public interface UploadFileService {
 
     void uploadCheck(String check);
 
+    void uploadStatement(String statement);
+
 }
