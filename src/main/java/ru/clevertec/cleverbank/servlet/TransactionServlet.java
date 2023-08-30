@@ -50,7 +50,7 @@ public class TransactionServlet extends HttpServlet {
                 } else {
                     TransactionStatementRequest statementRequest = (TransactionStatementRequest) asyncContext.getRequest()
                             .getAttribute("statementRequest");
-                    transactionJson = transactionStatement(gson, statementRequest);
+                    transactionJson = findAllByPeriodOfDateAndAccountId(gson, statementRequest);
                 }
 
                 HttpServletResponse response = (HttpServletResponse) asyncContext.getResponse();
@@ -98,7 +98,7 @@ public class TransactionServlet extends HttpServlet {
         return gson.toJson(response);
     }
 
-    private String transactionStatement(Gson gson, TransactionStatementRequest request) {
+    private String findAllByPeriodOfDateAndAccountId(Gson gson, TransactionStatementRequest request) {
         TransactionStatementResponse response = transactionService.findAllByPeriodOfDateAndAccountId(request);
         return gson.toJson(response);
     }

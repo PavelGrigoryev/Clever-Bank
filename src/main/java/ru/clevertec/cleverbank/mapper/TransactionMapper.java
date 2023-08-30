@@ -2,6 +2,7 @@ package ru.clevertec.cleverbank.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceRequest;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransactionResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransactionStatement;
@@ -20,14 +21,17 @@ import java.util.List;
 @Mapper
 public interface TransactionMapper {
 
+    @Mapping(target = "sendersAccount", source = "request.senderAccountId")
+    @Mapping(target = "recipientsAccount", source = "request.recipientAccountId")
     @Mapping(target = "date", expression = "java(LocalDate.now())")
     @Mapping(target = "time", expression = "java(LocalTime.now())")
     Transaction toChangeTransaction(Type type,
                                     String recipientsBank,
-                                    String recipientsAccount,
-                                    BigDecimal sum);
+                                    String sendersBank,
+                                    ChangeBalanceRequest request);
 
     @Mapping(target = "transactionId", source = "transaction.id")
+    @Mapping(target = "senderBankName", source = "transaction.sendersBank")
     @Mapping(target = "recipientBankName", source = "transaction.recipientsBank")
     @Mapping(target = "recipientAccountId", source = "transaction.recipientsAccount")
     ChangeBalanceResponse toChangeResponse(Transaction transaction,
@@ -60,7 +64,7 @@ public interface TransactionMapper {
 
     List<TransactionResponse> toResponseList(List<Transaction> transactions);
 
-    List<TransactionStatement> toTransactionStatementList(List<Transaction> transaction);
+    TransactionStatement toStatement(Transaction transaction, String userLastname);
 
     @Mapping(target = "formationDate", expression = "java(LocalDate.now())")
     @Mapping(target = "formationTime", expression = "java(LocalTime.now())")

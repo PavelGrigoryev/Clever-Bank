@@ -23,6 +23,9 @@ public record ChangeBalanceResponse(@SerializedName("transaction_id")
                                     Currency currency,
                                     Type type,
 
+                                    @SerializedName("sender_bank_name")
+                                    String senderBankName,
+
                                     @SerializedName("recipient_bank_name")
                                     String recipientBankName,
 

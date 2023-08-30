@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import ru.clevertec.cleverbank.exception.badrequest.BadRequestException;
+import ru.clevertec.cleverbank.exception.conflict.LocalDateParseException;
 import ru.clevertec.cleverbank.exception.conflict.ValidationException;
 import ru.clevertec.cleverbank.exception.notfound.NotFoundException;
 
@@ -18,6 +19,8 @@ import static jakarta.servlet.RequestDispatcher.ERROR_EXCEPTION;
 @Slf4j
 @WebServlet(urlPatterns = "/exception_handler")
 public class ExceptionHandlerServlet extends HttpServlet {
+
+    private final transient Gson gson = new Gson();
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -36,8 +39,12 @@ public class ExceptionHandlerServlet extends HttpServlet {
             printExceptionResponse(exception.getMessage(), printWriter);
         } else if (exception instanceof ValidationException) {
             resp.setStatus(409);
-            printWriter.print(exception.getMessage());
-            printWriter.flush();
+            if (exception instanceof LocalDateParseException) {
+                printExceptionResponse(exception.getMessage(), printWriter);
+            } else {
+                printWriter.print(exception.getMessage());
+                printWriter.flush();
+            }
         } else {
             resp.setStatus(500);
             printExceptionResponse(exception.getMessage(), printWriter);
@@ -46,7 +53,7 @@ public class ExceptionHandlerServlet extends HttpServlet {
 
     private void printExceptionResponse(String message, PrintWriter printWriter) {
         ExceptionResponse response = new ExceptionResponse(message);
-        String json = new Gson().toJson(response);
+        String json = gson.toJson(response);
         printWriter.print(json);
         printWriter.flush();
     }

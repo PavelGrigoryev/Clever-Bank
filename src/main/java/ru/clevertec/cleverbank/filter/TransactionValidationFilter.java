@@ -40,10 +40,10 @@ public class TransactionValidationFilter implements Filter {
 
             if (jsonObject.has("type")) {
                 validateChangeBalanceRequest(req, jsonObject);
-            } else if (jsonObject.has("sender_account_id")) {
-                validateTransferBalanceRequest(req, jsonObject);
-            } else {
+            } else if (jsonObject.has("from")) {
                 validateStatementRequest(req, jsonObject);
+            } else {
+                validateTransferBalanceRequest(req, jsonObject);
             }
         }
         chain.doFilter(request, response);
@@ -84,7 +84,6 @@ public class TransactionValidationFilter implements Filter {
 
     private void validateStatementRequest(HttpServletRequest req, JsonObject jsonObject) {
         TransactionStatementRequest request = gson.fromJson(jsonObject.toString(), TransactionStatementRequest.class);
-        //todo
         req.setAttribute("statementRequest", request);
     }
 

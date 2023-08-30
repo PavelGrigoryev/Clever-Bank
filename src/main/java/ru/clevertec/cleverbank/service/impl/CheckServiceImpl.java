@@ -18,6 +18,7 @@ public class CheckServiceImpl implements CheckService {
                 | Чек: %52s |
                 | %s %46s |
                 | Тип транзакции: %41s |
+                | Банк отправителя: %39s |
                 | Банк получателя: %40s |
                 | Счет получателя: %40s |
                 | Сумма: %46s %s |
@@ -30,9 +31,10 @@ public class CheckServiceImpl implements CheckService {
                 response.date(),
                 response.time().format(DateTimeFormatter.ofPattern("HH:mm:ss")),
                 response.type(),
+                response.senderBankName(),
                 response.recipientBankName(),
                 response.recipientAccountId(),
-                response.type() == Type.WITHDRAWAL ? "-" + response.sum() : "+" + response.sum(),
+                response.type() == Type.WITHDRAWAL ? "-" + response.sum() : "" + response.sum(),
                 response.currency(),
                 repeat);
     }

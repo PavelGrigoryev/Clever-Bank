@@ -62,6 +62,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public ChangeBalanceResponse changeBalance(ChangeBalanceRequest request) {
         Account accountRecipient = accountService.findById(request.recipientAccountId());
+        Account accountSender = accountService.findById(request.senderAccountId());
         validationService.validateAccountForClosingDate(accountRecipient.getClosingDate(), accountRecipient.getId());
 
         BigDecimal oldBalance = accountRecipient.getBalance();
@@ -72,9 +73,10 @@ public class TransactionServiceImpl implements TransactionService {
         Account updatedAccount = accountService.updateBalance(accountRecipient, newBalance);
 
         Bank bankRecipient = bankService.findById(accountRecipient.getBankId());
+        Bank bankSender = bankService.findById(accountSender.getBankId());
 
         Transaction transaction = transactionMapper
-                .toChangeTransaction(request.type(), bankRecipient.getName(), updatedAccount.getId(), request.sum());
+                .toChangeTransaction(request.type(), bankRecipient.getName(), bankSender.getName(), request);
         Transaction savedTransaction = transactionDAO.save(transaction);
 
         ChangeBalanceResponse response = transactionMapper
@@ -131,10 +133,18 @@ public class TransactionServiceImpl implements TransactionService {
         Account account = accountService.findById(request.accountId());
         Bank bank = bankService.findById(account.getBankId());
         User user = userService.findById(account.getUserId());
-        //TODO
+
         List<Transaction> transactions = transactionDAO
                 .findAllByPeriodOfDateAndAccountId(request.from(), request.to(), account.getId());
-        List<TransactionStatement> transactionStatements = transactionMapper.toTransactionStatementList(transactions);
+
+        List<TransactionStatement> transactionStatements = transactions.stream()
+                .map(transaction -> {
+                    Account acc = accountService.findById(transaction.getSendersAccount());
+                    User userById = userService.findById(acc.getUserId());
+                    return transactionMapper.toStatement(transaction, userById.getLastname());
+                })
+                .toList();
+
         return transactionMapper.toStatementResponse(bank.getName(), user, account, request, transactionStatements);
     }
 
