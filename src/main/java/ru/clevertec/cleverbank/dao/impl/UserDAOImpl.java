@@ -1,10 +1,10 @@
 package ru.clevertec.cleverbank.dao.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.clevertec.cleverbank.util.ConnectionManager;
 import ru.clevertec.cleverbank.dao.UserDAO;
 import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
 import ru.clevertec.cleverbank.model.User;
+import ru.clevertec.cleverbank.util.ConnectionManager;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -24,6 +24,13 @@ public class UserDAOImpl implements UserDAO {
         connection = ConnectionManager.getJDBCConnection();
     }
 
+    /**
+     * Находит пользователя по его id в базе данных и возвращает его в виде объекта Optional.
+     *
+     * @param id Long, представляющее идентификатор пользователя
+     * @return объект Optional, содержащий пользователя, если он найден, или пустой, если нет
+     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     */
     @Override
     public Optional<User> findById(Long id) {
         String sql = "SELECT * FROM users WHERE id = ?";
@@ -42,6 +49,12 @@ public class UserDAOImpl implements UserDAO {
         return user;
     }
 
+    /**
+     * Находит всех пользователей в базе данных и возвращает их в виде списка объектов User.
+     *
+     * @return список объектов User, представляющих пользователей
+     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     */
     @Override
     public List<User> findAll() {
         List<User> users = new ArrayList<>();
@@ -60,6 +73,13 @@ public class UserDAOImpl implements UserDAO {
         return users;
     }
 
+    /**
+     * Сохраняет пользователя в базе данных и возвращает его в виде объекта User.
+     *
+     * @param user объект User, представляющий пользователя для сохранения
+     * @return объект User, представляющий сохраненного пользователя
+     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     */
     @Override
     public User save(User user) {
         String sql = """
@@ -81,6 +101,13 @@ public class UserDAOImpl implements UserDAO {
         return user;
     }
 
+    /**
+     * Обновляет пользователя в базе данных и возвращает его в виде объекта User.
+     *
+     * @param user объект User, представляющий пользователя для обновления
+     * @return объект User, представляющий обновленного пользователя
+     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     */
     @Override
     public User update(User user) {
         String sql = """
@@ -104,6 +131,13 @@ public class UserDAOImpl implements UserDAO {
         return user;
     }
 
+    /**
+     * Удаляет пользователя из базы данных и связанные с ним счета по его id и возвращает его в виде объекта Optional.
+     *
+     * @param id Long, представляющее идентификатор пользователя для удаления
+     * @return объект Optional, содержащий удаленного пользователя, если он найден, или пустой, если нет
+     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     */
     @Override
     public Optional<User> delete(Long id) {
         deleteAllUsersAccounts(id);
@@ -123,6 +157,12 @@ public class UserDAOImpl implements UserDAO {
         return user;
     }
 
+    /**
+     * Удаляет все счета, принадлежащие пользователю с заданным id, из базы данных.
+     *
+     * @param userId Long, представляющее идентификатор пользователя, чьи счета нужно удалить
+     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     */
     private void deleteAllUsersAccounts(Long userId) {
         String sql = "DELETE FROM accounts WHERE user_id = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {

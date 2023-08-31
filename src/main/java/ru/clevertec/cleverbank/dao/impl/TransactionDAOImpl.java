@@ -27,6 +27,13 @@ public class TransactionDAOImpl implements TransactionDAO {
         connection = ConnectionManager.getJDBCConnection();
     }
 
+    /**
+     * Находит транзакцию по ее id в базе данных и возвращает ее в виде объекта Optional.
+     *
+     * @param id Long, представляющее идентификатор транзакции
+     * @return объект Optional, содержащий транзакцию, если она найдена, или пустой, если нет
+     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     */
     @Override
     public Optional<Transaction> findById(Long id) {
         String sql = "SELECT * FROM transactions WHERE id = ?";
@@ -45,6 +52,14 @@ public class TransactionDAOImpl implements TransactionDAO {
         return transaction;
     }
 
+    /**
+     * Находит все транзакции в базе данных, в которых участвовал счёт с заданным id в качестве отправителя,
+     * и возвращает их в виде списка объектов Transaction.
+     *
+     * @param id String, представляющая идентификатор счёта-отправителя
+     * @return список объектов Transaction, представляющих транзакции
+     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     */
     @Override
     public List<Transaction> findAllBySendersAccountId(String id) {
         List<Transaction> transactions = new ArrayList<>();
@@ -52,6 +67,14 @@ public class TransactionDAOImpl implements TransactionDAO {
         return findAll(sql, id, transactions);
     }
 
+    /**
+     * Находит все транзакции в базе данных, в которых участвовал счёт с заданным id в качестве получателя,
+     * и возвращает их в виде списка объектов Transaction.
+     *
+     * @param id String, представляющая идентификатор счёта-получателя
+     * @return список объектов Transaction, представляющих транзакции
+     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     */
     @Override
     public List<Transaction> findAllByRecipientAccountId(String id) {
         List<Transaction> transactions = new ArrayList<>();
@@ -59,6 +82,13 @@ public class TransactionDAOImpl implements TransactionDAO {
         return findAll(sql, id, transactions);
     }
 
+    /**
+     * Сохраняет транзакцию в базе данных и возвращает ее в виде объекта Transaction.
+     *
+     * @param transaction объект Transaction, представляющий транзакцию для сохранения
+     * @return объект Transaction, представляющий сохраненную транзакцию
+     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     */
     @Override
     public Transaction save(Transaction transaction) {
         String sql = """
@@ -81,6 +111,16 @@ public class TransactionDAOImpl implements TransactionDAO {
         return transaction;
     }
 
+    /**
+     * Находит все транзакции в базе данных, выполненные в заданный период даты и в которых участвовал счёт с
+     * заданным id, и возвращает их в виде списка объектов Transaction.
+     *
+     * @param from LocalDate, представляющий начальную дату периода
+     * @param to   LocalDate, представляющий конечную дату периода
+     * @param id   String, представляющая идентификатор счета
+     * @return список объектов Transaction, представляющих транзакции
+     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     */
     @Override
     public List<Transaction> findAllByPeriodOfDateAndAccountId(LocalDate from, LocalDate to, String id) {
         List<Transaction> transactions = new ArrayList<>();
@@ -107,6 +147,16 @@ public class TransactionDAOImpl implements TransactionDAO {
         return transactions;
     }
 
+    /**
+     * Находит сумму потраченных средств по всем транзакциям в базе данных, выполненные в заданный период даты
+     * и в которых участвовал счёт с заданным id в качестве отправителя или получателя при выводе наличных.
+     *
+     * @param from LocalDate, представляющий начальную дату периода
+     * @param to   LocalDate, представляющий конечную дату периода
+     * @param id   String, представляющая идентификатор счета
+     * @return BigDecimal, представляющий сумму потраченных средств
+     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     */
     @Override
     public BigDecimal findSumOfSpentFundsByPeriodOfDateAndAccountId(LocalDate from, LocalDate to, String id) {
         BigDecimal spentFunds = BigDecimal.ZERO;
@@ -132,6 +182,16 @@ public class TransactionDAOImpl implements TransactionDAO {
         return spentFunds;
     }
 
+    /**
+     * Находит сумму полученных средств по всем транзакциям в базе данных, выполненные в заданный период даты
+     * и в которых участвовал счёт с заданным id в качестве получателя, кроме вывода наличных.
+     *
+     * @param from LocalDate, представляющий начальную дату периода
+     * @param to   LocalDate, представляющий конечную дату периода
+     * @param id   String, представляющая идентификатор счета
+     * @return BigDecimal, представляющий сумму полученных средств
+     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     */
     @Override
     public BigDecimal findSumOfReceivedFundsByPeriodOfDateAndAccountId(LocalDate from, LocalDate to, String id) {
         BigDecimal receivedFunds = BigDecimal.ZERO;
@@ -156,6 +216,16 @@ public class TransactionDAOImpl implements TransactionDAO {
         return receivedFunds;
     }
 
+    /**
+     * Выполняет общую логику поиска транзакций в базе данных по SQL-запросу и id счёта и возвращает их в виде
+     * списка объектов Transaction.
+     *
+     * @param sql          String, представляющая SQL-запрос для поиска транзакций
+     * @param id           String, представляющая идентификатор счета
+     * @param transactions список объектов Transaction, в который будут добавлены найденные транзакции
+     * @return список объектов Transaction, представляющих транзакции
+     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     */
     private List<Transaction> findAll(String sql, String id, List<Transaction> transactions) {
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, id);

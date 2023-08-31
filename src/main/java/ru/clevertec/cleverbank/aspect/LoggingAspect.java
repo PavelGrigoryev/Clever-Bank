@@ -13,6 +13,14 @@ import java.util.Arrays;
 @Aspect
 public class LoggingAspect {
 
+    /**
+     * Логирует информацию о выполнении метода, аннотированного с помощью @ServiceLoggable, включая входные и
+     * выходные параметры.
+     *
+     * @param joinPoint объект ProceedingJoinPoint, который содержит информацию о методе и его аргументах
+     * @return результат выполнения метода
+     * @throws Throwable если метод выбросит исключение
+     */
     @Around("ru.clevertec.cleverbank.aspect.PointCuts.isMethodWithServiceLoggableAnnotation()")
     public Object loggingServiceMethod(ProceedingJoinPoint joinPoint) throws Throwable {
         Object result = joinPoint.proceed(joinPoint.getArgs());
@@ -32,6 +40,12 @@ public class LoggingAspect {
         return result;
     }
 
+    /**
+     * Логирует информацию об исключении, которое было выброшено в методе, аннотированном с помощью @ExceptionLoggable.
+     *
+     * @param joinPoint объект JoinPoint, который содержит информацию о методе и его аргументах
+     * @param e         объект Throwable, который представляет исключение, выброшенное в методе
+     */
     @AfterThrowing(pointcut = "ru.clevertec.cleverbank.aspect.PointCuts.isMethodWithExceptionLoggableAnnotation()", throwing = "e")
     public void loggingException(JoinPoint joinPoint, Throwable e) {
         String className = joinPoint.getTarget().getClass().getSimpleName();

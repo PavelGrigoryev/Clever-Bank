@@ -1,11 +1,11 @@
 package ru.clevertec.cleverbank.dao.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.clevertec.cleverbank.util.ConnectionManager;
 import ru.clevertec.cleverbank.dao.AccountDAO;
 import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
 import ru.clevertec.cleverbank.model.Account;
 import ru.clevertec.cleverbank.model.Currency;
+import ru.clevertec.cleverbank.util.ConnectionManager;
 import ru.clevertec.cleverbank.util.RandomStringGenerator;
 
 import java.sql.Connection;
@@ -27,6 +27,13 @@ public class AccountDAOImpl implements AccountDAO {
         connection = ConnectionManager.getJDBCConnection();
     }
 
+    /**
+     * Находит счёт по его id в базе данных и возвращает его в виде объекта Optional.
+     *
+     * @param id String, представляющая идентификатор счета
+     * @return объект Optional, содержащий счет, если он найден, или пустой, если нет
+     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     */
     @Override
     public Optional<Account> findById(String id) {
         String sql = "SELECT * FROM accounts WHERE id = ?";
@@ -45,6 +52,12 @@ public class AccountDAOImpl implements AccountDAO {
         return account;
     }
 
+    /**
+     * Находит все счета в базе данных и возвращает их в виде списка объектов Account.
+     *
+     * @return список объектов Account, представляющих счета
+     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     */
     @Override
     public List<Account> findAll() {
         List<Account> accounts = new ArrayList<>();
@@ -63,6 +76,13 @@ public class AccountDAOImpl implements AccountDAO {
         return accounts;
     }
 
+    /**
+     * Сохраняет счёт в базе данных и возвращает его в виде объекта Account.
+     *
+     * @param account объект Account, представляющий счёт для сохранения
+     * @return объект Account, представляющий сохраненный счёт
+     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     */
     @Override
     public Account save(Account account) {
         String sql = """
@@ -85,6 +105,13 @@ public class AccountDAOImpl implements AccountDAO {
         return account;
     }
 
+    /**
+     * Обновляет счёт в базе данных и возвращает его в виде объекта Account.
+     *
+     * @param account объект Account, представляющий счёт для обновления
+     * @return объект Account, представляющий обновленный счёт
+     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     */
     @Override
     public Account update(Account account) {
         String sql = """
@@ -108,6 +135,13 @@ public class AccountDAOImpl implements AccountDAO {
         return account;
     }
 
+    /**
+     * Удаляет счёт из базы данных по его id и возвращает его в виде объекта Optional.
+     *
+     * @param id String, представляющая идентификатор счёта для удаления
+     * @return объект Optional, содержащий удаленный счет, если он найден, или пустой, если нет
+     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     */
     @Override
     public Optional<Account> delete(String id) {
         String sql = "DELETE FROM accounts WHERE id = ?";

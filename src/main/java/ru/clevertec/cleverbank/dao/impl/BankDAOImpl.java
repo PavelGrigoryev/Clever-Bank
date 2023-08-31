@@ -1,10 +1,10 @@
 package ru.clevertec.cleverbank.dao.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.clevertec.cleverbank.util.ConnectionManager;
 import ru.clevertec.cleverbank.dao.BankDAO;
 import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
 import ru.clevertec.cleverbank.model.Bank;
+import ru.clevertec.cleverbank.util.ConnectionManager;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -24,6 +24,13 @@ public class BankDAOImpl implements BankDAO {
         connection = ConnectionManager.getJDBCConnection();
     }
 
+    /**
+     * Находит банк по его идентификатору в базе данных и возвращает его в виде объекта Optional.
+     *
+     * @param id Long, представляющее идентификатор банка
+     * @return объект Optional, содержащий банк, если он найден, или пустой, если нет
+     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     */
     @Override
     public Optional<Bank> findById(Long id) {
         String sql = "SELECT * FROM banks WHERE id = ?";
@@ -42,6 +49,12 @@ public class BankDAOImpl implements BankDAO {
         return bank;
     }
 
+    /**
+     * Находит все банки в базе данных и возвращает их в виде списка объектов Bank.
+     *
+     * @return список объектов Bank, представляющих банки
+     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     */
     @Override
     public List<Bank> findAll() {
         List<Bank> banks = new ArrayList<>();
@@ -60,6 +73,13 @@ public class BankDAOImpl implements BankDAO {
         return banks;
     }
 
+    /**
+     * Сохраняет банк в базе данных и возвращает его в виде объекта Bank.
+     *
+     * @param bank объект Bank, представляющий банк для сохранения
+     * @return объект Bank, представляющий сохраненный банк
+     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     */
     @Override
     public Bank save(Bank bank) {
         String sql = """
@@ -81,6 +101,13 @@ public class BankDAOImpl implements BankDAO {
         return bank;
     }
 
+    /**
+     * Обновляет банк в базе данных и возвращает его в виде объекта Bank.
+     *
+     * @param bank объект Bank, представляющий банк для обновления
+     * @return объект Bank, представляющий обновленный банк
+     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     */
     @Override
     public Bank update(Bank bank) {
         String sql = """
@@ -104,6 +131,13 @@ public class BankDAOImpl implements BankDAO {
         return bank;
     }
 
+    /**
+     * Удаляет банк из базы данных и связанные с ним счета по его id, и возвращает его в виде объекта Optional.
+     *
+     * @param id Long, представляющее идентификатор банка для удаления
+     * @return объект Optional, содержащий удаленный банк, если он найден, или пустой, если нет
+     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     */
     @Override
     public Optional<Bank> delete(Long id) {
         deleteAllBanksAccounts(id);
@@ -123,6 +157,12 @@ public class BankDAOImpl implements BankDAO {
         return bank;
     }
 
+    /**
+     * Удаляет все счета, принадлежащие банку с заданным id, из базы данных.
+     *
+     * @param bankId Long, представляющее идентификатор банка, чьи счета нужно удалить
+     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     */
     private void deleteAllBanksAccounts(Long bankId) {
         String sql = "DELETE FROM accounts WHERE bank_id = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {

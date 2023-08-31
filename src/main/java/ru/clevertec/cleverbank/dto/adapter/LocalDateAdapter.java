@@ -11,11 +11,26 @@ import java.time.format.DateTimeParseException;
 
 public class LocalDateAdapter extends TypeAdapter<LocalDate> {
 
+    /**
+     * Записывает объект LocalDate в JSON-формате в выходной поток.
+     *
+     * @param out   выходной поток для записи JSON-данных
+     * @param value объект LocalDate, который нужно записать
+     * @throws IOException если произошла ошибка ввода-вывода
+     */
     @Override
     public void write(JsonWriter out, LocalDate value) throws IOException {
         out.value(value.toString());
     }
 
+    /**
+     * Считывает объект LocalDate из JSON-формата из входного потока.
+     *
+     * @param in входной поток для чтения JSON-данных
+     * @return объект LocalDate, полученный из JSON-данных
+     * @throws IOException             если произошла ошибка ввода-вывода
+     * @throws LocalDateParseException если строка JSON-данных не соответствует формату даты yyyy-MM-dd
+     */
     @Override
     public LocalDate read(JsonReader in) throws IOException {
         try {

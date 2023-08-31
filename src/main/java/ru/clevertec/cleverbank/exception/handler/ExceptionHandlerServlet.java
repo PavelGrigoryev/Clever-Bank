@@ -20,6 +20,14 @@ public class ExceptionHandlerServlet extends HttpServlet {
 
     private final transient Gson gson = new Gson();
 
+    /**
+     * Переопределяет метод service, чтобы обработать исключения, переданные через атрибут запроса ERROR_EXCEPTION.
+     * Определяет тип исключения и устанавливает соответствующий статус-код ответа для него.
+     *
+     * @param req  объект HttpServletRequest, содержащий данные запроса
+     * @param resp объект HttpServletResponse, содержащий данные ответа
+     * @throws IOException если произошла ошибка ввода-вывода
+     */
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         resp.setContentType("application/json");
@@ -48,6 +56,13 @@ public class ExceptionHandlerServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Создает объект ExceptionResponse с сообщением об исключении и преобразует его в JSON-формат.
+     * Записывает JSON-данные в поток ответа и сбрасывает его.
+     *
+     * @param message     сообщение об исключении
+     * @param printWriter поток для записи данных в ответ
+     */
     private void printExceptionResponse(String message, PrintWriter printWriter) {
         ExceptionResponse response = new ExceptionResponse(message);
         String json = gson.toJson(response);
