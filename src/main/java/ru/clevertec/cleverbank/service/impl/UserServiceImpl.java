@@ -27,23 +27,48 @@ public class UserServiceImpl implements UserService {
         userMapper = Mappers.getMapper(UserMapper.class);
     }
 
+    /**
+     * Реализует метод findById, который возвращает пользователя по его id.
+     *
+     * @param id Long, представляющее id пользователя
+     * @return объект User, представляющий пользователя с заданным id
+     * @throws UserNotFoundException если пользователь с заданным id не найден в базе данных
+     */
     @Override
     public User findById(Long id) {
         return userDAO.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User with ID " + id + " is not found!"));
     }
 
+    /**
+     * Реализует метод findByIdResponse, который возвращает ответ с данными о пользователе по его id.
+     *
+     * @param id Long, представляющее id пользователя
+     * @return объект UserResponse, представляющий ответ с данными о пользователе с заданным id
+     * @throws UserNotFoundException если пользователь с заданным id не найден в базе данных
+     */
     @Override
     @ServiceLoggable
     public UserResponse findByIdResponse(Long id) {
         return userMapper.toResponse(findById(id));
     }
 
+    /**
+     * Реализует метод findAll, который возвращает список всех пользователей из базы данных.
+     *
+     * @return список объектов UserResponse, представляющих ответы со всеми данными о пользователях из базы данных
+     */
     @Override
     public List<UserResponse> findAll() {
         return userMapper.toResponseList(userDAO.findAll());
     }
 
+    /**
+     * Реализует метод save, который сохраняет нового пользователя в базу данных по данным из запроса.
+     *
+     * @param request объект UserRequest, представляющий запрос с данными для создания нового пользователя
+     * @return объект UserResponse, представляющий ответ с данными о созданном пользователе
+     */
     @Override
     @ServiceLoggable
     public UserResponse save(UserRequest request) {
@@ -58,6 +83,14 @@ public class UserServiceImpl implements UserService {
         return userMapper.toResponse(savedUser);
     }
 
+    /**
+     * Реализует метод update, который обновляет пользователя в базе данных по его id и данным из запроса.
+     *
+     * @param id      Long, представляющее id пользователя
+     * @param request объект UserRequest, представляющий запрос с данными для обновления пользователя
+     * @return объект UserResponse, представляющий ответ с данными об обновленном пользователе
+     * @throws UserNotFoundException если пользователь с заданным id не найден в базе данных
+     */
     @Override
     @ServiceLoggable
     public UserResponse update(Long id, UserRequest request) {
@@ -69,6 +102,13 @@ public class UserServiceImpl implements UserService {
         return userMapper.toResponse(updatedUser);
     }
 
+    /**
+     * Реализует метод delete, который удаляет пользователя из базы данных по его id.
+     *
+     * @param id Long, представляющее id пользователя
+     * @return объект DeleteResponse, представляющий ответ с сообщением об успешном удалении пользователя
+     * @throws UserNotFoundException если нет пользователя с заданным id для удаления из базы данных
+     */
     @Override
     @ServiceLoggable
     public DeleteResponse delete(Long id) {

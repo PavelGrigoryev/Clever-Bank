@@ -12,6 +12,12 @@ import java.time.format.DateTimeFormatter;
 
 public class CheckServiceImpl implements CheckService {
 
+    /**
+     * Реализует метод createChangeBalanceCheck, который создает чек по операции изменения баланса счёта.
+     *
+     * @param response объект ChangeBalanceResponse, представляющий ответ с данными об измененном балансе счёта
+     * @return String, представляющая чек по операции изменения баланса счёта
+     */
     @Override
     public String createChangeBalanceCheck(ChangeBalanceResponse response) {
         String repeat = "-".repeat(61);
@@ -39,6 +45,12 @@ public class CheckServiceImpl implements CheckService {
                 repeat);
     }
 
+    /**
+     * Реализует метод createTransferBalanceCheck, который создает чек по операции перевода средств между счетами.
+     *
+     * @param response объект TransferBalanceResponse, представляющий ответ с данными о переведенных средствах между счетами
+     * @return String, представляющая чек по операции перевода средств между счетами
+     */
     @Override
     public String createTransferBalanceCheck(TransferBalanceResponse response) {
         String repeat = "-".repeat(61);
@@ -68,6 +80,13 @@ public class CheckServiceImpl implements CheckService {
                 repeat);
     }
 
+    /**
+     * Реализует метод createTransactionStatement, который создает выписку по транзакциям по счёту за определенный
+     * период дат.
+     *
+     * @param response объект TransactionStatementResponse, представляющий ответ со списком транзакций по счёту за период дат
+     * @return String, представляющая выписку по транзакциям по счёту за период дат
+     */
     @Override
     public String createTransactionStatement(TransactionStatementResponse response) {
         String line = "|";
@@ -106,6 +125,14 @@ public class CheckServiceImpl implements CheckService {
                 result);
     }
 
+    /**
+     * Реализует метод createAmountStatement, который создает выписку по суммам транзакций по счёту за определенный
+     * период дат.
+     *
+     * @param response объект AmountStatementResponse, представляющий ответ с суммами потраченных и полученных средств
+     *                 по счёту за период дат
+     * @return String, представляющая выписку по суммам транзакций по счёту за период дат
+     */
     @Override
     public String createAmountStatement(AmountStatementResponse response) {
         String line = "|";

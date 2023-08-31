@@ -13,7 +13,7 @@ public interface ValidationService {
 
     void validateAccountForClosingDate(LocalDate closingDate, String accountId);
 
-    void validateAccountForCurrency(Currency senderCurrency, Currency resipientCurrency);
+    void validateAccountForCurrency(Currency senderCurrency, Currency recipientCurrency);
 
     void validateAccountForSufficientBalance(Type type, BigDecimal sum, BigDecimal oldBalance);
 

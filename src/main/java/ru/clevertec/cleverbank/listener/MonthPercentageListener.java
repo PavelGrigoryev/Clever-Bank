@@ -38,6 +38,12 @@ public class MonthPercentageListener implements ServletContextListener {
         accountService = new AccountServiceImpl();
     }
 
+    /**
+     * Переопределяет метод contextInitialized, чтобы запустить задачу по начислению процентов по счетам в конце
+     * каждого месяца.
+     *
+     * @param sce объект ServletContextEvent, содержащий информацию о контексте сервлета
+     */
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         Map<String, String> shedulerMap = new YamlUtil().getYamlMap().get("scheduler");
@@ -71,6 +77,11 @@ public class MonthPercentageListener implements ServletContextListener {
         scheduler.scheduleAtFixedRate(task, initialDelay, period, TimeUnit.SECONDS);
     }
 
+    /**
+     * Переопределяет метод contextDestroyed, чтобы остановить пулы потоков.
+     *
+     * @param sce объект ServletContextEvent, содержащий информацию о контексте сервлета
+     */
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         executor.shutdown();

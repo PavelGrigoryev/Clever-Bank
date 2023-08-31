@@ -59,6 +59,12 @@ public class TransactionServiceImpl implements TransactionService {
         connection = ConnectionManager.getJDBCConnection();
     }
 
+    /**
+     * Реализует метод changeBalance, который изменяет баланс счёта в базе данных по данным из запроса.
+     *
+     * @param request объект ChangeBalanceRequest, представляющий запрос с данными для изменения баланса счёта
+     * @return объект ChangeBalanceResponse, представляющий ответ с данными об измененном балансе счёта
+     */
     @Override
     @ServiceLoggable
     public ChangeBalanceResponse changeBalance(ChangeBalanceRequest request) {
@@ -87,6 +93,13 @@ public class TransactionServiceImpl implements TransactionService {
         return response;
     }
 
+    /**
+     * Реализует метод transferBalance, который переводит средства между двумя счётами в базе данных по данным из запроса.
+     *
+     * @param request объект TransferBalanceRequest, представляющий запрос с данными для перевода средств между счетами
+     * @return объект TransferBalanceResponse, представляющий ответ с данными о переведенных средствах между счетами
+     * @throws SQLException если произошла ошибка при работе с базой данных
+     */
     @Override
     @ServiceLoggable
     public TransferBalanceResponse transferBalance(TransferBalanceRequest request) throws SQLException {
@@ -128,6 +141,14 @@ public class TransactionServiceImpl implements TransactionService {
         }
     }
 
+    /**
+     * Реализует метод findAllByPeriodOfDateAndAccountId, который формирует выписку по транзакциям счёта за определенный
+     * период дат.
+     *
+     * @param request объект TransactionStatementRequest, представляющий запрос с данными о счёте и периоде дат
+     * @return объект TransactionStatementResponse, представляющий ответ со списком транзакций по счёту за период дат
+     * @throws TransactionNotFoundException если нет транзакций по счёту за период дат
+     */
     @Override
     @ServiceLoggable
     public TransactionStatementResponse findAllByPeriodOfDateAndAccountId(TransactionStatementRequest request) {
@@ -157,6 +178,15 @@ public class TransactionServiceImpl implements TransactionService {
         return response;
     }
 
+    /**
+     * Реализует метод findSumOfFundsByPeriodOfDateAndAccountId, который возвращает сумму потраченных и полученных
+     * средств по счёту за определенный период дат.
+     *
+     * @param request объект TransactionStatementRequest, представляющий запрос с данными о счёте и периоде дат
+     * @return объект AmountStatementResponse, представляющий ответ с суммой потраченных и полученных средств по счёту
+     * за период дат
+     * @throws TransactionNotFoundException если нет транзакций по счёту за период дат
+     */
     @Override
     @ServiceLoggable
     public AmountStatementResponse findSumOfFundsByPeriodOfDateAndAccountId(TransactionStatementRequest request) {
@@ -180,6 +210,13 @@ public class TransactionServiceImpl implements TransactionService {
         return response;
     }
 
+    /**
+     * Реализует метод findById, который возвращает транзакцию по ее id.
+     *
+     * @param id Long, представляющее id транзакции
+     * @return объект TransactionResponse, представляющий ответ с данными о транзакции
+     * @throws TransactionNotFoundException если транзакция с заданным id не найдена в базе данных
+     */
     @Override
     @ServiceLoggable
     public TransactionResponse findById(Long id) {
@@ -188,11 +225,23 @@ public class TransactionServiceImpl implements TransactionService {
                 .orElseThrow(() -> new TransactionNotFoundException("Transaction with ID " + id + " is not found!"));
     }
 
+    /**
+     * Реализует метод findAllBySendersAccountId, который возвращает список транзакций по id счёта отправителя.
+     *
+     * @param id String, представляющая id счёта отправителя
+     * @return список объектов TransactionResponse, представляющих ответы с данными о транзакциях по счёту отправителя
+     */
     @Override
     public List<TransactionResponse> findAllBySendersAccountId(String id) {
         return transactionMapper.toResponseList(transactionDAO.findAllBySendersAccountId(id));
     }
 
+    /**
+     * Реализует метод findAllByRecipientAccountId, который возвращает список транзакций по id счёта получателя.
+     *
+     * @param id String, представляющая id счёта получателя
+     * @return список объектов TransactionResponse, представляющих ответы с данными о транзакциях по счёту получателя
+     */
     @Override
     public List<TransactionResponse> findAllByRecipientAccountId(String id) {
         return transactionMapper.toResponseList(transactionDAO.findAllByRecipientAccountId(id));

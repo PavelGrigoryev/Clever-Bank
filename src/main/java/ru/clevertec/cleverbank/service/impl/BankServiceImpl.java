@@ -27,23 +27,48 @@ public class BankServiceImpl implements BankService {
 
     }
 
+    /**
+     * Реализует метод findById, который возвращает банк по его id.
+     *
+     * @param id Long, представляющее id банка
+     * @return объект Bank, представляющий банк с заданным id
+     * @throws BankNotFoundException если банк с заданным id не найден в базе данных
+     */
     @Override
     public Bank findById(Long id) {
         return bankDAO.findById(id)
                 .orElseThrow(() -> new BankNotFoundException("Bank with ID " + id + " is not found!"));
     }
 
+    /**
+     * Реализует метод findByIdResponse, который возвращает ответ с данными о банке по его id.
+     *
+     * @param id Long, представляющее id банка
+     * @return объект BankResponse, представляющий ответ с данными о банке с заданным id
+     * @throws BankNotFoundException если банк с заданным id не найден в базе данных
+     */
     @Override
     @ServiceLoggable
     public BankResponse findByIdResponse(Long id) {
         return bankMapper.toResponse(findById(id));
     }
 
+    /**
+     * Реализует метод findAll, который возвращает список всех банков из базы данных.
+     *
+     * @return список объектов BankResponse, представляющих ответы со всеми данными о банках из базы данных
+     */
     @Override
     public List<BankResponse> findAll() {
         return bankMapper.toResponseList(bankDAO.findAll());
     }
 
+    /**
+     * Реализует метод save, который сохраняет новый банк в базу данных по данным из запроса.
+     *
+     * @param request объект BankRequest, представляющий запрос с данными для создания нового банка
+     * @return объект BankResponse, представляющий ответ с данными о созданном банке
+     */
     @Override
     @ServiceLoggable
     public BankResponse save(BankRequest request) {
@@ -57,6 +82,14 @@ public class BankServiceImpl implements BankService {
         return bankMapper.toResponse(savedBank);
     }
 
+    /**
+     * Реализует метод update, который обновляет банк в базе данных по его id и данным из запроса.
+     *
+     * @param id      Long, представляющее id банка
+     * @param request объект BankRequest, представляющий запрос с данными для обновления банка
+     * @return объект BankResponse, представляющий ответ с данными об обновленном банке
+     * @throws BankNotFoundException если банк с заданным id не найден в базе данных
+     */
     @Override
     @ServiceLoggable
     public BankResponse update(Long id, BankRequest request) {
@@ -67,6 +100,13 @@ public class BankServiceImpl implements BankService {
         return bankMapper.toResponse(updatedBank);
     }
 
+    /**
+     * Реализует метод delete, который удаляет банк из базы данных по его id.
+     *
+     * @param id Long, представляющее id банка
+     * @return объект DeleteResponse, представляющий ответ с сообщением об успешном удалении банка
+     * @throws BankNotFoundException если нет банка с заданным id для удаления из базы данных
+     */
     @Override
     @ServiceLoggable
     public DeleteResponse delete(Long id) {

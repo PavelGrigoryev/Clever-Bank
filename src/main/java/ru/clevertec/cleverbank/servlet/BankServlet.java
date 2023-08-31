@@ -21,6 +21,13 @@ public class BankServlet extends HttpServlet {
     private final transient BankService bankService = new BankServiceImpl();
     private final transient Gson gson = new Gson();
 
+    /**
+     * Переопределяет метод doGet, который обрабатывает GET-запросы к ресурсу /banks.
+     *
+     * @param req  объект HttpServletRequest, представляющий запрос
+     * @param resp объект HttpServletResponse, представляющий ответ
+     * @throws IOException если возникает ошибка ввода-вывода при работе с потоком печати
+     */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String id = req.getParameter("id");
@@ -32,6 +39,13 @@ public class BankServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Переопределяет метод doPost, который обрабатывает POST-запросы к ресурсу /banks.
+     *
+     * @param req  объект HttpServletRequest, представляющий запрос
+     * @param resp объект HttpServletResponse, представляющий ответ
+     * @throws IOException если возникает ошибка ввода-вывода при работе с потоком печати
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         BankRequest request = (BankRequest) req.getAttribute("bankRequest");
@@ -44,6 +58,13 @@ public class BankServlet extends HttpServlet {
         printWriter.flush();
     }
 
+    /**
+     * Переопределяет метод doPut, который обрабатывает PUT-запросы к ресурсу /banks.
+     *
+     * @param req  объект HttpServletRequest, представляющий запрос
+     * @param resp объект HttpServletResponse, представляющий ответ
+     * @throws IOException если возникает ошибка ввода-вывода при работе с потоком печати
+     */
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String id = req.getParameter("id");
@@ -57,6 +78,13 @@ public class BankServlet extends HttpServlet {
         printWriter.flush();
     }
 
+    /**
+     * Переопределяет метод doDelete, который обрабатывает DELETE-запросы к ресурсу /banks.
+     *
+     * @param req  объект HttpServletRequest, представляющий запрос
+     * @param resp объект HttpServletResponse, представляющий ответ
+     * @throws IOException если возникает ошибка ввода-вывода при работе с потоком печати
+     */
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String id = req.getParameter("id");
@@ -67,6 +95,12 @@ public class BankServlet extends HttpServlet {
         printWriter.flush();
     }
 
+    /**
+     * Метод findById, который находит банк по его id и выводит его в формате JSON.
+     *
+     * @param id          String, представляющая id банка
+     * @param printWriter объект PrintWriter, представляющий поток печати для вывода данных о банке
+     */
     private void findById(String id, PrintWriter printWriter) {
         BankResponse response = bankService.findByIdResponse(Long.valueOf(id));
         String bankJson = gson.toJson(response);
@@ -74,6 +108,11 @@ public class BankServlet extends HttpServlet {
         printWriter.flush();
     }
 
+    /**
+     * Метод findAll, который получает все банки и выводит их в формате JSON.
+     *
+     * @param printWriter объект PrintWriter, представляющий поток печати для вывода данных о всех банках
+     */
     private void findAll(PrintWriter printWriter) {
         List<BankResponse> responses = bankService.findAll();
         String bankJson = gson.toJson(responses);

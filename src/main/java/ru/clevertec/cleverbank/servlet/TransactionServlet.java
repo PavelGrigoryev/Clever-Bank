@@ -34,6 +34,12 @@ public class TransactionServlet extends HttpServlet {
     private final transient TransactionService transactionService = new TransactionServiceImpl();
     private final transient Gson gson = new Gson();
 
+    /**
+     * Переопределяет метод doPost, который обрабатывает POST-запросы к ресурсу /transactions.
+     *
+     * @param req  объект HttpServletRequest, представляющий запрос
+     * @param resp объект HttpServletResponse, представляющий ответ
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
         AsyncContext asyncContext = req.startAsync();
@@ -68,6 +74,12 @@ public class TransactionServlet extends HttpServlet {
         });
     }
 
+    /**
+     * Переопределяет метод doPut, который обрабатывает PUT-запросы к ресурсу /transactions.
+     *
+     * @param req  объект HttpServletRequest, представляющий запрос
+     * @param resp объект HttpServletResponse, представляющий ответ
+     */
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) {
         AsyncContext asyncContext = req.startAsync();
@@ -91,6 +103,13 @@ public class TransactionServlet extends HttpServlet {
         });
     }
 
+    /**
+     * Переопределяет метод doGet, который обрабатывает GET-запросы к ресурсу /transactions.
+     *
+     * @param req  объект HttpServletRequest, представляющий запрос
+     * @param resp объект HttpServletResponse, представляющий ответ
+     * @throws IOException если возникает ошибка ввода-вывода при работе с потоком печати
+     */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String id = req.getParameter("id");
@@ -106,11 +125,26 @@ public class TransactionServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Метод changeBalance, который выполняет операцию изменения баланса счёта и возвращает строку JSON с данными о транзакции.
+     *
+     * @param gson    объект Gson, представляющий парсер JSON
+     * @param request объект ChangeBalanceRequest, представляющий запрос на изменение баланса счета
+     * @return String JSON, представляющая ответ с данными о транзакции
+     */
     private String changeBalance(Gson gson, ChangeBalanceRequest request) {
         ChangeBalanceResponse response = transactionService.changeBalance(request);
         return gson.toJson(response);
     }
 
+    /**
+     * Метод transferBalance, который выполняет операцию перевода средств между счетами и возвращает строку JSON
+     * с данными о транзакции.
+     *
+     * @param gson    объект Gson, представляющий парсер JSON
+     * @param request объект TransferBalanceRequest, представляющий запрос на перевод средств между счетами
+     * @return String JSON, представляющая ответ с данными о транзакции
+     */
     private String transferBalance(Gson gson, TransferBalanceRequest request) {
         TransferBalanceResponse response;
         try {
@@ -122,16 +156,40 @@ public class TransactionServlet extends HttpServlet {
         return gson.toJson(response);
     }
 
+    /**
+     * Метод findAllByPeriodOfDateAndAccountId, который получает выписку по транзакциям по счёту за определенный период
+     * дат и возвращает строку JSON с данными о транзакциях.
+     *
+     * @param gson    объект Gson, представляющий парсер JSON
+     * @param request объект TransactionStatementRequest, представляющий запрос на получение выписки по транзакциям по
+     *                счету за период дат
+     * @return String JSON, представляющая ответ с данными о транзакциях
+     */
     private String findAllByPeriodOfDateAndAccountId(Gson gson, TransactionStatementRequest request) {
         TransactionStatementResponse response = transactionService.findAllByPeriodOfDateAndAccountId(request);
         return gson.toJson(response);
     }
 
+    /**
+     * Метод findSumOfFundsByPeriodOfDateAndAccountId, который получает сумму потраченных и полученных средств по счёту
+     * за определенный период дат и возвращает строку JSON с данными о суммах.
+     *
+     * @param gson    объект Gson, представляющий парсер JSON
+     * @param request объект TransactionStatementRequest, представляющий запрос на получение суммы потраченных и
+     *                полученных средств по счёту за определенный период дат
+     * @return String JSON, представляющая ответ с данными о суммах
+     */
     private String findSumOfFundsByPeriodOfDateAndAccountId(Gson gson, TransactionStatementRequest request) {
         AmountStatementResponse response = transactionService.findSumOfFundsByPeriodOfDateAndAccountId(request);
         return gson.toJson(response);
     }
 
+    /**
+     * Метод findById, который находит транзакцию по ее id и выводит ее в формате JSON.
+     *
+     * @param id          String, представляющая id транзакции
+     * @param printWriter объект PrintWriter, представляющий поток печати для вывода данных о транзакции
+     */
     private void findById(String id, PrintWriter printWriter) {
         TransactionResponse response = transactionService.findById(Long.valueOf(id));
         String transactionJson = gson.toJson(response);
@@ -139,6 +197,12 @@ public class TransactionServlet extends HttpServlet {
         printWriter.flush();
     }
 
+    /**
+     * Метод findAllBySendersAccountId, который получает все транзакции по счёту отправителя и выводит их в формате JSON.
+     *
+     * @param id          String, представляющая id счета отправителя
+     * @param printWriter объект PrintWriter, представляющий поток печати для вывода данных о транзакциях
+     */
     private void findAllBySendersAccountId(String id, PrintWriter printWriter) {
         List<TransactionResponse> responses = transactionService.findAllBySendersAccountId(id);
         String transactionJson = gson.toJson(responses);
@@ -146,6 +210,12 @@ public class TransactionServlet extends HttpServlet {
         printWriter.flush();
     }
 
+    /**
+     * Метод findAllByRecipientAccountId, который получает все транзакции по счёту получателя и выводит их в формате JSON.
+     *
+     * @param id          String, представляющая id счета получателя
+     * @param printWriter объект PrintWriter, представляющий поток печати для вывода данных о транзакциях
+     */
     private void findAllByRecipientAccountId(String id, PrintWriter printWriter) {
         List<TransactionResponse> responses = transactionService.findAllByRecipientAccountId(id);
         String transactionJson = gson.toJson(responses);

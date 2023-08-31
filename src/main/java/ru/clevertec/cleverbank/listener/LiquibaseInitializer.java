@@ -24,6 +24,11 @@ public class LiquibaseInitializer implements ServletContextListener {
 
     private Database database;
 
+    /**
+     * Переопределяет метод contextInitialized, чтобы выполнить обновление базы данных с помощью Liquibase.
+     *
+     * @param sce объект ServletContextEvent, содержащий информацию о контексте сервлета
+     */
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         try (JdbcConnection jdbcConnection = new JdbcConnection(getDatabaseConnection());
@@ -39,6 +44,11 @@ public class LiquibaseInitializer implements ServletContextListener {
         }
     }
 
+    /**
+     * Переопределяет метод contextDestroyed, чтобы закрыть соединение с базой данных.
+     *
+     * @param sce объект ServletContextEvent, содержащий информацию о контексте сервлета
+     */
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         if (database != null) {
@@ -50,6 +60,12 @@ public class LiquibaseInitializer implements ServletContextListener {
         }
     }
 
+    /**
+     * Возвращает объект Connection, представляющий соединение с базой данных PostgresSQL.
+     *
+     * @return объект Connection, представляющий соединение с базой данных PostgresSQL
+     * @throws SQLException если произошла ошибка при работе с базой данных
+     */
     private Connection getDatabaseConnection() throws SQLException {
         Map<String, String> postgresqlMap = new YamlUtil().getYamlMap().get("postgresql");
         String url = postgresqlMap.get("url");

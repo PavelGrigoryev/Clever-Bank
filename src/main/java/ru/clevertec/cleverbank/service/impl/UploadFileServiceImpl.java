@@ -16,24 +16,45 @@ import java.nio.file.StandardOpenOption;
 @Slf4j
 public class UploadFileServiceImpl implements UploadFileService {
 
+    /**
+     * Реализует метод uploadCheck, который загружает чек по транзакции в формате txt.
+     *
+     * @param check String, представляющая чек по транзакции
+     */
     @Override
     public void uploadCheck(String check) {
         Path path = Paths.get(findPaths("BankCheck.txt"));
         writeFile(check, path);
     }
 
+    /**
+     * Реализует метод uploadStatement, который загружает выписку по транзакциям в формате txt.
+     *
+     * @param statement String, представляющая выписку по транзакциям
+     */
     @Override
     public void uploadStatement(String statement) {
         Path path = Paths.get(findPaths("TransactionStatement.txt"));
         writeFile(statement, path);
     }
 
+    /**
+     * Реализует метод uploadAmount, который загружает выписку по суммам транзакций в формате txt.
+     *
+     * @param amount String, представляющая выписку по суммам транзакций
+     */
     @Override
     public void uploadAmount(String amount) {
         Path path = Paths.get(findPaths("AmountStatement.txt"));
         writeFile(amount, path);
     }
 
+    /**
+     * Метод writeFile, который записывает строку в файл по заданному пути.
+     *
+     * @param statement String, которую нужно записать в файл
+     * @param path      объект Path, представляющий путь к файлу на сервере
+     */
     private static void writeFile(String statement, Path path) {
         log.info("File download link: {}", path);
         try {
@@ -44,6 +65,13 @@ public class UploadFileServiceImpl implements UploadFileService {
         }
     }
 
+    /**
+     * Метод findPaths, который возвращает путь к файлу на сервере по заданному названию файла.
+     *
+     * @param fileName String, представляющая название файла для загрузки
+     * @return String, представляющая путь к файлу на сервере
+     * @throws UploadFileException если не удается найти путь для загрузки txt файла
+     */
     private static String findPaths(String fileName) {
         URL pdfURL = UploadFileServiceImpl.class.getResource("/check");
         if (pdfURL == null) {

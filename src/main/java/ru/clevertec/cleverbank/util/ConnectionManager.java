@@ -16,6 +16,14 @@ public class ConnectionManager {
 
     private Connection connection;
 
+    /**
+     * Метод для получения соединения с базой данных PostgresSQL.
+     * Метод читает параметры из файла yaml и создает новое соединение.
+     * В случае возникновения исключений, метод записывает сообщение об ошибке в логгер и выбрасывает JDBCConnectionException.
+     *
+     * @return соединение с базой данных PostgresSQL
+     * @throws JDBCConnectionException если не удалось установить соединение с базой данных
+     */
     public Connection getJDBCConnection() {
         if (connection == null) {
             Map<String, String> postgresqlMap = new YamlUtil().getYamlMap().get("postgresql");

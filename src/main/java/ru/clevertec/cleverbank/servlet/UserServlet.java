@@ -21,6 +21,13 @@ public class UserServlet extends HttpServlet {
     private final transient UserService userService = new UserServiceImpl();
     private final transient Gson gson = new Gson();
 
+    /**
+     * Переопределяет метод doGet, который обрабатывает GET-запросы к ресурсу /users.
+     *
+     * @param req  объект HttpServletRequest, представляющий запрос
+     * @param resp объект HttpServletResponse, представляющий ответ
+     * @throws IOException если возникает ошибка ввода-вывода при работе с потоком печати
+     */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String id = req.getParameter("id");
@@ -32,6 +39,13 @@ public class UserServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Переопределяет метод doPost, который обрабатывает POST-запросы к ресурсу /users.
+     *
+     * @param req  объект HttpServletRequest, представляющий запрос
+     * @param resp объект HttpServletResponse, представляющий ответ
+     * @throws IOException если возникает ошибка ввода-вывода при работе с потоком печати
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         UserRequest request = (UserRequest) req.getAttribute("userRequest");
@@ -44,6 +58,13 @@ public class UserServlet extends HttpServlet {
         printWriter.flush();
     }
 
+    /**
+     * Переопределяет метод doPut, который обрабатывает PUT-запросы к ресурсу /users.
+     *
+     * @param req  объект HttpServletRequest, представляющий запрос
+     * @param resp объект HttpServletResponse, представляющий ответ
+     * @throws IOException если возникает ошибка ввода-вывода при работе с потоком печати
+     */
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String id = req.getParameter("id");
@@ -57,6 +78,13 @@ public class UserServlet extends HttpServlet {
         printWriter.flush();
     }
 
+    /**
+     * Переопределяет метод doDelete, который обрабатывает DELETE-запросы к ресурсу /users.
+     *
+     * @param req  объект HttpServletRequest, представляющий запрос
+     * @param resp объект HttpServletResponse, представляющий ответ
+     * @throws IOException если возникает ошибка ввода-вывода при работе с потоком печати
+     */
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String id = req.getParameter("id");
@@ -67,6 +95,12 @@ public class UserServlet extends HttpServlet {
         printWriter.flush();
     }
 
+    /**
+     * Метод findById, который находит пользователя по его id и выводит его в формате JSON.
+     *
+     * @param id          String, представляющая id пользователя
+     * @param printWriter объект PrintWriter, представляющий поток печати для вывода данных о пользователе
+     */
     private void findById(String id, PrintWriter printWriter) {
         UserResponse response = userService.findByIdResponse(Long.valueOf(id));
         String userJson = gson.toJson(response);
@@ -74,6 +108,11 @@ public class UserServlet extends HttpServlet {
         printWriter.flush();
     }
 
+    /**
+     * Метод findAll, который получает всех пользователей и выводит их в формате JSON.
+     *
+     * @param printWriter объект PrintWriter, представляющий поток печати для вывода данных о всех пользователях
+     */
     private void findAll(PrintWriter printWriter) {
         List<UserResponse> responses = userService.findAll();
         String userJson = gson.toJson(responses);

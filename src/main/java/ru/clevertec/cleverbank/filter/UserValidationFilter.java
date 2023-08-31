@@ -27,6 +27,15 @@ public class UserValidationFilter implements Filter {
     private final Gson gson = new Gson();
     private final ValidationService validationService = new ValidationServiceImpl();
 
+    /**
+     * Переопределяет метод doFilter, чтобы проверить корректность данных в запросе на создание или обновление пользователя.
+     *
+     * @param request  объект ServletRequest, содержащий данные запроса
+     * @param response объект ServletResponse, содержащий данные ответа
+     * @param chain    объект FilterChain, который позволяет передать запрос и ответ дальше по цепочке фильтров
+     * @throws IOException      если произошла ошибка ввода-вывода
+     * @throws ServletException если произошла ошибка сервлета
+     */
     @Override
     @ExceptionLoggable
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -37,6 +46,13 @@ public class UserValidationFilter implements Filter {
         chain.doFilter(request, response);
     }
 
+    /**
+     * Валидирует данные в запросе на создание или обновление пользователя и устанавливает атрибут "userRequest"
+     * с объектом UserRequest в запросе.
+     *
+     * @param req объект HttpServletRequest, содержащий данные запроса
+     * @throws IOException если произошла ошибка ввода-вывода
+     */
     private void validateUserRequest(HttpServletRequest req) throws IOException {
         UserRequest request = gson.fromJson(extractJsonFromBody(req), UserRequest.class);
         List<Violation> violations = new ArrayList<>();
@@ -59,6 +75,13 @@ public class UserValidationFilter implements Filter {
         req.setAttribute("userRequest", request);
     }
 
+    /**
+     * Извлекает JSON-данные из тела запроса и возвращает их в виде строки.
+     *
+     * @param req объект HttpServletRequest, содержащий данные запроса
+     * @return строка с JSON-данными из тела запроса
+     * @throws IOException если произошла ошибка ввода-вывода
+     */
     private String extractJsonFromBody(HttpServletRequest req) throws IOException {
         BufferedReader reader = req.getReader();
         StringBuilder result = new StringBuilder();

@@ -31,6 +31,15 @@ public class TransactionValidationFilter implements Filter {
     private final Gson gson = new Gson();
     private final ValidationService validationService = new ValidationServiceImpl();
 
+    /**
+     * Переопределяет метод doFilter, чтобы проверить корректность данных в запросе на выполнение транзакции.
+     *
+     * @param request  объект ServletRequest, содержащий данные запроса
+     * @param response объект ServletResponse, содержащий данные ответа
+     * @param chain    объект FilterChain, который позволяет передать запрос и ответ дальше по цепочке фильтров
+     * @throws IOException      если произошла ошибка ввода-вывода
+     * @throws ServletException если произошла ошибка сервлета
+     */
     @Override
     @ExceptionLoggable
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -53,6 +62,13 @@ public class TransactionValidationFilter implements Filter {
         chain.doFilter(request, response);
     }
 
+    /**
+     * Валидирует данные в запросе на изменение баланса счета и устанавливает атрибут "changeBalanceRequest" с объектом
+     * ChangeBalanceRequest в запросе.
+     *
+     * @param req        объект HttpServletRequest, содержащий данные запроса
+     * @param jsonObject объект JsonObject, содержащий JSON-данные из тела запроса
+     */
     private void validateChangeBalanceRequest(HttpServletRequest req, JsonObject jsonObject) {
         ChangeBalanceRequest request = gson.fromJson(jsonObject.toString(), ChangeBalanceRequest.class);
         List<Violation> violations = new ArrayList<>();
@@ -72,6 +88,13 @@ public class TransactionValidationFilter implements Filter {
         req.setAttribute("changeBalanceRequest", request);
     }
 
+    /**
+     * Валидирует данные в запросе на перевод средств между счетами и устанавливает атрибут "transferBalanceRequest"
+     * с объектом TransferBalanceRequest в запросе.
+     *
+     * @param req        объект HttpServletRequest, содержащий данные запроса
+     * @param jsonObject объект JsonObject, содержащий JSON-данные из тела запроса
+     */
     private void validateTransferBalanceRequest(HttpServletRequest req, JsonObject jsonObject) {
         TransferBalanceRequest request = gson.fromJson(jsonObject.toString(), TransferBalanceRequest.class);
         List<Violation> violations = new ArrayList<>();
@@ -86,16 +109,37 @@ public class TransactionValidationFilter implements Filter {
         req.setAttribute("transferBalanceRequest", request);
     }
 
+    /**
+     * Валидирует данные в запросе на получение выписки по счету и устанавливает атрибут "statementRequest" с объектом
+     * TransactionStatementRequest в запросе.
+     *
+     * @param req        объект HttpServletRequest, содержащий данные запроса
+     * @param jsonObject объект JsonObject, содержащий JSON-данные из тела запроса
+     */
     private void validateStatementRequest(HttpServletRequest req, JsonObject jsonObject) {
         TransactionStatementRequest request = gson.fromJson(jsonObject.toString(), TransactionStatementRequest.class);
         req.setAttribute("statementRequest", request);
     }
 
+    /**
+     * Валидирует данные в запросе на изменение суммы транзакции и устанавливает атрибут "amountRequest" с объектом
+     * TransactionStatementRequest в запросе.
+     *
+     * @param req        объект HttpServletRequest, содержащий данные запроса
+     * @param jsonObject объект JsonObject, содержащий JSON-данные из тела запроса
+     */
     private void validateAmountRequest(HttpServletRequest req, JsonObject jsonObject) {
         TransactionStatementRequest request = gson.fromJson(jsonObject.toString(), TransactionStatementRequest.class);
         req.setAttribute("amountRequest", request);
     }
 
+    /**
+     * Извлекает JSON-данные из тела запроса и возвращает их в виде строки.
+     *
+     * @param req объект HttpServletRequest, содержащий данные запроса
+     * @return строка с JSON-данными из тела запроса
+     * @throws IOException если произошла ошибка ввода-вывода
+     */
     private String extractJsonFromBody(HttpServletRequest req) throws IOException {
         BufferedReader reader = req.getReader();
         StringBuilder result = new StringBuilder();

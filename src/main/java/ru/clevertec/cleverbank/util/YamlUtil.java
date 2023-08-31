@@ -11,6 +11,9 @@ public class YamlUtil {
 
     private final Map<String, Map<String, String>> yamlMap;
 
+    /**
+     * Конструктор класса, который загружает файл application.yaml из ресурсов и парсит его в карту с помощью класса Yaml.
+     */
     public YamlUtil() {
         Yaml yaml = new Yaml();
         InputStream inputStream = this.getClass()
