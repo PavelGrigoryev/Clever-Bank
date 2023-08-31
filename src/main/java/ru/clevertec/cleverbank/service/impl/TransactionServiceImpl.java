@@ -1,7 +1,7 @@
 package ru.clevertec.cleverbank.service.impl;
 
-import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
+import ru.clevertec.cleverbank.aspect.annotation.ServiceLoggable;
 import ru.clevertec.cleverbank.dao.TransactionDAO;
 import ru.clevertec.cleverbank.dao.impl.TransactionDAOImpl;
 import ru.clevertec.cleverbank.dto.transaction.AmountStatementResponse;
@@ -35,7 +35,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-@Slf4j
 public class TransactionServiceImpl implements TransactionService {
 
     private final AccountService accountService;
@@ -61,6 +60,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    @ServiceLoggable
     public ChangeBalanceResponse changeBalance(ChangeBalanceRequest request) {
         Account accountRecipient = accountService.findById(request.recipientAccountId());
         Account accountSender = accountService.findById(request.senderAccountId());
@@ -84,11 +84,11 @@ public class TransactionServiceImpl implements TransactionService {
                 .toChangeResponse(savedTransaction, updatedAccount.getCurrency(), oldBalance, newBalance);
         String check = checkService.createChangeBalanceCheck(response);
         uploadFileService.uploadCheck(check);
-        log.info("Change balance:{}", check);
         return response;
     }
 
     @Override
+    @ServiceLoggable
     public TransferBalanceResponse transferBalance(TransferBalanceRequest request) throws SQLException {
         connection.setAutoCommit(false);
         try {
@@ -119,7 +119,6 @@ public class TransactionServiceImpl implements TransactionService {
                     accountSender.getCurrency(), senderOldBalance, senderNewBalance, recipientOldBalance, recipientNewBalance);
             String check = checkService.createTransferBalanceCheck(response);
             uploadFileService.uploadCheck(check);
-            log.info("Transfer balance:{}", check);
             return response;
         } catch (Exception e) {
             connection.rollback();
@@ -130,6 +129,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    @ServiceLoggable
     public TransactionStatementResponse findAllByPeriodOfDateAndAccountId(TransactionStatementRequest request) {
         Account account = accountService.findById(request.accountId());
         Bank bank = bankService.findById(account.getBankId());
@@ -154,11 +154,11 @@ public class TransactionServiceImpl implements TransactionService {
                 .toStatementResponse(bank.getName(), user, account, request, transactionStatements);
         String statement = checkService.createTransactionStatement(response);
         uploadFileService.uploadStatement(statement);
-        log.info("Statement:{}", statement);
         return response;
     }
 
     @Override
+    @ServiceLoggable
     public AmountStatementResponse findSumOfFundsByPeriodOfDateAndAccountId(TransactionStatementRequest request) {
         Account account = accountService.findById(request.accountId());
         Bank bank = bankService.findById(account.getBankId());
@@ -177,11 +177,11 @@ public class TransactionServiceImpl implements TransactionService {
                 .toAmountResponse(bank.getName(), user, account, request, spentFunds, receivedFunds);
         String amountStatement = checkService.createAmountStatement(response);
         uploadFileService.uploadAmount(amountStatement);
-        log.info("Amount:{}", amountStatement);
         return response;
     }
 
     @Override
+    @ServiceLoggable
     public TransactionResponse findById(Long id) {
         return transactionDAO.findById(id)
                 .map(transactionMapper::toResponse)

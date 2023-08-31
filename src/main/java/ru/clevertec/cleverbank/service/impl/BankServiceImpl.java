@@ -1,6 +1,7 @@
 package ru.clevertec.cleverbank.service.impl;
 
 import org.mapstruct.factory.Mappers;
+import ru.clevertec.cleverbank.aspect.annotation.ServiceLoggable;
 import ru.clevertec.cleverbank.dao.BankDAO;
 import ru.clevertec.cleverbank.dao.impl.BankDAOImpl;
 import ru.clevertec.cleverbank.dto.DeleteResponse;
@@ -33,6 +34,7 @@ public class BankServiceImpl implements BankService {
     }
 
     @Override
+    @ServiceLoggable
     public BankResponse findByIdResponse(Long id) {
         return bankMapper.toResponse(findById(id));
     }
@@ -43,6 +45,7 @@ public class BankServiceImpl implements BankService {
     }
 
     @Override
+    @ServiceLoggable
     public BankResponse save(BankRequest request) {
         Bank bank = bankMapper.fromRequest(request);
         Bank savedBank;
@@ -55,6 +58,7 @@ public class BankServiceImpl implements BankService {
     }
 
     @Override
+    @ServiceLoggable
     public BankResponse update(Long id, BankRequest request) {
         findById(id);
         Bank bank = bankMapper.fromRequest(request);
@@ -64,6 +68,7 @@ public class BankServiceImpl implements BankService {
     }
 
     @Override
+    @ServiceLoggable
     public DeleteResponse delete(Long id) {
         return bankDAO.delete(id)
                 .map(bank -> new DeleteResponse("Bank with ID " + id + " was successfully deleted"))

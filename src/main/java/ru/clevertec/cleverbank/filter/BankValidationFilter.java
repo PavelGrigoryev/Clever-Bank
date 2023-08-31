@@ -8,6 +8,7 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
+import ru.clevertec.cleverbank.aspect.annotation.ExceptionLoggable;
 import ru.clevertec.cleverbank.dto.bank.BankRequest;
 import ru.clevertec.cleverbank.exception.conflict.ValidationException;
 import ru.clevertec.cleverbank.exception.handler.ValidationResponse;
@@ -27,6 +28,7 @@ public class BankValidationFilter implements Filter {
     private final ValidationService validationService = new ValidationServiceImpl();
 
     @Override
+    @ExceptionLoggable
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
         if ("POST".equalsIgnoreCase(req.getMethod()) || "PUT".equalsIgnoreCase(req.getMethod())) {

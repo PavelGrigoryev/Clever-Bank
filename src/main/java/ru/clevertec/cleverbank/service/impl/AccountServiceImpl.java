@@ -1,6 +1,7 @@
 package ru.clevertec.cleverbank.service.impl;
 
 import org.mapstruct.factory.Mappers;
+import ru.clevertec.cleverbank.aspect.annotation.ServiceLoggable;
 import ru.clevertec.cleverbank.dao.AccountDAO;
 import ru.clevertec.cleverbank.dao.impl.AccountDAOImpl;
 import ru.clevertec.cleverbank.dto.DeleteResponse;
@@ -38,6 +39,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    @ServiceLoggable
     public AccountResponse findByIdResponse(String id) {
         return accountMapper.toResponse(findById(id));
     }
@@ -53,6 +55,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    @ServiceLoggable
     public AccountResponse save(AccountRequest request) {
         Account account = accountMapper.fromRequest(request);
         userService.findById(account.getUserId());
@@ -69,6 +72,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    @ServiceLoggable
     public AccountResponse closeAccount(String id) {
         Account account = accountDAO.findById(id)
                 .orElseThrow(() -> new AccountNotFoundException("Account with ID " + id + " is not found!"));
@@ -79,6 +83,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    @ServiceLoggable
     public DeleteResponse delete(String id) {
         return accountDAO.delete(id)
                 .map(account -> new DeleteResponse("Account with ID " + id + " was successfully deleted"))

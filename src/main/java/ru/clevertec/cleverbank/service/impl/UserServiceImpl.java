@@ -1,6 +1,7 @@
 package ru.clevertec.cleverbank.service.impl;
 
 import org.mapstruct.factory.Mappers;
+import ru.clevertec.cleverbank.aspect.annotation.ServiceLoggable;
 import ru.clevertec.cleverbank.dao.UserDAO;
 import ru.clevertec.cleverbank.dao.impl.UserDAOImpl;
 import ru.clevertec.cleverbank.dto.DeleteResponse;
@@ -33,6 +34,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @ServiceLoggable
     public UserResponse findByIdResponse(Long id) {
         return userMapper.toResponse(findById(id));
     }
@@ -43,6 +45,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @ServiceLoggable
     public UserResponse save(UserRequest request) {
         User user = userMapper.fromRequest(request);
         user.setRegisterDate(LocalDate.now());
@@ -56,6 +59,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @ServiceLoggable
     public UserResponse update(Long id, UserRequest request) {
         User userById = findById(id);
         User user = userMapper.fromRequest(request);
@@ -66,6 +70,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @ServiceLoggable
     public DeleteResponse delete(Long id) {
         return userDAO.delete(id)
                 .map(user -> new DeleteResponse("User with ID " + id + " was successfully deleted"))

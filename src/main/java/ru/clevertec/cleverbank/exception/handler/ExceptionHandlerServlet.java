@@ -5,7 +5,6 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
 import ru.clevertec.cleverbank.exception.badrequest.BadRequestException;
 import ru.clevertec.cleverbank.exception.conflict.LocalDateParseException;
 import ru.clevertec.cleverbank.exception.conflict.ValidationException;
@@ -16,7 +15,6 @@ import java.io.PrintWriter;
 
 import static jakarta.servlet.RequestDispatcher.ERROR_EXCEPTION;
 
-@Slf4j
 @WebServlet(urlPatterns = "/exception_handler")
 public class ExceptionHandlerServlet extends HttpServlet {
 
@@ -29,7 +27,6 @@ public class ExceptionHandlerServlet extends HttpServlet {
 
         Exception exception = (Exception) req.getAttribute(ERROR_EXCEPTION);
         PrintWriter printWriter = resp.getWriter();
-        log.error(exception.getMessage());
 
         if (exception instanceof NotFoundException) {
             resp.setStatus(404);

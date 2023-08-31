@@ -7,6 +7,7 @@ import ru.clevertec.cleverbank.dto.transaction.TransferBalanceResponse;
 import ru.clevertec.cleverbank.model.Type;
 import ru.clevertec.cleverbank.service.CheckService;
 
+import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 
 public class CheckServiceImpl implements CheckService {
@@ -133,7 +134,8 @@ public class CheckServiceImpl implements CheckService {
                 line, response.balance(), response.currency(),
                 "Приход", line, "Уход",
                 "-".repeat(32),
-                response.receivedFunds(), line, "-" + response.spentFunds());
+                response.receivedFunds() == null ? BigDecimal.ZERO : response.receivedFunds(), line,
+                response.spentFunds() == null ? BigDecimal.ZERO : "-" + response.spentFunds());
     }
 
 }

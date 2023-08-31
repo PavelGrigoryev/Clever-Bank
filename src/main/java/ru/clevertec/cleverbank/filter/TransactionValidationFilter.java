@@ -9,6 +9,7 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
+import ru.clevertec.cleverbank.aspect.annotation.ExceptionLoggable;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceRequest;
 import ru.clevertec.cleverbank.dto.transaction.TransactionStatementRequest;
 import ru.clevertec.cleverbank.dto.transaction.TransferBalanceRequest;
@@ -31,6 +32,7 @@ public class TransactionValidationFilter implements Filter {
     private final ValidationService validationService = new ValidationServiceImpl();
 
     @Override
+    @ExceptionLoggable
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
         if ("POST".equalsIgnoreCase(req.getMethod())) {
