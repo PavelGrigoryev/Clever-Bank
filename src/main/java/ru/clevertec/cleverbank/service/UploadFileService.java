@@ -6,4 +6,6 @@ public interface UploadFileService {
 
     void uploadStatement(String statement);
 
+    void  uploadAmount(String amount);
+
 }

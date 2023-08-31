@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import ru.clevertec.cleverbank.dto.transaction.AmountOfFundsResponse;
+import ru.clevertec.cleverbank.dto.transaction.AmountStatementResponse;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceRequest;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransactionResponse;
@@ -128,7 +128,7 @@ public class TransactionServlet extends HttpServlet {
     }
 
     private String findSumOfFundsByPeriodOfDateAndAccountId(Gson gson, TransactionStatementRequest request) {
-        AmountOfFundsResponse response = transactionService.findSumOfFundsByPeriodOfDateAndAccountId(request);
+        AmountStatementResponse response = transactionService.findSumOfFundsByPeriodOfDateAndAccountId(request);
         return gson.toJson(response);
     }
 

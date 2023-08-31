@@ -28,6 +28,12 @@ public class UploadFileServiceImpl implements UploadFileService {
         writeFile(statement, path);
     }
 
+    @Override
+    public void uploadAmount(String amount) {
+        Path path = Paths.get(findPaths("AmountStatement.txt"));
+        writeFile(amount, path);
+    }
+
     private static void writeFile(String statement, Path path) {
         log.info("File download link: {}", path);
         try {

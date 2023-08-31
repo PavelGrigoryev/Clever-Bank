@@ -2,7 +2,7 @@ package ru.clevertec.cleverbank.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import ru.clevertec.cleverbank.dto.transaction.AmountOfFundsResponse;
+import ru.clevertec.cleverbank.dto.transaction.AmountStatementResponse;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceRequest;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransactionResponse;
@@ -77,11 +77,11 @@ public interface TransactionMapper {
 
     @Mapping(target = "formationDate", expression = "java(LocalDate.now())")
     @Mapping(target = "formationTime", expression = "java(LocalTime.now())")
-    AmountOfFundsResponse toAmountResponse(String bankName,
-                                           User user,
-                                           Account account,
-                                           TransactionStatementRequest request,
-                                           BigDecimal spentFunds,
-                                           BigDecimal receivedFunds);
+    AmountStatementResponse toAmountResponse(String bankName,
+                                             User user,
+                                             Account account,
+                                             TransactionStatementRequest request,
+                                             BigDecimal spentFunds,
+                                             BigDecimal receivedFunds);
 
 }

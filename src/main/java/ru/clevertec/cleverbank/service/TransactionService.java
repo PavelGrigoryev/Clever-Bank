@@ -1,6 +1,6 @@
 package ru.clevertec.cleverbank.service;
 
-import ru.clevertec.cleverbank.dto.transaction.AmountOfFundsResponse;
+import ru.clevertec.cleverbank.dto.transaction.AmountStatementResponse;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceRequest;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransactionResponse;
@@ -20,7 +20,7 @@ public interface TransactionService {
 
     TransactionStatementResponse findAllByPeriodOfDateAndAccountId(TransactionStatementRequest request);
 
-    AmountOfFundsResponse findSumOfFundsByPeriodOfDateAndAccountId(TransactionStatementRequest request);
+    AmountStatementResponse findSumOfFundsByPeriodOfDateAndAccountId(TransactionStatementRequest request);
 
     TransactionResponse findById(Long id);
 

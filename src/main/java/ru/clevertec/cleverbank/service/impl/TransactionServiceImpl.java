@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import ru.clevertec.cleverbank.dao.TransactionDAO;
 import ru.clevertec.cleverbank.dao.impl.TransactionDAOImpl;
-import ru.clevertec.cleverbank.dto.transaction.AmountOfFundsResponse;
+import ru.clevertec.cleverbank.dto.transaction.AmountStatementResponse;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceRequest;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransactionResponse;
@@ -159,7 +159,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public AmountOfFundsResponse findSumOfFundsByPeriodOfDateAndAccountId(TransactionStatementRequest request) {
+    public AmountStatementResponse findSumOfFundsByPeriodOfDateAndAccountId(TransactionStatementRequest request) {
         Account account = accountService.findById(request.accountId());
         Bank bank = bankService.findById(account.getBankId());
         User user = userService.findById(account.getUserId());
@@ -168,8 +168,17 @@ public class TransactionServiceImpl implements TransactionService {
                 .findSumOfSpentFundsByPeriodOfDateAndAccountId(request.from(), request.to(), request.accountId());
         BigDecimal receivedFunds = transactionDAO
                 .findSumOfReceivedFundsByPeriodOfDateAndAccountId(request.from(), request.to(), request.accountId());
+        if (spentFunds == null && receivedFunds == null) {
+            throw new TransactionNotFoundException("It is not possible to create a transaction amount because" +
+                                                   " you do not have any transactions");
+        }
 
-        return transactionMapper.toAmountResponse(bank.getName(), user, account, request, spentFunds, receivedFunds);
+        AmountStatementResponse response = transactionMapper
+                .toAmountResponse(bank.getName(), user, account, request, spentFunds, receivedFunds);
+        String amountStatement = checkService.createAmountStatement(response);
+        uploadFileService.uploadAmount(amountStatement);
+        log.info("Amount:{}", amountStatement);
+        return response;
     }
 
     @Override

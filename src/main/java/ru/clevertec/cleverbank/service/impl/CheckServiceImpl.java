@@ -1,5 +1,6 @@
 package ru.clevertec.cleverbank.service.impl;
 
+import ru.clevertec.cleverbank.dto.transaction.AmountStatementResponse;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransactionStatementResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransferBalanceResponse;
@@ -102,6 +103,37 @@ public class CheckServiceImpl implements CheckService {
                 "Дата", line, "Примечание", line, "Сумма",
                 "-".repeat(70),
                 result);
+    }
+
+    @Override
+    public String createAmountStatement(AmountStatementResponse response) {
+        String line = "|";
+        return """
+                %s%36s
+                %32s
+                Клиент %25s %s %s %s
+                Счет %27s %s
+                Валюта %25s %s
+                Дата открытия %18s %s
+                Период %25s %s - %s
+                Дата и время формирования %6s %s,  %s
+                Остаток %24s %s %s
+                %20s %6s %8s
+                %42s
+                %20s %6s %12s
+                """.formatted("\n",
+                "Выписка по деньгам",
+                response.bankName(),
+                line, response.lastname(), response.firstname(), response.surname(),
+                line, response.accountId(),
+                line, response.currency(),
+                line, response.openingDate(),
+                line, response.from(), response.to(),
+                line, response.formationDate(), response.formationTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")),
+                line, response.balance(), response.currency(),
+                "Приход", line, "Уход",
+                "-".repeat(32),
+                response.receivedFunds(), line, "-" + response.spentFunds());
     }
 
 }
