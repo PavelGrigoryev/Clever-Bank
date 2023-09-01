@@ -68,6 +68,7 @@ public class BankServiceImpl implements BankService {
      *
      * @param request объект BankRequest, представляющий запрос с данными для создания нового банка
      * @return объект BankResponse, представляющий ответ с данными о созданном банке
+     * @throws UniquePhoneNumberException если заданный телефон не уникальный
      */
     @Override
     @ServiceLoggable
@@ -88,7 +89,8 @@ public class BankServiceImpl implements BankService {
      * @param id      Long, представляющее id банка
      * @param request объект BankRequest, представляющий запрос с данными для обновления банка
      * @return объект BankResponse, представляющий ответ с данными об обновленном банке
-     * @throws BankNotFoundException если банк с заданным id не найден в базе данных
+     * @throws BankNotFoundException      если банк с заданным id не найден в базе данных
+     * @throws UniquePhoneNumberException если заданный телефон не уникальный
      */
     @Override
     @ServiceLoggable
@@ -96,7 +98,12 @@ public class BankServiceImpl implements BankService {
         findById(id);
         Bank bank = bankMapper.fromRequest(request);
         bank.setId(id);
-        Bank updatedBank = bankDAO.update(bank);
+        Bank updatedBank;
+        try {
+            updatedBank = bankDAO.update(bank);
+        } catch (JDBCConnectionException e) {
+            throw new UniquePhoneNumberException("Bank with phone number " + request.phoneNumber() + " is already exist");
+        }
         return bankMapper.toResponse(updatedBank);
     }
 

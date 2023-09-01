@@ -68,6 +68,7 @@ public class UserServiceImpl implements UserService {
      *
      * @param request объект UserRequest, представляющий запрос с данными для создания нового пользователя
      * @return объект UserResponse, представляющий ответ с данными о созданном пользователе
+     * @throws UniquePhoneNumberException если заданный телефон не уникальный
      */
     @Override
     @ServiceLoggable
@@ -89,7 +90,8 @@ public class UserServiceImpl implements UserService {
      * @param id      Long, представляющее id пользователя
      * @param request объект UserRequest, представляющий запрос с данными для обновления пользователя
      * @return объект UserResponse, представляющий ответ с данными об обновленном пользователе
-     * @throws UserNotFoundException если пользователь с заданным id не найден в базе данных
+     * @throws UserNotFoundException      если пользователь с заданным id не найден в базе данных
+     * @throws UniquePhoneNumberException если заданный телефон не уникальный
      */
     @Override
     @ServiceLoggable
@@ -98,7 +100,12 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.fromRequest(request);
         user.setId(userById.getId());
         user.setRegisterDate(userById.getRegisterDate());
-        User updatedUser = userDAO.update(user);
+        User updatedUser;
+        try {
+            updatedUser = userDAO.update(user);
+        } catch (JDBCConnectionException e) {
+            throw new UniquePhoneNumberException("User with phone number " + request.mobileNumber() + " is already exist");
+        }
         return userMapper.toResponse(updatedUser);
     }
 
