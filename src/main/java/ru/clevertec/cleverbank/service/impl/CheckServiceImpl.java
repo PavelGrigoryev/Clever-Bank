@@ -38,9 +38,9 @@ public class CheckServiceImpl implements CheckService {
                 response.transactionId(),
                 response.date(), response.time().format(DateTimeFormatter.ofPattern("HH:mm:ss")),
                 response.type().getName(),
-                response.senderBankName(),
-                response.recipientBankName(),
-                response.recipientAccountId(),
+                response.bankSenderName(),
+                response.bankRecipientName(),
+                response.accountRecipientId(),
                 response.type() == Type.WITHDRAWAL ? "-" + response.sum() : "" + response.sum(), response.currency(),
                 repeat);
     }
@@ -72,10 +72,10 @@ public class CheckServiceImpl implements CheckService {
                 response.transactionId(),
                 response.date(), response.time().format(DateTimeFormatter.ofPattern("HH:mm:ss")),
                 response.type().getName(),
-                response.senderBankName(),
-                response.recipientBankName(),
-                response.senderAccountId(),
-                response.recipientAccountId(),
+                response.bankSenderName(),
+                response.bankRecipientName(),
+                response.accountSenderId(),
+                response.accountRecipientId(),
                 response.sum(), response.currency(),
                 repeat);
     }

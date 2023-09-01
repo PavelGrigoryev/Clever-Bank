@@ -19,10 +19,10 @@ public class Transaction {
     private LocalDate date;
     private LocalTime time;
     private Type type;
-    private String sendersBank;
-    private String recipientsBank;
-    private String sendersAccount;
-    private String recipientsAccount;
+    private Long bankSenderId;
+    private Long bankRecipientId;
+    private String accountSenderId;
+    private String accountRecipientId;
     private BigDecimal sum;
 
 }

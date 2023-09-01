@@ -63,7 +63,7 @@ public class TransactionDAOImpl implements TransactionDAO {
     @Override
     public List<Transaction> findAllBySendersAccountId(String id) {
         List<Transaction> transactions = new ArrayList<>();
-        String sql = "SELECT * FROM transactions WHERE senders_account = ?";
+        String sql = "SELECT * FROM transactions WHERE account_sender_id = ?";
         return findAll(sql, id, transactions);
     }
 
@@ -78,7 +78,7 @@ public class TransactionDAOImpl implements TransactionDAO {
     @Override
     public List<Transaction> findAllByRecipientAccountId(String id) {
         List<Transaction> transactions = new ArrayList<>();
-        String sql = "SELECT * FROM transactions WHERE recipients_account = ?";
+        String sql = "SELECT * FROM transactions WHERE account_recipient_id = ?";
         return findAll(sql, id, transactions);
     }
 
@@ -93,7 +93,7 @@ public class TransactionDAOImpl implements TransactionDAO {
     public Transaction save(Transaction transaction) {
         String sql = """
                 INSERT INTO transactions
-                (date, time, type, senders_bank, recipients_bank, senders_account, recipients_account, sum)
+                (date, time, type, bank_sender_id, bank_recipient_id, account_sender_id, account_recipient_id, sum)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """;
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -127,7 +127,7 @@ public class TransactionDAOImpl implements TransactionDAO {
         String sql = """
                 SELECT * FROM transactions
                 WHERE date BETWEEN ? AND ?
-                AND (senders_account = ? OR recipients_account = ?)
+                AND (account_sender_id = ? OR account_recipient_id = ?)
                 """;
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setObject(1, from);
@@ -163,7 +163,7 @@ public class TransactionDAOImpl implements TransactionDAO {
         String sql = """
                 SELECT SUM(sum) AS spent FROM transactions
                 WHERE date BETWEEN ? AND ?
-                AND ((senders_account = ? AND type = 'TRANSFER') OR (recipients_account = ? AND type = 'WITHDRAWAL'))
+                AND ((account_sender_id = ? AND type = 'TRANSFER') OR (account_recipient_id = ? AND type = 'WITHDRAWAL'))
                 """;
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setObject(1, from);
@@ -198,7 +198,7 @@ public class TransactionDAOImpl implements TransactionDAO {
         String sql = """
                 SELECT SUM(sum) AS received FROM transactions
                 WHERE date BETWEEN ? AND ?
-                AND (recipients_account = ? AND type != 'WITHDRAWAL')
+                AND (account_recipient_id = ? AND type != 'WITHDRAWAL')
                 """;
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setObject(1, from);
@@ -248,10 +248,10 @@ public class TransactionDAOImpl implements TransactionDAO {
                 .date(resultSet.getDate("date").toLocalDate())
                 .time(resultSet.getTime("time").toLocalTime())
                 .type(Type.valueOf(resultSet.getString("type")))
-                .sendersBank(resultSet.getString("senders_bank"))
-                .recipientsBank(resultSet.getString("recipients_bank"))
-                .sendersAccount(resultSet.getString("senders_account"))
-                .recipientsAccount(resultSet.getString("recipients_account"))
+                .bankSenderId(resultSet.getLong("bank_sender_id"))
+                .bankRecipientId(resultSet.getLong("bank_recipient_id"))
+                .accountSenderId(resultSet.getString("account_sender_id"))
+                .accountRecipientId(resultSet.getString("account_recipient_id"))
                 .sum(new BigDecimal(resultSet.getString("sum")))
                 .build();
     }
@@ -260,10 +260,10 @@ public class TransactionDAOImpl implements TransactionDAO {
         preparedStatement.setObject(1, transaction.getDate());
         preparedStatement.setObject(2, transaction.getTime());
         preparedStatement.setString(3, String.valueOf(transaction.getType()));
-        preparedStatement.setString(4, transaction.getSendersBank());
-        preparedStatement.setString(5, transaction.getRecipientsBank());
-        preparedStatement.setString(6, transaction.getSendersAccount());
-        preparedStatement.setString(7, transaction.getRecipientsAccount());
+        preparedStatement.setLong(4, transaction.getBankSenderId());
+        preparedStatement.setLong(5, transaction.getBankRecipientId());
+        preparedStatement.setString(6, transaction.getAccountSenderId());
+        preparedStatement.setString(7, transaction.getAccountRecipientId());
         preparedStatement.setBigDecimal(8, transaction.getSum());
     }
 

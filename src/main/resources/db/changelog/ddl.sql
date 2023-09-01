@@ -32,13 +32,13 @@ CREATE TABLE IF NOT EXISTS accounts
 
 CREATE TABLE IF NOT EXISTS transactions
 (
-    id                 BIGSERIAL PRIMARY KEY,
-    date               DATE         NOT NULL,
-    time               TIME         NOT NULL,
-    type               VARCHAR(20)  NOT NULL,
-    senders_bank       VARCHAR(200),
-    recipients_bank    VARCHAR(200) NOT NULL,
-    senders_account    VARCHAR(40),
-    recipients_account VARCHAR(40)  NOT NULL,
-    sum                NUMERIC      NOT NULL
+    id                   BIGSERIAL PRIMARY KEY,
+    date                 DATE        NOT NULL,
+    time                 TIME        NOT NULL,
+    type                 VARCHAR(20) NOT NULL,
+    bank_sender_id       BIGINT      NOT NULL,
+    bank_recipient_id    BIGINT      NOT NULL,
+    account_sender_id    VARCHAR(40) NOT NULL,
+    account_recipient_id VARCHAR(40) NOT NULL,
+    sum                  NUMERIC     NOT NULL
 );

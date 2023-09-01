@@ -23,17 +23,17 @@ public record TransferBalanceResponse(@SerializedName("transaction_id")
                                       Currency currency,
                                       Type type,
 
-                                      @SerializedName("sender_bank_name")
-                                      String senderBankName,
+                                      @SerializedName("bank_sender_name")
+                                      String bankSenderName,
 
-                                      @SerializedName("recipient_bank_name")
-                                      String recipientBankName,
+                                      @SerializedName("bank_recipient_name")
+                                      String bankRecipientName,
 
-                                      @SerializedName("sender_account_id")
-                                      String senderAccountId,
+                                      @SerializedName("account_sender_id")
+                                      String accountSenderId,
 
-                                      @SerializedName("recipient_account_id")
-                                      String recipientAccountId,
+                                      @SerializedName("account_recipient_id")
+                                      String accountRecipientId,
 
                                       BigDecimal sum,
 

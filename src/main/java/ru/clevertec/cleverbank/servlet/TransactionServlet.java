@@ -113,8 +113,8 @@ public class TransactionServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String id = req.getParameter("id");
-        String senderAccountId = req.getParameter("sender_account_id");
-        String recipientAccountId = req.getParameter("recipient_account_id");
+        String senderAccountId = req.getParameter("account_sender_id");
+        String recipientAccountId = req.getParameter("account_recipient_id");
         PrintWriter printWriter = resp.getWriter();
         if (id != null) {
             findById(id, printWriter);

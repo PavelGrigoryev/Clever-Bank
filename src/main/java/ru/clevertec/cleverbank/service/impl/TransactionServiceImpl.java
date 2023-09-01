@@ -68,8 +68,8 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     @ServiceLoggable
     public ChangeBalanceResponse changeBalance(ChangeBalanceRequest request) {
-        Account accountRecipient = accountService.findById(request.recipientAccountId());
-        Account accountSender = accountService.findById(request.senderAccountId());
+        Account accountRecipient = accountService.findById(request.accountRecipientId());
+        Account accountSender = accountService.findById(request.accountSenderId());
         validationService.validateAccountForClosingDate(accountRecipient.getClosingDate(), accountRecipient.getId());
 
         BigDecimal oldBalance = accountRecipient.getBalance();
@@ -83,11 +83,12 @@ public class TransactionServiceImpl implements TransactionService {
         Bank bankSender = bankService.findById(accountSender.getBankId());
 
         Transaction transaction = transactionMapper
-                .toChangeTransaction(request.type(), bankRecipient.getName(), bankSender.getName(), request);
+                .toChangeTransaction(request.type(), bankRecipient.getId(), bankSender.getId(), request);
         Transaction savedTransaction = transactionDAO.save(transaction);
 
         ChangeBalanceResponse response = transactionMapper
-                .toChangeResponse(savedTransaction, updatedAccount.getCurrency(), oldBalance, newBalance);
+                .toChangeResponse(savedTransaction, bankSender.getName(), bankRecipient.getName(),
+                        updatedAccount.getCurrency(), oldBalance, newBalance);
         String check = checkService.createChangeBalanceCheck(response);
         uploadFileService.uploadCheck(check);
         return response;
@@ -105,8 +106,8 @@ public class TransactionServiceImpl implements TransactionService {
     public TransferBalanceResponse transferBalance(TransferBalanceRequest request) throws SQLException {
         connection.setAutoCommit(false);
         try {
-            Account accountSender = accountService.findById(request.senderAccountId());
-            Account accountRecipient = accountService.findById(request.recipientAccountId());
+            Account accountSender = accountService.findById(request.accountSenderId());
+            Account accountRecipient = accountService.findById(request.accountRecipientId());
             validationService.validateAccountForClosingDate(accountSender.getClosingDate(), accountSender.getId());
             validationService.validateAccountForClosingDate(accountRecipient.getClosingDate(), accountRecipient.getId());
             validationService.validateAccountForCurrency(accountSender.getCurrency(), accountRecipient.getCurrency());
@@ -122,14 +123,15 @@ public class TransactionServiceImpl implements TransactionService {
             Account updatedRecipientAccount = accountService.updateBalance(accountRecipient, recipientNewBalance);
             Bank bankRecipient = bankService.findById(accountRecipient.getBankId());
 
-            Transaction transaction = transactionMapper.toTransferTransaction(Type.TRANSFER, bankSender.getName(),
-                    bankRecipient.getName(), updatedSenderAccount.getId(), updatedRecipientAccount.getId(), request.sum());
+            Transaction transaction = transactionMapper.toTransferTransaction(Type.TRANSFER, bankSender.getId(),
+                    bankRecipient.getId(), updatedSenderAccount.getId(), updatedRecipientAccount.getId(), request.sum());
             Transaction savedTransaction = transactionDAO.save(transaction);
 
             connection.commit();
 
             TransferBalanceResponse response = transactionMapper.toTransferResponse(savedTransaction,
-                    accountSender.getCurrency(), senderOldBalance, senderNewBalance, recipientOldBalance, recipientNewBalance);
+                    accountSender.getCurrency(), bankSender.getName(), bankRecipient.getName(), senderOldBalance,
+                    senderNewBalance, recipientOldBalance, recipientNewBalance);
             String check = checkService.createTransferBalanceCheck(response);
             uploadFileService.uploadCheck(check);
             return response;
@@ -159,13 +161,14 @@ public class TransactionServiceImpl implements TransactionService {
         List<Transaction> transactions = transactionDAO
                 .findAllByPeriodOfDateAndAccountId(request.from(), request.to(), account.getId());
         if (transactions.isEmpty()) {
-            throw new TransactionNotFoundException("It is not possible to create a transaction statement because" +
-                                                   " you do not have any transactions");
+            throw new TransactionNotFoundException("It is not possible to create a transaction amount because" +
+                                                   " you do not have any transactions for this period of time : from "
+                                                   + request.from() + " to " + request.to());
         }
 
         List<TransactionStatement> transactionStatements = transactions.stream()
                 .map(transaction -> {
-                    Account acc = accountService.findById(transaction.getSendersAccount());
+                    Account acc = accountService.findById(transaction.getAccountSenderId());
                     User userById = userService.findById(acc.getUserId());
                     return transactionMapper.toStatement(transaction, userById.getLastname());
                 })
@@ -200,7 +203,8 @@ public class TransactionServiceImpl implements TransactionService {
                 .findSumOfReceivedFundsByPeriodOfDateAndAccountId(request.from(), request.to(), request.accountId());
         if (spentFunds == null && receivedFunds == null) {
             throw new TransactionNotFoundException("It is not possible to create a transaction amount because" +
-                                                   " you do not have any transactions");
+                                                   " you do not have any transactions for this period of time : from "
+                                                   + request.from() + " to " + request.to());
         }
 
         AmountStatementResponse response = transactionMapper

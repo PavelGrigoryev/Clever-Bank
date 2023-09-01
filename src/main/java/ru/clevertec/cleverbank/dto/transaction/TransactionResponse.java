@@ -20,17 +20,17 @@ public record TransactionResponse(Long id,
 
                                   Type type,
 
-                                  @SerializedName("senders_bank")
-                                  String sendersBank,
+                                  @SerializedName("bank_sender_id")
+                                  Long bankSenderId,
 
-                                  @SerializedName("recipients_bank")
-                                  String recipientsBank,
+                                  @SerializedName("bank_recipient_id")
+                                  Long bankRecipientId,
 
-                                  @SerializedName("senders_account")
-                                  String sendersAccount,
+                                  @SerializedName("account_sender_id")
+                                  String accountSenderId,
 
-                                  @SerializedName("recipients_account")
-                                  String recipientsAccount,
+                                  @SerializedName("account_recipient_id")
+                                  String accountRecipientId,
 
                                   BigDecimal sum) {
 }

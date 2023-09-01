@@ -5,11 +5,11 @@ import ru.clevertec.cleverbank.model.Type;
 
 import java.math.BigDecimal;
 
-public record ChangeBalanceRequest(@SerializedName("sender_account_id")
-                                   String senderAccountId,
+public record ChangeBalanceRequest(@SerializedName("account_sender_id")
+                                   String accountSenderId,
 
-                                   @SerializedName("recipient_account_id")
-                                   String recipientAccountId,
+                                   @SerializedName("account_recipient_id")
+                                   String accountRecipientId,
 
                                    BigDecimal sum,
                                    Type type) {
