@@ -1,5 +1,6 @@
 package ru.clevertec.cleverbank.dao;
 
+import ru.clevertec.cleverbank.dto.transaction.TransactionStatement;
 import ru.clevertec.cleverbank.model.Transaction;
 
 import java.math.BigDecimal;
@@ -17,7 +18,7 @@ public interface TransactionDAO {
 
     Transaction save(Transaction transaction);
 
-    List<Transaction> findAllByPeriodOfDateAndAccountId(LocalDate from, LocalDate to, String id);
+    List<TransactionStatement> findAllByPeriodOfDateAndAccountId(LocalDate from, LocalDate to, String id);
 
     BigDecimal findSumOfSpentFundsByPeriodOfDateAndAccountId(LocalDate from, LocalDate to, String id);
 

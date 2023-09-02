@@ -152,21 +152,13 @@ public class TransactionServiceImpl implements TransactionService {
         Bank bank = account.getBank();
         User user = account.getUser();
 
-        List<Transaction> transactions = transactionDAO
+        List<TransactionStatement> transactionStatements = transactionDAO
                 .findAllByPeriodOfDateAndAccountId(request.from(), request.to(), account.getId());
-        if (transactions.isEmpty()) {
+        if (transactionStatements.isEmpty()) {
             throw new TransactionNotFoundException("It is not possible to create a transaction amount because" +
                                                    " you do not have any transactions for this period of time : from "
                                                    + request.from() + " to " + request.to());
         }
-
-        List<TransactionStatement> transactionStatements = transactions.stream()
-                .map(transaction -> {
-                    Account acc = accountService.findById(transaction.getAccountSenderId());
-                    User userById = acc.getUser();
-                    return transactionMapper.toStatement(transaction, userById.getLastname());
-                })
-                .toList();
 
         TransactionStatementResponse response = transactionMapper
                 .toStatementResponse(bank.getName(), user, account, request, transactionStatements);

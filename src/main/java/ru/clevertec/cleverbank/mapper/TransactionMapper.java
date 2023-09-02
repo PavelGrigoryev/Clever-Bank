@@ -62,8 +62,6 @@ public interface TransactionMapper {
 
     List<TransactionResponse> toResponseList(List<Transaction> transactions);
 
-    TransactionStatement toStatement(Transaction transaction, String userLastname);
-
     @Mapping(target = "formationDate", expression = "java(LocalDate.now())")
     @Mapping(target = "formationTime", expression = "java(LocalTime.now())")
     TransactionStatementResponse toStatementResponse(String bankName,
