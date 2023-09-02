@@ -1,5 +1,6 @@
 package ru.clevertec.cleverbank.service.impl;
 
+import lombok.AllArgsConstructor;
 import org.mapstruct.factory.Mappers;
 import ru.clevertec.cleverbank.aspect.annotation.ServiceLoggable;
 import ru.clevertec.cleverbank.dao.AccountDAO;
@@ -20,6 +21,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+@AllArgsConstructor
 public class AccountServiceImpl implements AccountService {
 
     private final AccountDAO accountDAO;
