@@ -24,6 +24,8 @@ ext {
     mapstructVersion = '1.5.3.Final'
     aspectjVersion = '1.9.20'
     junitVersion = '5.10.0'
+    asertjVersion = '3.24.2'
+    mockitoVersion = '5.5.0'
 }
 
 sourceCompatibility = targetCompatibility = '17'
@@ -51,6 +53,11 @@ dependencies {
     annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 
     testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
+    testImplementation "org.assertj:assertj-core:${asertjVersion}"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
+    testImplementation "org.junit.jupiter:junit-jupiter-params:${junitVersion}"
+    testImplementation "org.mockito:mockito-core:${mockitoVersion}"
+    testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
 
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
 }

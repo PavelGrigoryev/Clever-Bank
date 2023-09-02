@@ -1,5 +1,6 @@
 package ru.clevertec.cleverbank.service.impl;
 
+import lombok.AllArgsConstructor;
 import org.mapstruct.factory.Mappers;
 import ru.clevertec.cleverbank.aspect.annotation.ServiceLoggable;
 import ru.clevertec.cleverbank.dao.UserDAO;
@@ -17,6 +18,7 @@ import ru.clevertec.cleverbank.service.UserService;
 import java.time.LocalDate;
 import java.util.List;
 
+@AllArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserDAO userDAO;
