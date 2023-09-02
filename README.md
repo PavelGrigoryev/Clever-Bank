@@ -483,10 +483,22 @@ Response Status 200:
 {
   "id": "0J2O 6O3P 1CUB VZUT 91SJ X3FU MUR4",
   "currency": "BYN",
-  "balance": 200.00,
+  "balance": 5000.00,
   "opening_date": "2020-03-01",
-  "bank_id": 6,
-  "user_id": 2
+  "bank": {
+    "id": 6,
+    "name": "Россельхозбанк",
+    "address": "ул. Кутузовский проспект, 20",
+    "phone_number": "+7 (495) 111-11-11"
+  },
+  "user": {
+    "id": 2,
+    "lastname": "Петров",
+    "firstname": "Петр",
+    "surname": "Петрович",
+    "register_date": "1991-02-02",
+    "mobile_number": "+7 (901) 234-56-78"
+  }
 }
 ```
 
@@ -505,30 +517,45 @@ Response Status 200:
 ```json
 [
   {
-    "id": "AS12 ASDG 1200 2132 ASDA 353A 2132",
-    "currency": "RUB",
-    "balance": 10000.00,
-    "opening_date": "2020-01-01",
-    "bank_id": 1,
-    "user_id": 1
-  },
-  {
     "id": "RSK9 NQIW GVZY ODR9 0ZS3 NA6N 9HNJ",
     "currency": "USD",
     "balance": 0,
     "opening_date": "2020-02-01",
     "closing_date": "2020-12-31",
-    "bank_id": 2,
-    "user_id": 1
+    "bank": {
+      "id": 2,
+      "name": "Сбербанк",
+      "address": "ул. Ленина, 1",
+      "phone_number": "+7 (495) 555-55-55"
+    },
+    "user": {
+      "id": 1,
+      "lastname": "Иванов",
+      "firstname": "Иван",
+      "surname": "Иванович",
+      "register_date": "1990-01-01",
+      "mobile_number": "+7 (900) 123-45-67"
+    }
   },
   {
-    "id": "OYXM ZJ38 HR36 FQAO C21J 6ERX SEJE",
-    "currency": "BYN",
-    "balance": 0,
-    "opening_date": "2020-04-01",
-    "closing_date": "2020-12-31",
-    "bank_id": 4,
-    "user_id": 2
+    "id": "AS12 ASDG 1200 2132 ASDA 353A 2132",
+    "currency": "RUB",
+    "balance": 10000.00,
+    "opening_date": "2020-01-01",
+    "bank": {
+      "id": 1,
+      "name": "Клевер-Банк",
+      "address": "ул. Тверская, 25",
+      "phone_number": "+7 (495) 222-22-22"
+    },
+    "user": {
+      "id": 1,
+      "lastname": "Иванов",
+      "firstname": "Иван",
+      "surname": "Иванович",
+      "register_date": "1990-01-01",
+      "mobile_number": "+7 (900) 123-45-67"
+    }
   }
 ]
 ```
@@ -555,12 +582,24 @@ Response Status 201:
 
 ```json
 {
-  "id": "K01Z 6HMK ND4R YAPR RR88 SR1N 23BM",
+  "id": "1W4L JUDP JPY7 KT9W BCIP 1IN3 JPHI",
   "currency": "USD",
   "balance": 1100.50,
-  "opening_date": "2023-09-01",
-  "bank_id": 5,
-  "user_id": 3
+  "opening_date": "2023-09-02",
+  "bank": {
+    "id": 5,
+    "name": "Газпромбанк",
+    "address": "ул. Новый Арбат, 15",
+    "phone_number": "+7 (495) 999-99-99"
+  },
+  "user": {
+    "id": 3,
+    "lastname": "Сидоров",
+    "firstname": "Сидор",
+    "surname": "Сидорович",
+    "register_date": "1992-03-03",
+    "mobile_number": "+7 (902) 345-67-89"
+  }
 }
 ```
 
@@ -589,7 +628,7 @@ Response Status 409:
 }
 ```
 
-#### PUT закрыть счёт по id
+#### PUT закрыть счёт по id, баланс становится 0
 
 Request param:
 
@@ -599,13 +638,25 @@ Response Status 201:
 
 ```json
 {
-  "id": "EHZ9 Z3I4 1IUK 277J 85OA Q2BH GDOK",
+  "id": "1W4L JUDP JPY7 KT9W BCIP 1IN3 JPHI",
   "currency": "USD",
   "balance": 0,
-  "opening_date": "2023-09-01",
-  "closing_date": "2023-09-01",
-  "bank_id": 5,
-  "user_id": 3
+  "opening_date": "2023-09-02",
+  "closing_date": "2023-09-02",
+  "bank": {
+    "id": 5,
+    "name": "Газпромбанк",
+    "address": "ул. Новый Арбат, 15",
+    "phone_number": "+7 (495) 999-99-99"
+  },
+  "user": {
+    "id": 3,
+    "lastname": "Сидоров",
+    "firstname": "Сидор",
+    "surname": "Сидорович",
+    "register_date": "1992-03-03",
+    "mobile_number": "+7 (902) 345-67-89"
+  }
 }
 ```
 

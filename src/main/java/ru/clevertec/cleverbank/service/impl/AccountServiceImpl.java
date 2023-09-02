@@ -10,6 +10,8 @@ import ru.clevertec.cleverbank.dto.account.AccountResponse;
 import ru.clevertec.cleverbank.exception.notfound.AccountNotFoundException;
 import ru.clevertec.cleverbank.mapper.AccountMapper;
 import ru.clevertec.cleverbank.model.Account;
+import ru.clevertec.cleverbank.model.Bank;
+import ru.clevertec.cleverbank.model.User;
 import ru.clevertec.cleverbank.service.AccountService;
 import ru.clevertec.cleverbank.service.BankService;
 import ru.clevertec.cleverbank.service.UserService;
@@ -88,9 +90,11 @@ public class AccountServiceImpl implements AccountService {
     @ServiceLoggable
     public AccountResponse save(AccountRequest request) {
         Account account = accountMapper.fromRequest(request);
-        userService.findById(account.getUserId());
-        bankService.findById(account.getBankId());
+        User user = userService.findById(request.userId());
+        Bank bank = bankService.findById(request.bankId());
         account.setOpeningDate(LocalDate.now());
+        account.setUser(user);
+        account.setBank(bank);
         Account savedAccount = accountDAO.save(account);
         return accountMapper.toResponse(savedAccount);
     }

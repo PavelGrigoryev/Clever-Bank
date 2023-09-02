@@ -19,7 +19,7 @@ public class Account {
     private BigDecimal balance;
     private LocalDate openingDate;
     private LocalDate closingDate;
-    private Long bankId;
-    private Long userId;
+    private Bank bank;
+    private User user;
 
 }
