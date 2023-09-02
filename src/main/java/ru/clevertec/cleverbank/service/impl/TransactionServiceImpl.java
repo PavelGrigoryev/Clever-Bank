@@ -1,5 +1,6 @@
 package ru.clevertec.cleverbank.service.impl;
 
+import lombok.AllArgsConstructor;
 import org.mapstruct.factory.Mappers;
 import ru.clevertec.cleverbank.aspect.annotation.ServiceLoggable;
 import ru.clevertec.cleverbank.dao.TransactionDAO;
@@ -33,6 +34,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
+@AllArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
 
     private final AccountService accountService;
