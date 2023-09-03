@@ -1,5 +1,6 @@
 package ru.clevertec.cleverbank.dao.impl;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.clevertec.cleverbank.dao.TransactionDAO;
 import ru.clevertec.cleverbank.dto.transaction.TransactionStatement;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Slf4j
+@AllArgsConstructor
 public class TransactionDAOImpl implements TransactionDAO {
 
     private final Connection connection;
@@ -144,7 +146,7 @@ public class TransactionDAOImpl implements TransactionDAO {
                             resultSet.getDate("date").toLocalDate(),
                             Type.valueOf(resultSet.getString("type")),
                             resultSet.getString("lastname"),
-                            new BigDecimal(resultSet.getString("sum")));
+                            resultSet.getBigDecimal("sum"));
                     statements.add(statement);
                 }
             }
@@ -260,7 +262,7 @@ public class TransactionDAOImpl implements TransactionDAO {
                 .bankRecipientId(resultSet.getLong("bank_recipient_id"))
                 .accountSenderId(resultSet.getString("account_sender_id"))
                 .accountRecipientId(resultSet.getString("account_recipient_id"))
-                .sum(new BigDecimal(resultSet.getString("sum")))
+                .sum(resultSet.getBigDecimal("sum"))
                 .build();
     }
 
