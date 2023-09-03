@@ -17,6 +17,8 @@
 * Liquibase 4.23.1
 * Mapstruct 1.5.3.Final
 * Junit 5.10.0
+* AssertJ 3.24.2
+* Mockito 5.5.0
 
 ### Инструкция для запуска приложения локально:
 
