@@ -1,0 +1,33 @@
+###найти пользователя по id
+GET http://localhost:8080/users?id=25
+Accept: application/json
+
+###найти всех пользователей
+GET http://localhost:8080/users
+Accept: application/json
+
+###сохранить пользователя
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "lastname": "Алексеев",
+  "firstname": "Алексей",
+  "surname": "Алексеевич",
+  "mobile_number": "+7 (495) 555-11-94"
+}
+
+###обновить пользователя по id
+PUT http://localhost:8080/users?id=25
+Content-Type: application/json
+
+{
+  "lastname": "Сидорович",
+  "firstname": "Сидр",
+  "surname": "Сидорович",
+  "mobile_number": "+7 (495) 444-45-66"
+}
+
+###удалить пользователя по id
+DELETE http://localhost:8080/users?id=1
+Content-Type: application/json
