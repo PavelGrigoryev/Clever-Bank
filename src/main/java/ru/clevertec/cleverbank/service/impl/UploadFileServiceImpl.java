@@ -52,13 +52,13 @@ public class UploadFileServiceImpl implements UploadFileService {
     /**
      * Метод writeFile, который записывает строку в файл по заданному пути.
      *
-     * @param statement String, которую нужно записать в файл
-     * @param path      объект Path, представляющий путь к файлу на сервере
+     * @param file String, которую нужно записать в файл
+     * @param path объект Path, представляющий путь к файлу на сервере
      */
-    private static void writeFile(String statement, Path path) {
+    private static void writeFile(String file, Path path) {
         log.info("File download link: {}", path);
         try {
-            Files.write(path, statement.getBytes(), StandardOpenOption.APPEND, StandardOpenOption.CREATE);
+            Files.write(path, file.getBytes(), StandardOpenOption.APPEND, StandardOpenOption.CREATE);
         } catch (IOException e) {
             log.error(e.getMessage());
             throw new UploadFileException("Sorry! We got Server upload file problems");
@@ -73,11 +73,11 @@ public class UploadFileServiceImpl implements UploadFileService {
      * @throws UploadFileException если не удается найти путь для загрузки txt файла
      */
     private static String findPaths(String fileName) {
-        URL pdfURL = UploadFileServiceImpl.class.getResource("/check");
-        if (pdfURL == null) {
+        URL url = UploadFileServiceImpl.class.getResource("/check");
+        if (url == null) {
             throw new UploadFileException("Can not find a way to upload a txt file");
         }
-        return URLDecoder.decode(pdfURL.getPath(), StandardCharsets.UTF_8)
+        return URLDecoder.decode(url.getPath(), StandardCharsets.UTF_8)
                 .concat(fileName)
                 .substring(1);
     }

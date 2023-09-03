@@ -1,5 +1,6 @@
 package ru.clevertec.cleverbank.dao.impl;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.clevertec.cleverbank.dao.UserDAO;
 import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Slf4j
+@AllArgsConstructor
 public class UserDAOImpl implements UserDAO {
 
     private final Connection connection;
