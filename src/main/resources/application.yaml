@@ -1,0 +1,8 @@
+postgresql:
+  url: "jdbc:postgresql://localhost:5432/clever_bank"
+  user: "enter your username"
+  password: "enter your password"
+scheduler:
+  monthPercentage: "1.0"
+  initialDelay: "10"
+  period: "30"
