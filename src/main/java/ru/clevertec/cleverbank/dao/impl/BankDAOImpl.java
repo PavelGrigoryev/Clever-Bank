@@ -2,12 +2,13 @@ package ru.clevertec.cleverbank.dao.impl;
 
 import lombok.AllArgsConstructor;
 import org.jooq.DSLContext;
+import org.jooq.exception.IntegrityConstraintViolationException;
 import org.jooq.impl.DSL;
 import ru.clevertec.cleverbank.dao.BankDAO;
 import ru.clevertec.cleverbank.exception.badrequest.UniquePhoneNumberException;
 import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
 import ru.clevertec.cleverbank.tables.pojos.Bank;
-import ru.clevertec.cleverbank.util.ConnectionManager;
+import ru.clevertec.cleverbank.util.HikariConnectionManager;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,7 +22,7 @@ public class BankDAOImpl implements BankDAO {
     private final DSLContext dslContext;
 
     public BankDAOImpl() {
-        dslContext = DSL.using(ConnectionManager.getJDBCConnection());
+        dslContext = DSL.using(HikariConnectionManager.getConnection());
     }
 
     /**
@@ -61,6 +62,7 @@ public class BankDAOImpl implements BankDAO {
                 .set(BANK.NAME, bank.getName())
                 .set(BANK.ADDRESS, bank.getAddress())
                 .set(BANK.PHONE_NUMBER, bank.getPhoneNumber())
+                .onDuplicateKeyIgnore()
                 .returning()
                 .fetchOptional()
                 .map(bankRecord -> bankRecord.into(Bank.class))
@@ -77,16 +79,21 @@ public class BankDAOImpl implements BankDAO {
      */
     @Override
     public Bank update(Bank bank) {
-        return dslContext.update(BANK)
-                .set(BANK.NAME, bank.getName())
-                .set(BANK.ADDRESS, bank.getAddress())
-                .set(BANK.PHONE_NUMBER, bank.getPhoneNumber())
-                .where(BANK.ID.eq(bank.getId()))
-                .returning()
-                .fetchOptional()
-                .map(bankRecord -> bankRecord.into(Bank.class))
-                .orElseThrow(() -> new UniquePhoneNumberException("Bank with phone number " + bank.getPhoneNumber()
-                                                                  + " is already exist"));
+        Bank updated;
+        try {
+            updated = dslContext.update(BANK)
+                    .set(BANK.NAME, bank.getName())
+                    .set(BANK.ADDRESS, bank.getAddress())
+                    .set(BANK.PHONE_NUMBER, bank.getPhoneNumber())
+                    .where(BANK.ID.eq(bank.getId()))
+                    .returning()
+                    .fetchOptional()
+                    .map(bankRecord -> bankRecord.into(Bank.class))
+                    .orElseThrow(JDBCConnectionException::new);
+        } catch (IntegrityConstraintViolationException e) {
+            throw new UniquePhoneNumberException("Bank with phone number " + bank.getPhoneNumber() + " is already exist");
+        }
+        return updated;
     }
 
     /**

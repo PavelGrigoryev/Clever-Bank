@@ -9,7 +9,7 @@ import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionExcep
 import ru.clevertec.cleverbank.model.Type;
 import ru.clevertec.cleverbank.tables.Account;
 import ru.clevertec.cleverbank.tables.pojos.Transaction;
-import ru.clevertec.cleverbank.util.ConnectionManager;
+import ru.clevertec.cleverbank.util.HikariConnectionManager;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -27,7 +27,7 @@ public class TransactionDAOImpl implements TransactionDAO {
     private final DSLContext dslContext;
 
     public TransactionDAOImpl() {
-        dslContext = DSL.using(ConnectionManager.getJDBCConnection());
+        dslContext = DSL.using(HikariConnectionManager.getConnection());
     }
 
     /**

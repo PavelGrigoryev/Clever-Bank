@@ -10,7 +10,7 @@ import ru.clevertec.cleverbank.model.Currency;
 import ru.clevertec.cleverbank.tables.pojos.Account;
 import ru.clevertec.cleverbank.tables.pojos.Bank;
 import ru.clevertec.cleverbank.tables.pojos.User;
-import ru.clevertec.cleverbank.util.ConnectionManager;
+import ru.clevertec.cleverbank.util.HikariConnectionManager;
 import ru.clevertec.cleverbank.util.RandomStringGenerator;
 
 import java.util.List;
@@ -26,7 +26,7 @@ public class AccountDAOImpl implements AccountDAO {
     private final DSLContext dslContext;
 
     public AccountDAOImpl() {
-        dslContext = DSL.using(ConnectionManager.getJDBCConnection());
+        dslContext = DSL.using(HikariConnectionManager.getConnection());
     }
 
     /**
@@ -88,6 +88,7 @@ public class AccountDAOImpl implements AccountDAO {
                 .set(ACCOUNT.CLOSING_DATE, account.getClosingDate())
                 .set(ACCOUNT.BANK_ID, account.getBankId())
                 .set(ACCOUNT.USER_ID, account.getUserId())
+                .onDuplicateKeyIgnore()
                 .returning()
                 .fetchOptional()
                 .map(accountRecord -> accountRecord.into(Account.class))
