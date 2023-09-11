@@ -194,12 +194,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .findSumOfSpentFundsByPeriodOfDateAndAccountId(request.from(), request.to(), request.accountId());
         BigDecimal receivedFunds = transactionDAO
                 .findSumOfReceivedFundsByPeriodOfDateAndAccountId(request.from(), request.to(), request.accountId());
-        if (spentFunds == null && receivedFunds == null) {
-            throw new TransactionNotFoundException("It is not possible to create a transaction amount because" +
-                                                   " you do not have any transactions for this period of time : from "
-                                                   + request.from() + " to " + request.to());
-        }
-
+        
         AmountStatementResponse response = transactionMapper
                 .toAmountResponse(bank.getName(), user, account, request, spentFunds, receivedFunds);
         String amountStatement = checkService.createAmountStatement(response);

@@ -78,9 +78,9 @@ liquibase {
         createTables {
             changelogFile 'src/main/resources/db/changelog/db.changelog-master.yaml'
             driver 'org.postgresql.Driver'
-            url 'jdbc:postgresql://localhost:5432/clever_bank'
-            username 'pavel'
-            password 'pavel'
+            url project.ext.url
+            username project.ext.username
+            password project.ext.password
         }
     }
 }
@@ -92,9 +92,9 @@ jooq {
             generationTool {
                 jdbc {
                     driver = 'org.postgresql.Driver'
-                    url = 'jdbc:postgresql://localhost:5432/clever_bank'
-                    user = 'pavel'
-                    password = 'pavel'
+                    url = project.ext.url
+                    user = project.ext.username
+                    password = project.ext.password
                 }
                 generator {
                     database {

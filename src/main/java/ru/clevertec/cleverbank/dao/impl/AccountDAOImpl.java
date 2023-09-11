@@ -77,6 +77,7 @@ public class AccountDAOImpl implements AccountDAO {
      *
      * @param account объект Account, представляющий счёт для сохранения
      * @return объект AccountData, представляющий сохраненный счёт
+     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
      */
     @Override
     public AccountData save(Account account) {
@@ -101,6 +102,7 @@ public class AccountDAOImpl implements AccountDAO {
      *
      * @param account объект Account, представляющий счёт для обновления
      * @return объект AccountData, представляющий обновленный счёт
+     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
      */
     @Override
     public AccountData update(Account account) {

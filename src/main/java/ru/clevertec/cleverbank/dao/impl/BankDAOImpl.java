@@ -76,6 +76,7 @@ public class BankDAOImpl implements BankDAO {
      * @param bank объект Bank, представляющий банк для обновления
      * @return объект Bank, представляющий обновленный банк
      * @throws UniquePhoneNumberException если заданный телефон не уникальный
+     * @throws JDBCConnectionException    если произошла ошибка при работе с базой данных
      */
     @Override
     public Bank update(Bank bank) {

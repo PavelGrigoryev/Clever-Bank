@@ -17,11 +17,13 @@ import ru.clevertec.cleverbank.dto.account.AccountRequest;
 import ru.clevertec.cleverbank.dto.account.AccountResponse;
 import ru.clevertec.cleverbank.exception.notfound.AccountNotFoundException;
 import ru.clevertec.cleverbank.mapper.AccountMapper;
-import ru.clevertec.cleverbank.model.Account;
-import ru.clevertec.cleverbank.model.Bank;
-import ru.clevertec.cleverbank.model.User;
+import ru.clevertec.cleverbank.model.AccountData;
 import ru.clevertec.cleverbank.service.BankService;
 import ru.clevertec.cleverbank.service.UserService;
+import ru.clevertec.cleverbank.tables.pojos.Account;
+import ru.clevertec.cleverbank.tables.pojos.Bank;
+import ru.clevertec.cleverbank.tables.pojos.User;
+import ru.clevertec.cleverbank.util.account.AccountDataTestBuilder;
 import ru.clevertec.cleverbank.util.account.AccountRequestTestBuilder;
 import ru.clevertec.cleverbank.util.account.AccountResponseTestBuilder;
 import ru.clevertec.cleverbank.util.account.AccountTestBuilder;
@@ -71,7 +73,7 @@ class AccountServiceImplTest {
         @Test
         void testShouldReturnExpectedResponse() {
             AccountResponse expected = AccountResponseTestBuilder.aAccountResponse().build();
-            Account account = AccountTestBuilder.aAccount().build();
+            AccountData account = AccountDataTestBuilder.aAccountData().build();
             String id = expected.id();
 
             doReturn(expected)
@@ -94,7 +96,7 @@ class AccountServiceImplTest {
         @Test
         void testShouldReturnListOfSizeOne() {
             AccountResponse response = AccountResponseTestBuilder.aAccountResponse().build();
-            Account account = AccountTestBuilder.aAccount().build();
+            AccountData account = AccountDataTestBuilder.aAccountData().build();
             int expectedSize = 1;
 
             doReturn(List.of(response))
@@ -102,7 +104,7 @@ class AccountServiceImplTest {
                     .toResponseList(List.of(account));
             doReturn(List.of(account))
                     .when(accountDAO)
-                    .findAll();
+                    .findAllDatas();
 
             List<AccountResponse> actual = accountService.findAllResponses();
 
@@ -112,14 +114,14 @@ class AccountServiceImplTest {
         @Test
         void testShouldReturnListThatContainsExpectedResponse() {
             AccountResponse expected = AccountResponseTestBuilder.aAccountResponse().build();
-            Account account = AccountTestBuilder.aAccount().build();
+            AccountData account = AccountDataTestBuilder.aAccountData().build();
 
             doReturn(List.of(expected))
                     .when(accountMapper)
                     .toResponseList(List.of(account));
             doReturn(List.of(account))
                     .when(accountDAO)
-                    .findAll();
+                    .findAllDatas();
 
             List<AccountResponse> actual = accountService.findAllResponses();
 
@@ -132,7 +134,7 @@ class AccountServiceImplTest {
                     .when(accountDAO)
                     .findAll();
 
-            List<AccountResponse> actual = accountService.findAllResponses();
+            List<Account> actual = accountService.findAll();
 
             assertThat(actual).isEmpty();
         }
@@ -147,6 +149,10 @@ class AccountServiceImplTest {
         void testShouldCaptureValue(Account expected) {
             User user = UserTestBuilder.aUser().build();
             Bank bank = BankTestBuilder.aBank().build();
+            AccountData accountData = AccountDataTestBuilder.aAccountData()
+                    .withId(expected.getId())
+                    .withBalance(expected.getBalance())
+                    .build();
             AccountRequest request = AccountRequestTestBuilder.aAccountRequest().build();
             AccountResponse response = AccountResponseTestBuilder.aAccountResponse()
                     .withId(expected.getId())
@@ -162,12 +168,12 @@ class AccountServiceImplTest {
             doReturn(bank)
                     .when(bankService)
                     .findById(request.bankId());
-            doReturn(expected)
+            doReturn(accountData)
                     .when(accountDAO)
                     .save(expected);
             doReturn(response)
                     .when(accountMapper)
-                    .toResponse(expected);
+                    .toResponse(accountData);
 
             accountService.save(request);
             verify(accountDAO).save(captor.capture());
@@ -184,15 +190,16 @@ class AccountServiceImplTest {
         @Test
         void testShouldReturnUpdatedResponse() {
             BigDecimal newBalance = BigDecimal.valueOf(1);
-            Account expected = AccountTestBuilder.aAccount()
+            AccountData expected = AccountDataTestBuilder.aAccountData()
                     .withBalance(newBalance)
                     .build();
+            Account account = AccountTestBuilder.aAccount().build();
 
             doReturn(expected)
                     .when(accountDAO)
-                    .update(expected);
+                    .update(account);
 
-            Account actual = accountService.updateBalance(expected, newBalance);
+            AccountData actual = accountService.updateBalance(account, newBalance);
 
             assertThat(actual).isEqualTo(expected);
         }
@@ -205,19 +212,23 @@ class AccountServiceImplTest {
         @Test
         void testShouldReturnUpdatedResponse() {
             Account account = AccountTestBuilder.aAccount().build();
+            AccountData accountData = AccountDataTestBuilder.aAccountData().build();
             AccountResponse expected = AccountResponseTestBuilder.aAccountResponse().build();
 
-            doReturn(Optional.of(account))
+            doReturn(Optional.of(accountData))
                     .when(accountDAO)
-                    .findById(account.getId());
-            doReturn(account)
+                    .findById(accountData.getId());
+            doReturn(accountData)
                     .when(accountDAO)
                     .update(account);
+            doReturn(account)
+                    .when(accountMapper)
+                    .fromAccountData(accountData);
             doReturn(expected)
                     .when(accountMapper)
-                    .toResponse(account);
+                    .toResponse(accountData);
 
-            AccountResponse actual = accountService.closeAccount(account.getId());
+            AccountResponse actual = accountService.closeAccount(accountData.getId());
 
             assertThat(actual).isEqualTo(expected);
         }

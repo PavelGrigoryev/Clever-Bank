@@ -3,8 +3,8 @@ package ru.clevertec.cleverbank.util.transaction;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.With;
-import ru.clevertec.cleverbank.model.Transaction;
 import ru.clevertec.cleverbank.model.Type;
+import ru.clevertec.cleverbank.tables.pojos.Transaction;
 import ru.clevertec.cleverbank.util.TestBuilder;
 
 import java.math.BigDecimal;
@@ -29,17 +29,8 @@ public class TransactionTestBuilder implements TestBuilder<Transaction> {
 
     @Override
     public Transaction build() {
-        return Transaction.builder()
-                .id(id)
-                .date(date)
-                .time(time)
-                .type(type)
-                .bankSenderId(bankSenderId)
-                .bankRecipientId(bankRecipientId)
-                .accountSenderId(accountSenderId)
-                .accountRecipientId(accountRecipientId)
-                .sum(sum)
-                .build();
+        return new Transaction(id, date, time,  type.toString(), bankSenderId,
+                bankRecipientId, accountSenderId, accountRecipientId, sum);
     }
 
 }

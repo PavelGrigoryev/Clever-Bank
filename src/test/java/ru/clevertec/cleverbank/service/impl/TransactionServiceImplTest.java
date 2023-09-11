@@ -20,14 +20,17 @@ import ru.clevertec.cleverbank.dto.transaction.TransferBalanceResponse;
 import ru.clevertec.cleverbank.exception.internalservererror.TransactionException;
 import ru.clevertec.cleverbank.exception.notfound.AccountNotFoundException;
 import ru.clevertec.cleverbank.exception.notfound.TransactionNotFoundException;
+import ru.clevertec.cleverbank.mapper.AccountMapper;
 import ru.clevertec.cleverbank.mapper.TransactionMapper;
-import ru.clevertec.cleverbank.model.Account;
-import ru.clevertec.cleverbank.model.Transaction;
+import ru.clevertec.cleverbank.model.AccountData;
 import ru.clevertec.cleverbank.model.Type;
 import ru.clevertec.cleverbank.service.AccountService;
 import ru.clevertec.cleverbank.service.CheckService;
 import ru.clevertec.cleverbank.service.UploadFileService;
 import ru.clevertec.cleverbank.service.ValidationService;
+import ru.clevertec.cleverbank.tables.pojos.Account;
+import ru.clevertec.cleverbank.tables.pojos.Transaction;
+import ru.clevertec.cleverbank.util.account.AccountDataTestBuilder;
 import ru.clevertec.cleverbank.util.account.AccountTestBuilder;
 import ru.clevertec.cleverbank.util.transaction.AmountStatementResponseTestBuilder;
 import ru.clevertec.cleverbank.util.transaction.ChangeBalanceRequestTestBuilder;
@@ -63,6 +66,8 @@ class TransactionServiceImplTest {
     @Mock
     private TransactionMapper transactionMapper;
     @Mock
+    private AccountMapper accountMapper;
+    @Mock
     private CheckService checkService;
     @Mock
     private UploadFileService uploadFileService;
@@ -78,8 +83,9 @@ class TransactionServiceImplTest {
         void testShouldReturnExpectedResponseWithAddingBalance() {
             ChangeBalanceResponse expected = ChangeBalanceResponseTestBuilder.aChangeBalanceResponse().build();
             ChangeBalanceRequest request = ChangeBalanceRequestTestBuilder.aChangeBalanceRequest().build();
-            Account accountRecipient = AccountTestBuilder.aAccount().build();
-            Account accountSender = AccountTestBuilder.aAccount().withBalance(BigDecimal.TEN).build();
+            AccountData accountRecipient = AccountDataTestBuilder.aAccountData().build();
+            AccountData accountSender = AccountDataTestBuilder.aAccountData().withBalance(BigDecimal.TEN).build();
+            Account account = AccountTestBuilder.aAccount().build();
             Transaction transaction = TransactionTestBuilder.aTransaction().build();
             String check = "Check";
             BigDecimal newBalance = accountRecipient.getBalance().add(request.sum());
@@ -98,7 +104,10 @@ class TransactionServiceImplTest {
                     .validateAccountForSufficientBalance(request.type(), request.sum(), accountRecipient.getBalance());
             doReturn(accountRecipient)
                     .when(accountService)
-                    .updateBalance(accountRecipient, newBalance);
+                    .updateBalance(account, newBalance);
+            doReturn(account)
+                    .when(accountMapper)
+                    .fromAccountData(accountRecipient);
             doReturn(transaction)
                     .when(transactionMapper)
                     .toChangeTransaction(request.type(), accountRecipient.getBank().getId(), accountSender.getBank().getId(), request);
@@ -127,8 +136,9 @@ class TransactionServiceImplTest {
             ChangeBalanceRequest request = ChangeBalanceRequestTestBuilder.aChangeBalanceRequest()
                     .withType(Type.WITHDRAWAL)
                     .build();
-            Account accountRecipient = AccountTestBuilder.aAccount().build();
-            Account accountSender = AccountTestBuilder.aAccount().withBalance(BigDecimal.TEN).build();
+            AccountData accountRecipient = AccountDataTestBuilder.aAccountData().build();
+            AccountData accountSender = AccountDataTestBuilder.aAccountData().withBalance(BigDecimal.TEN).build();
+            Account account = AccountTestBuilder.aAccount().build();
             Transaction transaction = TransactionTestBuilder.aTransaction().build();
             String check = "Check";
             BigDecimal newBalance = accountRecipient.getBalance().subtract(request.sum());
@@ -147,7 +157,10 @@ class TransactionServiceImplTest {
                     .validateAccountForSufficientBalance(request.type(), request.sum(), accountRecipient.getBalance());
             doReturn(accountRecipient)
                     .when(accountService)
-                    .updateBalance(accountRecipient, newBalance);
+                    .updateBalance(account, newBalance);
+            doReturn(account)
+                    .when(accountMapper)
+                    .fromAccountData(accountRecipient);
             doReturn(transaction)
                     .when(transactionMapper)
                     .toChangeTransaction(request.type(), accountRecipient.getBank().getId(), accountSender.getBank().getId(), request);
@@ -181,8 +194,9 @@ class TransactionServiceImplTest {
             TransferBalanceRequest request = TransferBalanceRequestTestBuilder.aTransferBalanceRequest().build();
             TransferBalanceResponse expected = TransferBalanceResponseTestBuilder.aTransferBalanceResponse().build();
             Transaction transaction = TransactionTestBuilder.aTransaction().build();
-            Account accountRecipient = AccountTestBuilder.aAccount().build();
-            Account accountSender = AccountTestBuilder.aAccount().withBalance(BigDecimal.TEN).build();
+            AccountData accountRecipient = AccountDataTestBuilder.aAccountData().build();
+            AccountData accountSender = AccountDataTestBuilder.aAccountData().withBalance(BigDecimal.TEN).build();
+            Account account = AccountTestBuilder.aAccount().build();
             BigDecimal senderNewBalance = accountSender.getBalance().subtract(request.sum());
             BigDecimal recipientNewBalance = accountRecipient.getBalance().add(request.sum());
             String check = "Check";
@@ -207,10 +221,16 @@ class TransactionServiceImplTest {
                     .validateAccountForSufficientBalance(Type.TRANSFER, request.sum(), accountSender.getBalance());
             doReturn(accountSender)
                     .when(accountService)
-                    .updateBalance(accountSender, senderNewBalance);
+                    .updateBalance(account, senderNewBalance);
+            doReturn(account)
+                    .when(accountMapper)
+                    .fromAccountData(accountSender);
             doReturn(accountRecipient)
                     .when(accountService)
-                    .updateBalance(accountRecipient, recipientNewBalance);
+                    .updateBalance(account, recipientNewBalance);
+            doReturn(account)
+                    .when(accountMapper)
+                    .fromAccountData(accountRecipient);
             doReturn(transaction)
                     .when(transactionMapper)
                     .toTransferTransaction(Type.TRANSFER, accountSender.getBank().getId(), accountRecipient.getBank().getId(),
@@ -277,7 +297,7 @@ class TransactionServiceImplTest {
 
         @Test
         void testShouldReturnExpectedResponseThatContainsListOfSizeOne() {
-            Account account = AccountTestBuilder.aAccount().build();
+            AccountData account = AccountDataTestBuilder.aAccountData().build();
             TransactionStatementRequest request = TransactionStatementRequestTestBuilder.aTransactionStatementRequest().build();
             TransactionStatement statement = TransactionStatementTestBuilder.aTransactionStatement().build();
             TransactionStatementResponse expected = TransactionStatementResponseTestBuilder.aTransactionStatementResponse().build();
@@ -306,7 +326,7 @@ class TransactionServiceImplTest {
 
         @Test
         void testShouldReturnExpectedResponse() {
-            Account account = AccountTestBuilder.aAccount().build();
+            AccountData account = AccountDataTestBuilder.aAccountData().build();
             TransactionStatementRequest request = TransactionStatementRequestTestBuilder.aTransactionStatementRequest().build();
             TransactionStatement statement = TransactionStatementTestBuilder.aTransactionStatement().build();
             TransactionStatementResponse expected = TransactionStatementResponseTestBuilder.aTransactionStatementResponse().build();
@@ -335,7 +355,7 @@ class TransactionServiceImplTest {
 
         @Test
         void testShouldThrowTransactionNotFoundExceptionWithExpectedMessage() {
-            Account account = AccountTestBuilder.aAccount().build();
+            AccountData account = AccountDataTestBuilder.aAccountData().build();
             TransactionStatementRequest request = TransactionStatementRequestTestBuilder.aTransactionStatementRequest().build();
             String expectedMessage = "It is not possible to create a transaction amount because" +
                                      " you do not have any transactions for this period of time : from "
@@ -362,7 +382,7 @@ class TransactionServiceImplTest {
 
         @Test
         void testShouldReturnExpectedResponse() {
-            Account account = AccountTestBuilder.aAccount().build();
+            AccountData account = AccountDataTestBuilder.aAccountData().build();
             TransactionStatementRequest request = TransactionStatementRequestTestBuilder.aTransactionStatementRequest().build();
             AmountStatementResponse expected = AmountStatementResponseTestBuilder.aAmountStatementResponse().build();
             BigDecimal spentFunds = BigDecimal.TEN;
@@ -391,31 +411,6 @@ class TransactionServiceImplTest {
             AmountStatementResponse actual = transactionService.findSumOfFundsByPeriodOfDateAndAccountId(request);
 
             assertThat(actual).isEqualTo(expected);
-        }
-
-        @Test
-        void testShouldThrowTransactionNotFoundExceptionWithExpectedMessage() {
-            Account account = AccountTestBuilder.aAccount().build();
-            TransactionStatementRequest request = TransactionStatementRequestTestBuilder.aTransactionStatementRequest().build();
-            String expectedMessage = "It is not possible to create a transaction amount because" +
-                                     " you do not have any transactions for this period of time : from "
-                                     + request.from() + " to " + request.to();
-
-            doReturn(account)
-                    .when(accountService)
-                    .findById(request.accountId());
-            doReturn(null)
-                    .when(transactionDAO)
-                    .findSumOfSpentFundsByPeriodOfDateAndAccountId(request.from(), request.to(), request.accountId());
-            doReturn(null)
-                    .when(transactionDAO)
-                    .findSumOfReceivedFundsByPeriodOfDateAndAccountId(request.from(), request.to(), request.accountId());
-
-            Exception exception = assertThrows(TransactionNotFoundException.class,
-                    () -> transactionService.findSumOfFundsByPeriodOfDateAndAccountId(request));
-            String actualMessage = exception.getMessage();
-
-            assertThat(actualMessage).isEqualTo(expectedMessage);
         }
 
     }

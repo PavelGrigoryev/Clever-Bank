@@ -14,7 +14,8 @@
 * Slf4j-API 2.0.7
 * Logback logger 1.4.11
 * SnakeYaml 2.1
-* Liquibase 4.23.1
+* Liquibase plugin 2.2.0
+* Jooq plugin 8.2
 * Mapstruct 1.5.3.Final
 * Junit 5.10.0
 * AssertJ 3.24.2
@@ -29,12 +30,14 @@
 2. В Postgresql нужно создать базу данных. Как пример: "clever_bank" . Sql: CREATE DATABASE clever_bank
 3. В [application.yaml](src/main/resources/application.yaml) в строчке №3 введите ваш username для Postgresql, в строчке
    №4 введите ваш password для Postgresql.
-4. В настройках идеи Run -> Edit Configurations... вы должны поставить Tomcat 10.1. И в графе Deployment
+4. В [gradle.properties](gradle.properties) в строчке №2 введите ваш username для Postgresql, в строчке №3 введите ваш
+   password для Postgresql.
+5. В настройках идеи Run -> Edit Configurations... вы должны поставить Tomcat 10.1. И в графе Deployment
    очистить Application context.
-5. При запуске приложения Liquibase сам создаст таблицы и наполнит их дефолтными значениями. И запустится scheduler
-   который будет регулярно, по расписанию (раз в полминуты), проверять, нужно ли начислять проценты на остаток
-   счета в конце месяца.
-6. Приложение готово к использованию.
+6. При запуске приложения Liquibase сам создаст таблицы и наполнит их дефолтными значениями. Jooq сгенерирует entities.
+   И запустится scheduler который будет регулярно, по расписанию (раз в полминуты), проверять, нужно ли начислять
+   проценты на остаток счета в конце месяца.
+7. Приложение готово к использованию.
 
 ### Http Запросы
 

@@ -3,7 +3,7 @@ package ru.clevertec.cleverbank.util.user;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.With;
-import ru.clevertec.cleverbank.model.User;
+import ru.clevertec.cleverbank.tables.pojos.User;
 import ru.clevertec.cleverbank.util.TestBuilder;
 
 import java.time.LocalDate;
@@ -23,14 +23,7 @@ public class UserTestBuilder implements TestBuilder<User> {
 
     @Override
     public User build() {
-        return User.builder()
-                .id(id)
-                .lastname(lastname)
-                .firstname(firstname)
-                .surname(surname)
-                .registerDate(registerDate)
-                .mobileNumber(mobileNumber)
-                .build();
+        return new User(id, lastname, firstname, surname, registerDate, mobileNumber);
     }
 
 }

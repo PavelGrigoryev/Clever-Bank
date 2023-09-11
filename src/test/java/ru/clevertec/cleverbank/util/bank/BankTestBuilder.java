@@ -3,7 +3,7 @@ package ru.clevertec.cleverbank.util.bank;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.With;
-import ru.clevertec.cleverbank.model.Bank;
+import ru.clevertec.cleverbank.tables.pojos.Bank;
 import ru.clevertec.cleverbank.util.TestBuilder;
 
 @AllArgsConstructor
@@ -18,12 +18,7 @@ public class BankTestBuilder implements TestBuilder<Bank> {
 
     @Override
     public Bank build() {
-        return Bank.builder()
-                .id(id)
-                .name(name)
-                .address(address)
-                .phoneNumber(phoneNumber)
-                .build();
+        return new Bank(id, name, address, phoneNumber);
     }
 
 }

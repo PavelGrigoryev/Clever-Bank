@@ -77,6 +77,7 @@ public class UserDAOImpl implements UserDAO {
      * @param user объект User, представляющий пользователя для обновления
      * @return объект User, представляющий обновленного пользователя
      * @throws UniquePhoneNumberException если заданный телефон не уникальный
+     * @throws JDBCConnectionException    если произошла ошибка при работе с базой данных
      */
     @Override
     public User update(User user) {

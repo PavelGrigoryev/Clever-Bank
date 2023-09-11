@@ -15,11 +15,9 @@ import ru.clevertec.cleverbank.dao.UserDAO;
 import ru.clevertec.cleverbank.dto.DeleteResponse;
 import ru.clevertec.cleverbank.dto.user.UserRequest;
 import ru.clevertec.cleverbank.dto.user.UserResponse;
-import ru.clevertec.cleverbank.exception.badrequest.UniquePhoneNumberException;
-import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
 import ru.clevertec.cleverbank.exception.notfound.UserNotFoundException;
 import ru.clevertec.cleverbank.mapper.UserMapper;
-import ru.clevertec.cleverbank.model.User;
+import ru.clevertec.cleverbank.tables.pojos.User;
 import ru.clevertec.cleverbank.util.user.UserRequestTestBuilder;
 import ru.clevertec.cleverbank.util.user.UserResponseTestBuilder;
 import ru.clevertec.cleverbank.util.user.UserTestBuilder;
@@ -31,7 +29,6 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -160,26 +157,6 @@ class UserServiceImplTest {
             assertThat(userCaptor).isEqualTo(expected);
         }
 
-        @Test
-        void testShouldThrowUniquePhoneNumberExceptionWithExpectedMessage() {
-            String mobileNumber = "+7 (900) 123-45-67";
-            String expectedMessage = "User with phone number " + mobileNumber + " is already exist";
-            User user = UserTestBuilder.aUser().build();
-            UserRequest request = UserRequestTestBuilder.aUserRequest().build();
-
-            doReturn(user)
-                    .when(userMapper)
-                    .fromRequest(request);
-            doThrow(new JDBCConnectionException())
-                    .when(userDAO)
-                    .save(user);
-
-            Exception exception = assertThrows(UniquePhoneNumberException.class, () -> userService.save(request));
-            String actualMessage = exception.getMessage();
-
-            assertThat(actualMessage).isEqualTo(expectedMessage);
-        }
-
     }
 
     @Nested
@@ -207,29 +184,6 @@ class UserServiceImplTest {
             UserResponse actual = userService.update(user.getId(), request);
 
             assertThat(actual).isEqualTo(expected);
-        }
-
-        @Test
-        void testShouldThrowUniquePhoneNumberExceptionWithExpectedMessage() {
-            String mobileNumber = "+7 (900) 123-45-67";
-            String expectedMessage = "User with phone number " + mobileNumber + " is already exist";
-            User user = UserTestBuilder.aUser().build();
-            UserRequest request = UserRequestTestBuilder.aUserRequest().build();
-
-            doReturn(Optional.of(user))
-                    .when(userDAO)
-                    .findById(user.getId());
-            doReturn(user)
-                    .when(userMapper)
-                    .fromRequest(request);
-            doThrow(new JDBCConnectionException())
-                    .when(userDAO)
-                    .update(user);
-
-            Exception exception = assertThrows(UniquePhoneNumberException.class, () -> userService.update(1L, request));
-            String actualMessage = exception.getMessage();
-
-            assertThat(actualMessage).isEqualTo(expectedMessage);
         }
 
     }

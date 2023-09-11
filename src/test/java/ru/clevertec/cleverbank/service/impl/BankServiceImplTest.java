@@ -15,11 +15,9 @@ import ru.clevertec.cleverbank.dao.BankDAO;
 import ru.clevertec.cleverbank.dto.DeleteResponse;
 import ru.clevertec.cleverbank.dto.bank.BankRequest;
 import ru.clevertec.cleverbank.dto.bank.BankResponse;
-import ru.clevertec.cleverbank.exception.badrequest.UniquePhoneNumberException;
-import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
 import ru.clevertec.cleverbank.exception.notfound.BankNotFoundException;
 import ru.clevertec.cleverbank.mapper.BankMapper;
-import ru.clevertec.cleverbank.model.Bank;
+import ru.clevertec.cleverbank.tables.pojos.Bank;
 import ru.clevertec.cleverbank.util.bank.BankRequestTestBuilder;
 import ru.clevertec.cleverbank.util.bank.BankResponseTestBuilder;
 import ru.clevertec.cleverbank.util.bank.BankTestBuilder;
@@ -31,7 +29,6 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -160,26 +157,6 @@ class BankServiceImplTest {
             assertThat(bankCaptor).isEqualTo(expected);
         }
 
-        @Test
-        void testShouldThrowUniquePhoneNumberExceptionWithExpectedMessage() {
-            String phoneNumber = "+7 (495) 222-22-22";
-            String expectedMessage = "Bank with phone number " + phoneNumber + " is already exist";
-            Bank bank = BankTestBuilder.aBank().build();
-            BankRequest request = BankRequestTestBuilder.aBankRequest().build();
-
-            doReturn(bank)
-                    .when(bankMapper)
-                    .fromRequest(request);
-            doThrow(new JDBCConnectionException())
-                    .when(bankDAO)
-                    .save(bank);
-
-            Exception exception = assertThrows(UniquePhoneNumberException.class, () -> bankService.save(request));
-            String actualMessage = exception.getMessage();
-
-            assertThat(actualMessage).isEqualTo(expectedMessage);
-        }
-
     }
 
     @Nested
@@ -207,29 +184,6 @@ class BankServiceImplTest {
             BankResponse actual = bankService.update(bank.getId(), request);
 
             assertThat(actual).isEqualTo(expected);
-        }
-
-        @Test
-        void testShouldThrowUniquePhoneNumberExceptionWithExpectedMessage() {
-            String phoneNumber = "+7 (495) 222-22-22";
-            String expectedMessage = "Bank with phone number " + phoneNumber + " is already exist";
-            Bank bank = BankTestBuilder.aBank().build();
-            BankRequest request = BankRequestTestBuilder.aBankRequest().build();
-
-            doReturn(Optional.of(bank))
-                    .when(bankDAO)
-                    .findById(bank.getId());
-            doReturn(bank)
-                    .when(bankMapper)
-                    .fromRequest(request);
-            doThrow(new JDBCConnectionException())
-                    .when(bankDAO)
-                    .update(bank);
-
-            Exception exception = assertThrows(UniquePhoneNumberException.class, () -> bankService.update(1L, request));
-            String actualMessage = exception.getMessage();
-
-            assertThat(actualMessage).isEqualTo(expectedMessage);
         }
 
     }

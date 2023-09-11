@@ -105,7 +105,6 @@ public class TransactionDAOImpl implements TransactionDAO {
      * @param to   LocalDate, представляющий конечную дату периода
      * @param id   String, представляющая идентификатор счета
      * @return список объектов TransactionStatement, представляющих выписки транзакций
-     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
      */
     @Override
     public List<TransactionStatement> findAllByPeriodOfDateAndAccountId(LocalDate from, LocalDate to, String id) {
@@ -130,7 +129,6 @@ public class TransactionDAOImpl implements TransactionDAO {
      * @param to   LocalDate, представляющий конечную дату периода
      * @param id   String, представляющая идентификатор счета
      * @return BigDecimal, представляющий сумму потраченных средств
-     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
      */
     @Override
     public BigDecimal findSumOfSpentFundsByPeriodOfDateAndAccountId(LocalDate from, LocalDate to, String id) {
@@ -141,7 +139,7 @@ public class TransactionDAOImpl implements TransactionDAO {
                 .or(TRANSACTION.ACCOUNT_RECIPIENT_ID.eq(id).and(TRANSACTION.TYPE.eq(Type.WITHDRAWAL.toString())))
                 .fetchOptional()
                 .map(r -> r.getValue("spent", BigDecimal.class))
-                .orElseThrow(JDBCConnectionException::new);
+                .orElse(BigDecimal.ZERO);
     }
 
     /**
@@ -152,7 +150,6 @@ public class TransactionDAOImpl implements TransactionDAO {
      * @param to   LocalDate, представляющий конечную дату периода
      * @param id   String, представляющая идентификатор счета
      * @return BigDecimal, представляющий сумму полученных средств
-     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
      */
     @Override
     public BigDecimal findSumOfReceivedFundsByPeriodOfDateAndAccountId(LocalDate from, LocalDate to, String id) {
@@ -162,7 +159,7 @@ public class TransactionDAOImpl implements TransactionDAO {
                 .and(TRANSACTION.ACCOUNT_RECIPIENT_ID.eq(id).and(TRANSACTION.TYPE.notEqual(Type.WITHDRAWAL.toString())))
                 .fetchOptional()
                 .map(r -> r.getValue("received", BigDecimal.class))
-                .orElseThrow(JDBCConnectionException::new);
+                .orElse(BigDecimal.ZERO);
     }
 
 }
