@@ -1,7 +1,7 @@
 package ru.clevertec.cleverbank.dao;
 
 import ru.clevertec.cleverbank.dto.transaction.TransactionStatement;
-import ru.clevertec.cleverbank.model.Transaction;
+import ru.clevertec.cleverbank.tables.pojos.Transaction;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

@@ -8,12 +8,10 @@ import ru.clevertec.cleverbank.dao.impl.BankDAOImpl;
 import ru.clevertec.cleverbank.dto.DeleteResponse;
 import ru.clevertec.cleverbank.dto.bank.BankRequest;
 import ru.clevertec.cleverbank.dto.bank.BankResponse;
-import ru.clevertec.cleverbank.exception.badrequest.UniquePhoneNumberException;
-import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
 import ru.clevertec.cleverbank.exception.notfound.BankNotFoundException;
 import ru.clevertec.cleverbank.mapper.BankMapper;
-import ru.clevertec.cleverbank.model.Bank;
 import ru.clevertec.cleverbank.service.BankService;
+import ru.clevertec.cleverbank.tables.pojos.Bank;
 
 import java.util.List;
 
@@ -70,19 +68,12 @@ public class BankServiceImpl implements BankService {
      *
      * @param request объект BankRequest, представляющий запрос с данными для создания нового банка
      * @return объект BankResponse, представляющий ответ с данными о созданном банке
-     * @throws UniquePhoneNumberException если заданный телефон не уникальный
      */
     @Override
     @ServiceLoggable
     public BankResponse save(BankRequest request) {
         Bank bank = bankMapper.fromRequest(request);
-        Bank savedBank;
-        try {
-            savedBank = bankDAO.save(bank);
-        } catch (JDBCConnectionException e) {
-            throw new UniquePhoneNumberException("Bank with phone number " + request.phoneNumber() + " is already exist");
-        }
-        return bankMapper.toResponse(savedBank);
+        return bankMapper.toResponse(bankDAO.save(bank));
     }
 
     /**
@@ -91,8 +82,7 @@ public class BankServiceImpl implements BankService {
      * @param id      Long, представляющее id банка
      * @param request объект BankRequest, представляющий запрос с данными для обновления банка
      * @return объект BankResponse, представляющий ответ с данными об обновленном банке
-     * @throws BankNotFoundException      если банк с заданным id не найден в базе данных
-     * @throws UniquePhoneNumberException если заданный телефон не уникальный
+     * @throws BankNotFoundException если банк с заданным id не найден в базе данных
      */
     @Override
     @ServiceLoggable
@@ -100,13 +90,7 @@ public class BankServiceImpl implements BankService {
         findById(id);
         Bank bank = bankMapper.fromRequest(request);
         bank.setId(id);
-        Bank updatedBank;
-        try {
-            updatedBank = bankDAO.update(bank);
-        } catch (JDBCConnectionException e) {
-            throw new UniquePhoneNumberException("Bank with phone number " + request.phoneNumber() + " is already exist");
-        }
-        return bankMapper.toResponse(updatedBank);
+        return bankMapper.toResponse(bankDAO.update(bank));
     }
 
     /**

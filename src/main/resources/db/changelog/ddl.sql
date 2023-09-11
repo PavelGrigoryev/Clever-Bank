@@ -1,7 +1,7 @@
 --liquibase formatted sql
 
 --changeset Grigoryev_Pavel:1
-CREATE TABLE IF NOT EXISTS banks
+CREATE TABLE IF NOT EXISTS bank
 (
     id           BIGSERIAL PRIMARY KEY,
     name         VARCHAR(200)       NOT NULL,
@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS banks
     phone_number VARCHAR(40) UNIQUE NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS users
+CREATE TABLE IF NOT EXISTS "user"
 (
     id            BIGSERIAL PRIMARY KEY,
     lastname      VARCHAR(40)        NOT NULL,
@@ -19,18 +19,18 @@ CREATE TABLE IF NOT EXISTS users
     mobile_number varchar(40) UNIQUE NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS accounts
+CREATE TABLE IF NOT EXISTS account
 (
-    id           VARCHAR(40) PRIMARY KEY      NOT NULL,
-    currency     VARCHAR(20)                  NOT NULL,
-    balance      NUMERIC                      NOT NULL,
-    opening_date DATE                         NOT NULL,
+    id           VARCHAR(40) PRIMARY KEY       NOT NULL,
+    currency     VARCHAR(20)                   NOT NULL,
+    balance      NUMERIC                       NOT NULL,
+    opening_date DATE                          NOT NULL,
     closing_date DATE,
-    bank_id      BIGINT REFERENCES banks (id) NOT NULL,
-    user_id      BIGINT REFERENCES users (id) NOT NULL
+    bank_id      BIGINT REFERENCES bank (id)   NOT NULL,
+    user_id      BIGINT REFERENCES "user" (id) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS transactions
+CREATE TABLE IF NOT EXISTS transaction
 (
     id                   BIGSERIAL PRIMARY KEY,
     date                 DATE        NOT NULL,

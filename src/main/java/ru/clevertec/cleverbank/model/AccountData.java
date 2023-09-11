@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.clevertec.cleverbank.tables.pojos.Bank;
+import ru.clevertec.cleverbank.tables.pojos.User;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -12,7 +14,7 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Account {
+public class AccountData {
 
     private String id;
     private Currency currency;

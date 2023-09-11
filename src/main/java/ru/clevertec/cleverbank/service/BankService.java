@@ -3,7 +3,7 @@ package ru.clevertec.cleverbank.service;
 import ru.clevertec.cleverbank.dto.DeleteResponse;
 import ru.clevertec.cleverbank.dto.bank.BankRequest;
 import ru.clevertec.cleverbank.dto.bank.BankResponse;
-import ru.clevertec.cleverbank.model.Bank;
+import ru.clevertec.cleverbank.tables.pojos.Bank;
 
 import java.util.List;
 

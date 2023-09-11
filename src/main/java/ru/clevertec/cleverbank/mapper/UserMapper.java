@@ -3,7 +3,7 @@ package ru.clevertec.cleverbank.mapper;
 import org.mapstruct.Mapper;
 import ru.clevertec.cleverbank.dto.user.UserRequest;
 import ru.clevertec.cleverbank.dto.user.UserResponse;
-import ru.clevertec.cleverbank.model.User;
+import ru.clevertec.cleverbank.tables.pojos.User;
 
 import java.util.List;
 

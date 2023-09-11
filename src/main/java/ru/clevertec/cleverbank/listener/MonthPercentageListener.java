@@ -4,9 +4,9 @@ import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
 import lombok.extern.slf4j.Slf4j;
-import ru.clevertec.cleverbank.model.Account;
 import ru.clevertec.cleverbank.service.AccountService;
 import ru.clevertec.cleverbank.service.impl.AccountServiceImpl;
+import ru.clevertec.cleverbank.tables.pojos.Account;
 import ru.clevertec.cleverbank.util.YamlUtil;
 
 import java.math.BigDecimal;

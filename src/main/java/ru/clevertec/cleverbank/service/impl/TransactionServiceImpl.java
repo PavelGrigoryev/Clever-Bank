@@ -16,17 +16,18 @@ import ru.clevertec.cleverbank.dto.transaction.TransferBalanceRequest;
 import ru.clevertec.cleverbank.dto.transaction.TransferBalanceResponse;
 import ru.clevertec.cleverbank.exception.internalservererror.TransactionException;
 import ru.clevertec.cleverbank.exception.notfound.TransactionNotFoundException;
+import ru.clevertec.cleverbank.mapper.AccountMapper;
 import ru.clevertec.cleverbank.mapper.TransactionMapper;
-import ru.clevertec.cleverbank.model.Account;
-import ru.clevertec.cleverbank.model.Bank;
-import ru.clevertec.cleverbank.model.Transaction;
+import ru.clevertec.cleverbank.model.AccountData;
 import ru.clevertec.cleverbank.model.Type;
-import ru.clevertec.cleverbank.model.User;
 import ru.clevertec.cleverbank.service.AccountService;
 import ru.clevertec.cleverbank.service.CheckService;
 import ru.clevertec.cleverbank.service.TransactionService;
 import ru.clevertec.cleverbank.service.UploadFileService;
 import ru.clevertec.cleverbank.service.ValidationService;
+import ru.clevertec.cleverbank.tables.pojos.Bank;
+import ru.clevertec.cleverbank.tables.pojos.Transaction;
+import ru.clevertec.cleverbank.tables.pojos.User;
 import ru.clevertec.cleverbank.util.ConnectionManager;
 
 import java.math.BigDecimal;
@@ -40,6 +41,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final AccountService accountService;
     private final TransactionDAO transactionDAO;
     private final TransactionMapper transactionMapper;
+    private final AccountMapper accountMapper;
     private final CheckService checkService;
     private final UploadFileService uploadFileService;
     private final ValidationService validationService;
@@ -49,6 +51,7 @@ public class TransactionServiceImpl implements TransactionService {
         accountService = new AccountServiceImpl();
         transactionDAO = new TransactionDAOImpl();
         transactionMapper = Mappers.getMapper(TransactionMapper.class);
+        accountMapper = Mappers.getMapper(AccountMapper.class);
         checkService = new CheckServiceImpl();
         uploadFileService = new UploadFileServiceImpl();
         validationService = new ValidationServiceImpl();
@@ -64,8 +67,8 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     @ServiceLoggable
     public ChangeBalanceResponse changeBalance(ChangeBalanceRequest request) {
-        Account accountRecipient = accountService.findById(request.accountRecipientId());
-        Account accountSender = accountService.findById(request.accountSenderId());
+        AccountData accountRecipient = accountService.findById(request.accountRecipientId());
+        AccountData accountSender = accountService.findById(request.accountSenderId());
         validationService.validateAccountForClosingDate(accountRecipient.getClosingDate(), accountRecipient.getId());
 
         BigDecimal oldBalance = accountRecipient.getBalance();
@@ -73,7 +76,7 @@ public class TransactionServiceImpl implements TransactionService {
         BigDecimal newBalance = request.type() == Type.REPLENISHMENT
                 ? oldBalance.add(request.sum())
                 : oldBalance.subtract(request.sum());
-        Account updatedAccount = accountService.updateBalance(accountRecipient, newBalance);
+        AccountData updatedAccount = accountService.updateBalance(accountMapper.fromAccountData(accountRecipient), newBalance);
 
         Bank bankRecipient = accountRecipient.getBank();
         Bank bankSender = accountSender.getBank();
@@ -102,8 +105,8 @@ public class TransactionServiceImpl implements TransactionService {
     public TransferBalanceResponse transferBalance(TransferBalanceRequest request) throws SQLException {
         connection.setAutoCommit(false);
         try {
-            Account accountSender = accountService.findById(request.accountSenderId());
-            Account accountRecipient = accountService.findById(request.accountRecipientId());
+            AccountData accountSender = accountService.findById(request.accountSenderId());
+            AccountData accountRecipient = accountService.findById(request.accountRecipientId());
             validationService.validateAccountForClosingDate(accountSender.getClosingDate(), accountSender.getId());
             validationService.validateAccountForClosingDate(accountRecipient.getClosingDate(), accountRecipient.getId());
             validationService.validateAccountForCurrency(accountSender.getCurrency(), accountRecipient.getCurrency());
@@ -111,12 +114,14 @@ public class TransactionServiceImpl implements TransactionService {
             BigDecimal senderOldBalance = accountSender.getBalance();
             validationService.validateAccountForSufficientBalance(Type.TRANSFER, request.sum(), senderOldBalance);
             BigDecimal senderNewBalance = senderOldBalance.subtract(request.sum());
-            Account updatedSenderAccount = accountService.updateBalance(accountSender, senderNewBalance);
+            AccountData updatedSenderAccount = accountService
+                    .updateBalance(accountMapper.fromAccountData(accountSender), senderNewBalance);
             Bank bankSender = accountSender.getBank();
 
             BigDecimal recipientOldBalance = accountRecipient.getBalance();
             BigDecimal recipientNewBalance = recipientOldBalance.add(request.sum());
-            Account updatedRecipientAccount = accountService.updateBalance(accountRecipient, recipientNewBalance);
+            AccountData updatedRecipientAccount = accountService.
+                    updateBalance(accountMapper.fromAccountData(accountRecipient), recipientNewBalance);
             Bank bankRecipient = accountRecipient.getBank();
 
             Transaction transaction = transactionMapper.toTransferTransaction(Type.TRANSFER, bankSender.getId(),
@@ -150,7 +155,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     @ServiceLoggable
     public TransactionStatementResponse findAllByPeriodOfDateAndAccountId(TransactionStatementRequest request) {
-        Account account = accountService.findById(request.accountId());
+        AccountData account = accountService.findById(request.accountId());
         Bank bank = account.getBank();
         User user = account.getUser();
 
@@ -181,7 +186,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     @ServiceLoggable
     public AmountStatementResponse findSumOfFundsByPeriodOfDateAndAccountId(TransactionStatementRequest request) {
-        Account account = accountService.findById(request.accountId());
+        AccountData account = accountService.findById(request.accountId());
         Bank bank = account.getBank();
         User user = account.getUser();
 

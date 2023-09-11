@@ -3,14 +3,15 @@ package ru.clevertec.cleverbank.service;
 import ru.clevertec.cleverbank.dto.DeleteResponse;
 import ru.clevertec.cleverbank.dto.account.AccountRequest;
 import ru.clevertec.cleverbank.dto.account.AccountResponse;
-import ru.clevertec.cleverbank.model.Account;
+import ru.clevertec.cleverbank.model.AccountData;
+import ru.clevertec.cleverbank.tables.pojos.Account;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 public interface AccountService {
 
-    Account findById(String id);
+    AccountData findById(String id);
 
     AccountResponse findByIdResponse(String id);
 
@@ -20,7 +21,7 @@ public interface AccountService {
 
     AccountResponse save(AccountRequest request);
 
-    Account updateBalance(Account account, BigDecimal balance);
+    AccountData updateBalance(Account account, BigDecimal balance);
 
     AccountResponse closeAccount(String id);
 

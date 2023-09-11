@@ -24,8 +24,8 @@ POST http://localhost:8080/transactions
 Content-Type: application/json
 
 {
-  "from": "2023-09-02",
-  "to": "2023-09-02",
+  "from": "2023-09-11",
+  "to": "2023-09-11",
   "account_id": "G5QZ 6B43 A6XG AHNK CO6S PSO6 718Q"
 }
 
@@ -34,8 +34,8 @@ PUT http://localhost:8080/transactions
 Content-Type: application/json
 
 {
-  "from": "2023-09-02",
-  "to": "2023-09-02",
+  "from": "2023-09-11",
+  "to": "2023-09-11",
   "account_id": "G5QZ 6B43 A6XG AHNK CO6S PSO6 718Q"
 }
 

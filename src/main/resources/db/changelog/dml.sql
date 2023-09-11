@@ -1,7 +1,7 @@
 --liquibase formatted sql
 
 --changeset Grigoryev_Pavel:2
-INSERT INTO banks (name, address, phone_number)
+INSERT INTO bank (name, address, phone_number)
 VALUES ('Клевер-Банк', 'ул. Тверская, 25', '+7 (495) 222-22-22'),
        ('Сбербанк', 'ул. Ленина, 1', '+7 (495) 555-55-55'),
        ('Альфа-Банк', 'пр. Мира, 10', '+7 (495) 777-77-77'),
@@ -9,7 +9,7 @@ VALUES ('Клевер-Банк', 'ул. Тверская, 25', '+7 (495) 222-22-
        ('Газпромбанк', 'ул. Новый Арбат, 15', '+7 (495) 999-99-99'),
        ('Россельхозбанк', 'ул. Кутузовский проспект, 20', '+7 (495) 111-11-11');
 
-INSERT INTO users (lastname, firstname, surname, register_date, mobile_number)
+INSERT INTO "user" (lastname, firstname, surname, register_date, mobile_number)
 VALUES ('Иванов', 'Иван', 'Иванович', '1990-01-01', '+7 (900) 123-45-67'),
        ('Петров', 'Петр', 'Петрович', '1991-02-02', '+7 (901) 234-56-78'),
        ('Сидоров', 'Сидор', 'Сидорович', '1992-03-03', '+7 (902) 345-67-89'),
@@ -35,7 +35,7 @@ VALUES ('Иванов', 'Иван', 'Иванович', '1990-01-01', '+7 (900) 
        ('Степанова', 'Людмила', 'Львовна', '2000-11-23', '+7 (922) 345-67-89'),
        ('Антонова', 'Алиса', 'Александровна', '2001-12-24', '+7 (923) 456-78-90');
 
-INSERT INTO accounts (id, currency, balance, opening_date, closing_date, bank_id, user_id)
+INSERT INTO account (id, currency, balance, opening_date, closing_date, bank_id, user_id)
 VALUES ('AS12 ASDG 1200 2132 ASDA 353A 2132', 'RUB', 10000.00, '2020-01-01', NULL, 1, 1),
        ('RSK9 NQIW GVZY ODR9 0ZS3 NA6N 9HNJ', 'USD', 0, '2020-02-01', '2020-12-31', 2, 1),
        ('0J2O 6O3P 1CUB VZUT 91SJ X3FU MUR4', 'BYN', 5000.00, '2020-03-01', NULL, 6, 2),

@@ -4,19 +4,22 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import ru.clevertec.cleverbank.dto.account.AccountRequest;
 import ru.clevertec.cleverbank.dto.account.AccountResponse;
-import ru.clevertec.cleverbank.model.Account;
+import ru.clevertec.cleverbank.model.AccountData;
+import ru.clevertec.cleverbank.tables.pojos.Account;
 
 import java.util.List;
 
 @Mapper
 public interface AccountMapper {
 
-    AccountResponse toResponse(Account account);
+    AccountResponse toResponse(AccountData accountData);
 
-    List<AccountResponse> toResponseList(List<Account> accounts);
+    @Mapping(target = "userId", source = "user.id")
+    @Mapping(target = "bankId", source = "bank.id")
+    Account fromAccountData(AccountData accountData);
 
-    @Mapping(target = "user.id", source = "bankId")
-    @Mapping(target = "bank.id", source = "userId")
+    List<AccountResponse> toResponseList(List<AccountData> accounts);
+
     Account fromRequest(AccountRequest request);
 
 }

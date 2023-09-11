@@ -1,6 +1,6 @@
 package ru.clevertec.cleverbank.dao;
 
-import ru.clevertec.cleverbank.model.Bank;
+import ru.clevertec.cleverbank.tables.pojos.Bank;
 
 import java.util.List;
 import java.util.Optional;

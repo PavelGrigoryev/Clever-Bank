@@ -8,12 +8,10 @@ import ru.clevertec.cleverbank.dao.impl.UserDAOImpl;
 import ru.clevertec.cleverbank.dto.DeleteResponse;
 import ru.clevertec.cleverbank.dto.user.UserRequest;
 import ru.clevertec.cleverbank.dto.user.UserResponse;
-import ru.clevertec.cleverbank.exception.badrequest.UniquePhoneNumberException;
-import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
 import ru.clevertec.cleverbank.exception.notfound.UserNotFoundException;
 import ru.clevertec.cleverbank.mapper.UserMapper;
-import ru.clevertec.cleverbank.model.User;
 import ru.clevertec.cleverbank.service.UserService;
+import ru.clevertec.cleverbank.tables.pojos.User;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -70,20 +68,13 @@ public class UserServiceImpl implements UserService {
      *
      * @param request объект UserRequest, представляющий запрос с данными для создания нового пользователя
      * @return объект UserResponse, представляющий ответ с данными о созданном пользователе
-     * @throws UniquePhoneNumberException если заданный телефон не уникальный
      */
     @Override
     @ServiceLoggable
     public UserResponse save(UserRequest request) {
         User user = userMapper.fromRequest(request);
         user.setRegisterDate(LocalDate.now());
-        User savedUser;
-        try {
-            savedUser = userDAO.save(user);
-        } catch (JDBCConnectionException e) {
-            throw new UniquePhoneNumberException("User with phone number " + request.mobileNumber() + " is already exist");
-        }
-        return userMapper.toResponse(savedUser);
+        return userMapper.toResponse(userDAO.save(user));
     }
 
     /**
@@ -92,8 +83,7 @@ public class UserServiceImpl implements UserService {
      * @param id      Long, представляющее id пользователя
      * @param request объект UserRequest, представляющий запрос с данными для обновления пользователя
      * @return объект UserResponse, представляющий ответ с данными об обновленном пользователе
-     * @throws UserNotFoundException      если пользователь с заданным id не найден в базе данных
-     * @throws UniquePhoneNumberException если заданный телефон не уникальный
+     * @throws UserNotFoundException если пользователь с заданным id не найден в базе данных
      */
     @Override
     @ServiceLoggable
@@ -102,13 +92,7 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.fromRequest(request);
         user.setId(userById.getId());
         user.setRegisterDate(userById.getRegisterDate());
-        User updatedUser;
-        try {
-            updatedUser = userDAO.update(user);
-        } catch (JDBCConnectionException e) {
-            throw new UniquePhoneNumberException("User with phone number " + request.mobileNumber() + " is already exist");
-        }
-        return userMapper.toResponse(updatedUser);
+        return userMapper.toResponse(userDAO.update(user));
     }
 
     /**

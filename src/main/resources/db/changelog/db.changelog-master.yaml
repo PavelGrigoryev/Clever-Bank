@@ -1,5 +1,5 @@
 databaseChangeLog:
   - include:
-      file: db/changelog/ddl.sql
+      file: src/main/resources/db/changelog/ddl.sql
   - include:
-      file: db/changelog/dml.sql
+      file: src/main/resources/db/changelog/dml.sql

@@ -10,12 +10,13 @@ import ru.clevertec.cleverbank.dto.account.AccountRequest;
 import ru.clevertec.cleverbank.dto.account.AccountResponse;
 import ru.clevertec.cleverbank.exception.notfound.AccountNotFoundException;
 import ru.clevertec.cleverbank.mapper.AccountMapper;
-import ru.clevertec.cleverbank.model.Account;
-import ru.clevertec.cleverbank.model.Bank;
-import ru.clevertec.cleverbank.model.User;
+import ru.clevertec.cleverbank.model.AccountData;
 import ru.clevertec.cleverbank.service.AccountService;
 import ru.clevertec.cleverbank.service.BankService;
 import ru.clevertec.cleverbank.service.UserService;
+import ru.clevertec.cleverbank.tables.pojos.Account;
+import ru.clevertec.cleverbank.tables.pojos.Bank;
+import ru.clevertec.cleverbank.tables.pojos.User;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -40,11 +41,11 @@ public class AccountServiceImpl implements AccountService {
      * Реализует метод findById, который возвращает счёт по его id.
      *
      * @param id String, представляющая id счета
-     * @return объект Account, представляющий счёт с заданным id
+     * @return объект AccountData, представляющий счёт с заданным id
      * @throws AccountNotFoundException если счёт с заданным id не найден в базе данных
      */
     @Override
-    public Account findById(String id) {
+    public AccountData findById(String id) {
         return accountDAO.findById(id)
                 .orElseThrow(() -> new AccountNotFoundException("Account with ID " + id + " is not found!"));
     }
@@ -79,7 +80,7 @@ public class AccountServiceImpl implements AccountService {
      */
     @Override
     public List<AccountResponse> findAllResponses() {
-        return accountMapper.toResponseList(findAll());
+        return accountMapper.toResponseList(accountDAO.findAllDatas());
     }
 
     /**
@@ -95,9 +96,9 @@ public class AccountServiceImpl implements AccountService {
         User user = userService.findById(request.userId());
         Bank bank = bankService.findById(request.bankId());
         account.setOpeningDate(LocalDate.now());
-        account.setUser(user);
-        account.setBank(bank);
-        Account savedAccount = accountDAO.save(account);
+        account.setUserId(user.getId());
+        account.setBankId(bank.getId());
+        AccountData savedAccount = accountDAO.save(account);
         return accountMapper.toResponse(savedAccount);
     }
 
@@ -106,10 +107,10 @@ public class AccountServiceImpl implements AccountService {
      *
      * @param account объект Account, представляющий счёт, который нужно обновить
      * @param balance объект BigDecimal, представляющий новое значение баланса счёта
-     * @return объект Account, представляющий обновленный счёт
+     * @return объект AccountData, представляющий обновленный счёт
      */
     @Override
-    public Account updateBalance(Account account, BigDecimal balance) {
+    public AccountData updateBalance(Account account, BigDecimal balance) {
         account.setBalance(balance);
         return accountDAO.update(account);
     }
@@ -124,11 +125,11 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @ServiceLoggable
     public AccountResponse closeAccount(String id) {
-        Account account = accountDAO.findById(id)
+        AccountData account = accountDAO.findById(id)
                 .orElseThrow(() -> new AccountNotFoundException("Account with ID " + id + " is not found!"));
         account.setClosingDate(LocalDate.now());
         account.setBalance(BigDecimal.ZERO);
-        Account updatedAccount = accountDAO.update(account);
+        AccountData updatedAccount = accountDAO.update(accountMapper.fromAccountData(account));
         return accountMapper.toResponse(updatedAccount);
     }
 

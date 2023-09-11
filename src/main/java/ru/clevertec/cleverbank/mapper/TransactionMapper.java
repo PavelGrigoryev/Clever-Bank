@@ -10,11 +10,11 @@ import ru.clevertec.cleverbank.dto.transaction.TransactionStatement;
 import ru.clevertec.cleverbank.dto.transaction.TransactionStatementRequest;
 import ru.clevertec.cleverbank.dto.transaction.TransactionStatementResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransferBalanceResponse;
-import ru.clevertec.cleverbank.model.Account;
+import ru.clevertec.cleverbank.model.AccountData;
 import ru.clevertec.cleverbank.model.Currency;
-import ru.clevertec.cleverbank.model.Transaction;
 import ru.clevertec.cleverbank.model.Type;
-import ru.clevertec.cleverbank.model.User;
+import ru.clevertec.cleverbank.tables.pojos.Transaction;
+import ru.clevertec.cleverbank.tables.pojos.User;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -66,7 +66,7 @@ public interface TransactionMapper {
     @Mapping(target = "formationTime", expression = "java(LocalTime.now())")
     TransactionStatementResponse toStatementResponse(String bankName,
                                                      User user,
-                                                     Account account,
+                                                     AccountData account,
                                                      TransactionStatementRequest request,
                                                      List<TransactionStatement> transactions);
 
@@ -74,7 +74,7 @@ public interface TransactionMapper {
     @Mapping(target = "formationTime", expression = "java(LocalTime.now())")
     AmountStatementResponse toAmountResponse(String bankName,
                                              User user,
-                                             Account account,
+                                             AccountData account,
                                              TransactionStatementRequest request,
                                              BigDecimal spentFunds,
                                              BigDecimal receivedFunds);
