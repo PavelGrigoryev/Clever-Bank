@@ -4,6 +4,7 @@ plugins {
     id 'io.freefair.lombok' version '8.2.2'
     id 'io.freefair.aspectj.post-compile-weaving' version '8.3'
     id 'by.grigoryev.pavel.git-tag-plugin' version '1.0.0'
+    id 'gradle.plugin.git.tag.gitTask' version '0.0.1'
 }
 
 group 'ru.clevertec'
