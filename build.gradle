@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'war'
     id 'io.freefair.lombok' version '8.2.2'
+    id 'io.freefair.aspectj.post-compile-weaving' version '8.3'
 }
 
 group 'ru.clevertec'
@@ -39,8 +40,7 @@ dependencies {
 
     runtimeOnly "org.postgresql:postgresql:$postgresqlVersion"
 
-    implementation "org.aspectj:aspectjrt:$aspectjVersion"
-    implementation "org.aspectj:aspectjweaver:$aspectjVersion"
+    implementation "org.aspectj:aspectjtools:${aspectjVersion}"
     implementation "com.google.code.gson:gson:$gsonVersion"
     implementation "org.slf4j:slf4j-api:$slf4jVersion"
     implementation "ch.qos.logback:logback-core:$logbackVersion"
@@ -58,6 +58,7 @@ dependencies {
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
     testImplementation "org.mockito:mockito-junit-jupiter:$mockitoVersion"
     testImplementation "com.github.marschall:memoryfilesystem:$memoryFileSystemVersion"
+    testImplementation "jakarta.servlet:jakarta.servlet-api:$servletVersion"
 
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
 }

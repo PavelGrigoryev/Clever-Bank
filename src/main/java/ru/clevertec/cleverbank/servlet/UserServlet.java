@@ -5,6 +5,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
 import ru.clevertec.cleverbank.dto.DeleteResponse;
 import ru.clevertec.cleverbank.dto.user.UserRequest;
 import ru.clevertec.cleverbank.dto.user.UserResponse;
@@ -15,11 +16,17 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
+@AllArgsConstructor
 @WebServlet(urlPatterns = "/users")
 public class UserServlet extends HttpServlet {
 
-    private final transient UserService userService = new UserServiceImpl();
-    private final transient Gson gson = new Gson();
+    private final transient UserService userService;
+    private final transient Gson gson;
+
+    public UserServlet() {
+        userService = new UserServiceImpl();
+        gson = new Gson();
+    }
 
     /**
      * Переопределяет метод doGet, который обрабатывает GET-запросы к ресурсу /users.

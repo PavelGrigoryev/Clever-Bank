@@ -6,6 +6,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.clevertec.cleverbank.dto.transaction.AmountStatementResponse;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceRequest;
@@ -28,11 +29,17 @@ import java.util.concurrent.CompletableFuture;
 import static jakarta.servlet.RequestDispatcher.ERROR_EXCEPTION;
 
 @Slf4j
+@AllArgsConstructor
 @WebServlet(urlPatterns = "/transactions", asyncSupported = true)
 public class TransactionServlet extends HttpServlet {
 
-    private final transient TransactionService transactionService = new TransactionServiceImpl();
-    private final transient Gson gson = new Gson();
+    private final transient TransactionService transactionService;
+    private final transient Gson gson;
+
+    public TransactionServlet() {
+        transactionService = new TransactionServiceImpl();
+        gson = new Gson();
+    }
 
     /**
      * Переопределяет метод doPost, который обрабатывает POST-запросы к ресурсу /transactions.
