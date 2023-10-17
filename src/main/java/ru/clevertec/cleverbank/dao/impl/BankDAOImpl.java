@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import ru.clevertec.cleverbank.dao.BankDAO;
 import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
 import ru.clevertec.cleverbank.model.Bank;
-import ru.clevertec.cleverbank.util.ConnectionManager;
+import ru.clevertec.cleverbank.util.HikariConnectionManager;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -23,7 +23,7 @@ public class BankDAOImpl implements BankDAO {
     private final Connection connection;
 
     public BankDAOImpl() {
-        connection = ConnectionManager.getJDBCConnection();
+        connection = HikariConnectionManager.getConnection();
     }
 
     /**

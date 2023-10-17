@@ -2,6 +2,7 @@ postgresql:
   url: "jdbc:postgresql://localhost:5432/clever_bank"
   user: "enter your username"
   password: "enter your password"
+  maximumPoolSize: "30"
 scheduler:
   monthPercentage: "1.0"
   initialDelay: "10"

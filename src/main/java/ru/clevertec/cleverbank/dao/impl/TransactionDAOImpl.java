@@ -7,7 +7,7 @@ import ru.clevertec.cleverbank.dto.transaction.TransactionStatement;
 import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
 import ru.clevertec.cleverbank.model.Transaction;
 import ru.clevertec.cleverbank.model.Type;
-import ru.clevertec.cleverbank.util.ConnectionManager;
+import ru.clevertec.cleverbank.util.HikariConnectionManager;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -27,7 +27,7 @@ public class TransactionDAOImpl implements TransactionDAO {
     private final Connection connection;
 
     public TransactionDAOImpl() {
-        connection = ConnectionManager.getJDBCConnection();
+        connection = HikariConnectionManager.getConnection();
     }
 
     /**

@@ -27,7 +27,7 @@ import ru.clevertec.cleverbank.service.CheckService;
 import ru.clevertec.cleverbank.service.TransactionService;
 import ru.clevertec.cleverbank.service.UploadFileService;
 import ru.clevertec.cleverbank.service.ValidationService;
-import ru.clevertec.cleverbank.util.ConnectionManager;
+import ru.clevertec.cleverbank.util.HikariConnectionManager;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -52,7 +52,7 @@ public class TransactionServiceImpl implements TransactionService {
         checkService = new CheckServiceImpl();
         uploadFileService = new UploadFileServiceImpl();
         validationService = new ValidationServiceImpl();
-        connection = ConnectionManager.getJDBCConnection();
+        connection = HikariConnectionManager.getConnection();
     }
 
     /**

@@ -8,7 +8,7 @@ import ru.clevertec.cleverbank.model.Account;
 import ru.clevertec.cleverbank.model.Bank;
 import ru.clevertec.cleverbank.model.Currency;
 import ru.clevertec.cleverbank.model.User;
-import ru.clevertec.cleverbank.util.ConnectionManager;
+import ru.clevertec.cleverbank.util.HikariConnectionManager;
 import ru.clevertec.cleverbank.util.RandomStringGenerator;
 
 import java.sql.Connection;
@@ -28,7 +28,7 @@ public class AccountDAOImpl implements AccountDAO {
     private final Connection connection;
 
     public AccountDAOImpl() {
-        connection = ConnectionManager.getJDBCConnection();
+        connection = HikariConnectionManager.getConnection();
     }
 
     /**
