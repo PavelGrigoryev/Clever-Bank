@@ -1,6 +1,7 @@
 package ru.clevertec.cleverbank.service.impl;
 
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,6 +42,7 @@ import ru.clevertec.cleverbank.util.transaction.TransferBalanceRequestTestBuilde
 import ru.clevertec.cleverbank.util.transaction.TransferBalanceResponseTestBuilder;
 
 import java.math.BigDecimal;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.util.List;
 import java.util.Optional;
@@ -75,6 +77,7 @@ class TransactionServiceImplTest {
     class ChangeBalanceTest {
 
         @Test
+        @DisplayName("test should return expected response with adding balance")
         void testShouldReturnExpectedResponseWithAddingBalance() {
             ChangeBalanceResponse expected = ChangeBalanceResponseTestBuilder.aChangeBalanceResponse().build();
             ChangeBalanceRequest request = ChangeBalanceRequestTestBuilder.aChangeBalanceRequest().build();
@@ -83,6 +86,7 @@ class TransactionServiceImplTest {
             Transaction transaction = TransactionTestBuilder.aTransaction().build();
             String check = "Check";
             BigDecimal newBalance = accountRecipient.getBalance().add(request.sum());
+            Path path = Path.of("Path");
 
             doReturn(accountRecipient)
                     .when(accountService)
@@ -112,7 +116,7 @@ class TransactionServiceImplTest {
             doReturn(check)
                     .when(checkService)
                     .createChangeBalanceCheck(expected);
-            doNothing()
+            doReturn(path)
                     .when(uploadFileService)
                     .uploadCheck(check);
 
@@ -122,6 +126,7 @@ class TransactionServiceImplTest {
         }
 
         @Test
+        @DisplayName("test should return expected response with subtracting balance")
         void testShouldReturnExpectedResponseWithSubtractingBalance() {
             ChangeBalanceResponse expected = ChangeBalanceResponseTestBuilder.aChangeBalanceResponse().build();
             ChangeBalanceRequest request = ChangeBalanceRequestTestBuilder.aChangeBalanceRequest()
@@ -132,6 +137,7 @@ class TransactionServiceImplTest {
             Transaction transaction = TransactionTestBuilder.aTransaction().build();
             String check = "Check";
             BigDecimal newBalance = accountRecipient.getBalance().subtract(request.sum());
+            Path path = Path.of("Path");
 
             doReturn(accountRecipient)
                     .when(accountService)
@@ -161,7 +167,7 @@ class TransactionServiceImplTest {
             doReturn(check)
                     .when(checkService)
                     .createChangeBalanceCheck(expected);
-            doNothing()
+            doReturn(path)
                     .when(uploadFileService)
                     .uploadCheck(check);
 
@@ -177,6 +183,7 @@ class TransactionServiceImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return expected response")
         void testShouldReturnExpectedResponse() {
             TransferBalanceRequest request = TransferBalanceRequestTestBuilder.aTransferBalanceRequest().build();
             TransferBalanceResponse expected = TransferBalanceResponseTestBuilder.aTransferBalanceResponse().build();
@@ -186,6 +193,7 @@ class TransactionServiceImplTest {
             BigDecimal senderNewBalance = accountSender.getBalance().subtract(request.sum());
             BigDecimal recipientNewBalance = accountRecipient.getBalance().add(request.sum());
             String check = "Check";
+            Path path = Path.of("Path");
 
             doNothing()
                     .when(connection)
@@ -229,7 +237,7 @@ class TransactionServiceImplTest {
             doReturn(check)
                     .when(checkService)
                     .createTransferBalanceCheck(expected);
-            doNothing()
+            doReturn(path)
                     .when(uploadFileService)
                     .uploadCheck(check);
             doNothing()
@@ -243,6 +251,7 @@ class TransactionServiceImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should throw TransactionException with expected message")
         void testShouldThrowTransactionExceptionWithExpectedMessage() {
             String id = "0J2O 6O3P 1CUB VZUT 91SJ X3FU MUR4";
             String message = "Account with ID " + id + " is not found!";
@@ -276,12 +285,14 @@ class TransactionServiceImplTest {
     class FindAllByPeriodOfDateAndAccountIdTest {
 
         @Test
+        @DisplayName("test should return expected response that list that contains list of size one")
         void testShouldReturnExpectedResponseThatContainsListOfSizeOne() {
             Account account = AccountTestBuilder.aAccount().build();
             TransactionStatementRequest request = TransactionStatementRequestTestBuilder.aTransactionStatementRequest().build();
             TransactionStatement statement = TransactionStatementTestBuilder.aTransactionStatement().build();
             TransactionStatementResponse expected = TransactionStatementResponseTestBuilder.aTransactionStatementResponse().build();
             String check = "Check";
+            Path path = Path.of("Path");
 
             doReturn(account)
                     .when(accountService)
@@ -295,7 +306,7 @@ class TransactionServiceImplTest {
             doReturn(check)
                     .when(checkService)
                     .createTransactionStatement(expected);
-            doNothing()
+            doReturn(path)
                     .when(uploadFileService)
                     .uploadStatement(check);
 
@@ -305,12 +316,14 @@ class TransactionServiceImplTest {
         }
 
         @Test
+        @DisplayName("test should return expected response")
         void testShouldReturnExpectedResponse() {
             Account account = AccountTestBuilder.aAccount().build();
             TransactionStatementRequest request = TransactionStatementRequestTestBuilder.aTransactionStatementRequest().build();
             TransactionStatement statement = TransactionStatementTestBuilder.aTransactionStatement().build();
             TransactionStatementResponse expected = TransactionStatementResponseTestBuilder.aTransactionStatementResponse().build();
             String check = "Check";
+            Path path = Path.of("Path");
 
             doReturn(account)
                     .when(accountService)
@@ -324,7 +337,7 @@ class TransactionServiceImplTest {
             doReturn(check)
                     .when(checkService)
                     .createTransactionStatement(expected);
-            doNothing()
+            doReturn(path)
                     .when(uploadFileService)
                     .uploadStatement(check);
 
@@ -334,6 +347,7 @@ class TransactionServiceImplTest {
         }
 
         @Test
+        @DisplayName("test should throw TransactionNotFoundException with expected message")
         void testShouldThrowTransactionNotFoundExceptionWithExpectedMessage() {
             Account account = AccountTestBuilder.aAccount().build();
             TransactionStatementRequest request = TransactionStatementRequestTestBuilder.aTransactionStatementRequest().build();
@@ -361,6 +375,7 @@ class TransactionServiceImplTest {
     class FindSumOfFundsByPeriodOfDateAndAccountIdTest {
 
         @Test
+        @DisplayName("test should return expected response")
         void testShouldReturnExpectedResponse() {
             Account account = AccountTestBuilder.aAccount().build();
             TransactionStatementRequest request = TransactionStatementRequestTestBuilder.aTransactionStatementRequest().build();
@@ -368,6 +383,7 @@ class TransactionServiceImplTest {
             BigDecimal spentFunds = BigDecimal.TEN;
             BigDecimal receivedFunds = BigDecimal.ONE;
             String check = "Check";
+            Path path = Path.of("Path");
 
             doReturn(account)
                     .when(accountService)
@@ -384,7 +400,7 @@ class TransactionServiceImplTest {
             doReturn(check)
                     .when(checkService)
                     .createAmountStatement(expected);
-            doNothing()
+            doReturn(path)
                     .when(uploadFileService)
                     .uploadAmount(check);
 
@@ -394,6 +410,7 @@ class TransactionServiceImplTest {
         }
 
         @Test
+        @DisplayName("test should throw TransactionNotFoundException with expected message")
         void testShouldThrowTransactionNotFoundExceptionWithExpectedMessage() {
             Account account = AccountTestBuilder.aAccount().build();
             TransactionStatementRequest request = TransactionStatementRequestTestBuilder.aTransactionStatementRequest().build();
@@ -424,6 +441,7 @@ class TransactionServiceImplTest {
     class FindByIdTest {
 
         @Test
+        @DisplayName("test should throw TransactionNotFoundException with expected message")
         void testShouldThrowTransactionNotFoundExceptionWithExpectedMessage() {
             long id = 1L;
             String expectedMessage = "Transaction with ID " + id + " is not found!";
@@ -435,6 +453,7 @@ class TransactionServiceImplTest {
         }
 
         @Test
+        @DisplayName("test should return expected response")
         void testShouldReturnExpectedResponse() {
             TransactionResponse expected = TransactionResponseTestBuilder.aTransactionResponse().build();
             Transaction transaction = TransactionTestBuilder.aTransaction().build();
@@ -458,6 +477,7 @@ class TransactionServiceImplTest {
     class FindAllBySendersAccountIdTest {
 
         @Test
+        @DisplayName("test should return list of size one")
         void testShouldReturnListOfSizeOne() {
             TransactionResponse response = TransactionResponseTestBuilder.aTransactionResponse().build();
             Transaction transaction = TransactionTestBuilder.aTransaction().build();
@@ -477,6 +497,7 @@ class TransactionServiceImplTest {
         }
 
         @Test
+        @DisplayName("test should return list that contains expected response")
         void testShouldReturnListThatContainsExpectedResponse() {
             TransactionResponse expected = TransactionResponseTestBuilder.aTransactionResponse().build();
             Transaction transaction = TransactionTestBuilder.aTransaction().build();
@@ -495,6 +516,7 @@ class TransactionServiceImplTest {
         }
 
         @Test
+        @DisplayName("test should return empty list")
         void testShouldReturnEmptyList() {
             String id = "0J2O 6O3P 1CUB VZUT 91SJ X3FU MUR4";
 
@@ -513,6 +535,7 @@ class TransactionServiceImplTest {
     class FindAllByRecipientAccountIdTest {
 
         @Test
+        @DisplayName("test should return list of size one")
         void testShouldReturnListOfSizeOne() {
             TransactionResponse response = TransactionResponseTestBuilder.aTransactionResponse().build();
             Transaction transaction = TransactionTestBuilder.aTransaction().build();
@@ -532,6 +555,7 @@ class TransactionServiceImplTest {
         }
 
         @Test
+        @DisplayName("test should return list that contains expected response")
         void testShouldReturnListThatContainsExpectedResponse() {
             TransactionResponse expected = TransactionResponseTestBuilder.aTransactionResponse().build();
             Transaction transaction = TransactionTestBuilder.aTransaction().build();
@@ -550,6 +574,7 @@ class TransactionServiceImplTest {
         }
 
         @Test
+        @DisplayName("test should return empty list")
         void testShouldReturnEmptyList() {
             String id = "0J2O 6O3P 1CUB VZUT 91SJ X3FU MUR4";
 
@@ -565,4 +590,3 @@ class TransactionServiceImplTest {
     }
 
 }
-

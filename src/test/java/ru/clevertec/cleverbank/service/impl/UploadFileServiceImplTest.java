@@ -1,17 +1,16 @@
 package ru.clevertec.cleverbank.service.impl;
 
+import com.github.marschall.memoryfilesystem.MemoryFileSystemBuilder;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.net.URL;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,44 +22,56 @@ class UploadFileServiceImplTest {
 
     @Test
     @SneakyThrows
+    @DisplayName("test uploadCheck method should save a file.txt")
     void testUploadCheck() {
-        String check = "Check";
-        URL url = UploadFileServiceImpl.class.getResource("/check");
-        Path path = Paths.get(URLDecoder.decode(url.getPath(), StandardCharsets.UTF_8)
-                .concat("BankCheck.txt")
-                .substring(1));
+        String check = "Hello, Check!";
+        FileSystem fileSystem = MemoryFileSystemBuilder.newEmpty().build();
 
-        uploadFileService.uploadCheck(check);
+        Path memoryPath = fileSystem.getPath("memory.txt");
+        Files.writeString(memoryPath, check);
 
-        assertThat(Files.exists(path)).isTrue();
+        Path actualPath = uploadFileService.uploadCheck(check);
+
+        assertThat(Files.exists(actualPath)).isTrue();
+        assertThat(Files.readString(actualPath)).isEqualTo(Files.readString(memoryPath));
+
+        fileSystem.close();
     }
 
     @Test
     @SneakyThrows
+    @DisplayName("test uploadStatement method should save a file.txt")
     void testUploadStatement() {
-        String statement = "Statement";
-        URL url = UploadFileServiceImpl.class.getResource("/check");
-        Path path = Paths.get(URLDecoder.decode(url.getPath(), StandardCharsets.UTF_8)
-                .concat("TransactionStatement.txt")
-                .substring(1));
+        String statement = "Hello, Statement!";
+        FileSystem fileSystem = MemoryFileSystemBuilder.newEmpty().build();
 
-        uploadFileService.uploadStatement(statement);
+        Path memoryPath = fileSystem.getPath("memory.txt");
+        Files.writeString(memoryPath, statement);
 
-        assertThat(Files.exists(path)).isTrue();
+        Path actualPath = uploadFileService.uploadStatement(statement);
+
+        assertThat(Files.exists(actualPath)).isTrue();
+        assertThat(Files.readString(actualPath)).isEqualTo(Files.readString(memoryPath));
+
+        fileSystem.close();
     }
 
     @Test
     @SneakyThrows
+    @DisplayName("test uploadAmount method should save a file.txt")
     void testUploadAmount() {
-        String amount = "Amount";
-        URL url = UploadFileServiceImpl.class.getResource("/check");
-        Path path = Paths.get(URLDecoder.decode(url.getPath(), StandardCharsets.UTF_8)
-                .concat("AmountStatement.txt")
-                .substring(1));
+        String amount = "Hello, Amount!";
+        FileSystem fileSystem = MemoryFileSystemBuilder.newEmpty().build();
 
-        uploadFileService.uploadAmount(amount);
+        Path memoryPath = fileSystem.getPath("memory.txt");
+        Files.writeString(memoryPath, amount);
 
-        assertThat(Files.exists(path)).isTrue();
+        Path actualPath = uploadFileService.uploadAmount(amount);
+
+        assertThat(Files.exists(actualPath)).isTrue();
+        assertThat(Files.readString(actualPath)).isEqualTo(Files.readString(memoryPath));
+
+        fileSystem.close();
     }
 
 }

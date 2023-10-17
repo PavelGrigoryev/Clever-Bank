@@ -1,5 +1,6 @@
 package ru.clevertec.cleverbank.service.impl;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,6 +51,7 @@ class UserServiceImplTest {
     class FindByIdTest {
 
         @Test
+        @DisplayName("test should throw UserNotFoundException with expected message")
         void testShouldThrowUserNotFoundExceptionWithExpectedMessage() {
             long id = 1L;
             String expectedMessage = "User with ID " + id + " is not found!";
@@ -61,6 +63,7 @@ class UserServiceImplTest {
         }
 
         @Test
+        @DisplayName("test should return expected response")
         void testShouldReturnExpectedResponse() {
             UserResponse expected = UserResponseTestBuilder.aUserResponse().build();
             User user = UserTestBuilder.aUser().build();
@@ -84,6 +87,7 @@ class UserServiceImplTest {
     class FindAllTest {
 
         @Test
+        @DisplayName("test should return list of size one")
         void testShouldReturnListOfSizeOne() {
             UserResponse response = UserResponseTestBuilder.aUserResponse().build();
             User user = UserTestBuilder.aUser().build();
@@ -102,6 +106,7 @@ class UserServiceImplTest {
         }
 
         @Test
+        @DisplayName("test should return list that contains expected response")
         void testShouldReturnListThatContainsExpectedResponse() {
             UserResponse expected = UserResponseTestBuilder.aUserResponse().build();
             User user = UserTestBuilder.aUser().build();
@@ -119,6 +124,7 @@ class UserServiceImplTest {
         }
 
         @Test
+        @DisplayName("test should return empty list")
         void testShouldReturnEmptyList() {
             doReturn(List.of())
                     .when(userDAO)
@@ -136,6 +142,7 @@ class UserServiceImplTest {
 
         @ParameterizedTest(name = "{arguments} test")
         @MethodSource("ru.clevertec.cleverbank.service.impl.UserServiceImplTest#getArgumentsForSaveTest")
+        @DisplayName("test should capture value and return expected response")
         void testShouldCaptureValue(User expected) {
             UserRequest request = UserRequestTestBuilder.aUserRequest().build();
             UserResponse response = UserResponseTestBuilder.aUserResponse()
@@ -161,6 +168,7 @@ class UserServiceImplTest {
         }
 
         @Test
+        @DisplayName("test should throw UniquePhoneNumberException with expected message")
         void testShouldThrowUniquePhoneNumberExceptionWithExpectedMessage() {
             String mobileNumber = "+7 (900) 123-45-67";
             String expectedMessage = "User with phone number " + mobileNumber + " is already exist";
@@ -186,6 +194,7 @@ class UserServiceImplTest {
     class UpdateTest {
 
         @Test
+        @DisplayName("test should return updated response")
         void testShouldReturnUpdatedResponse() {
             User user = UserTestBuilder.aUser().build();
             UserRequest request = UserRequestTestBuilder.aUserRequest().build();
@@ -210,6 +219,7 @@ class UserServiceImplTest {
         }
 
         @Test
+        @DisplayName("test should throw UniquePhoneNumberException with expected message")
         void testShouldThrowUniquePhoneNumberExceptionWithExpectedMessage() {
             String mobileNumber = "+7 (900) 123-45-67";
             String expectedMessage = "User with phone number " + mobileNumber + " is already exist";
@@ -238,6 +248,7 @@ class UserServiceImplTest {
     class DeleteTest {
 
         @Test
+        @DisplayName("test should return expected response")
         void testShouldReturnExpectedResponse() {
             User user = UserTestBuilder.aUser().build();
             DeleteResponse expected = new DeleteResponse("User with ID " + user.getId() + " was successfully deleted");
@@ -252,6 +263,7 @@ class UserServiceImplTest {
         }
 
         @Test
+        @DisplayName("test should throw UserNotFoundException with expected message")
         void testShouldThrowUserNotFoundExceptionWithExpectedMessage() {
             long id = 1L;
             String expectedMessage = "No User with ID " + id + " to delete";

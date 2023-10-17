@@ -7,7 +7,6 @@
 * Java 17
 * Gradle 8.0.2
 * Lombok plugin 8.2.2
-* AspectJ plugin 8.3
 * Servlet API 6.0.0
 * Postgresql 42.6.0
 * Gson 2.10.1
@@ -16,9 +15,11 @@
 * SnakeYaml 2.1
 * Liquibase 4.23.1
 * Mapstruct 1.5.3.Final
+* AspectJ 1.9.20
 * Junit 5.10.0
 * AssertJ 3.24.2
 * Mockito 5.5.0
+* MemoryFileSystem 2.6.1
 
 ### Инструкция для запуска приложения локально:
 

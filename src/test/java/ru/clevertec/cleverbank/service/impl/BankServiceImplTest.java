@@ -1,5 +1,6 @@
 package ru.clevertec.cleverbank.service.impl;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,6 +51,7 @@ class BankServiceImplTest {
     class FindByIdTest {
 
         @Test
+        @DisplayName("test should throw BankNotFoundException with expected message")
         void testShouldThrowBankNotFoundExceptionWithExpectedMessage() {
             long id = 1L;
             String expectedMessage = "Bank with ID " + id + " is not found!";
@@ -61,6 +63,7 @@ class BankServiceImplTest {
         }
 
         @Test
+        @DisplayName("test should return expected response")
         void testShouldReturnExpectedResponse() {
             BankResponse expected = BankResponseTestBuilder.aBankResponse().build();
             Bank bank = BankTestBuilder.aBank().build();
@@ -84,6 +87,7 @@ class BankServiceImplTest {
     class FindAllTest {
 
         @Test
+        @DisplayName("test should return list of size one")
         void testShouldReturnListOfSizeOne() {
             BankResponse response = BankResponseTestBuilder.aBankResponse().build();
             Bank bank = BankTestBuilder.aBank().build();
@@ -102,6 +106,7 @@ class BankServiceImplTest {
         }
 
         @Test
+        @DisplayName("test should return list that contains expected response")
         void testShouldReturnListThatContainsExpectedResponse() {
             BankResponse expected = BankResponseTestBuilder.aBankResponse().build();
             Bank bank = BankTestBuilder.aBank().build();
@@ -119,6 +124,7 @@ class BankServiceImplTest {
         }
 
         @Test
+        @DisplayName("test should return empty list")
         void testShouldReturnEmptyList() {
             doReturn(List.of())
                     .when(bankDAO)
@@ -136,6 +142,7 @@ class BankServiceImplTest {
 
         @ParameterizedTest(name = "{arguments} test")
         @MethodSource("ru.clevertec.cleverbank.service.impl.BankServiceImplTest#getArgumentsForSaveTest")
+        @DisplayName("test should capture value and return expected response")
         void testShouldCaptureValue(Bank expected) {
             BankRequest request = BankRequestTestBuilder.aBankRequest().build();
             BankResponse response = BankResponseTestBuilder.aBankResponse()
@@ -161,6 +168,7 @@ class BankServiceImplTest {
         }
 
         @Test
+        @DisplayName("test should throw UniquePhoneNumberException with expected message")
         void testShouldThrowUniquePhoneNumberExceptionWithExpectedMessage() {
             String phoneNumber = "+7 (495) 222-22-22";
             String expectedMessage = "Bank with phone number " + phoneNumber + " is already exist";
@@ -186,6 +194,7 @@ class BankServiceImplTest {
     class UpdateTest {
 
         @Test
+        @DisplayName("test should return updated response")
         void testShouldReturnUpdatedResponse() {
             Bank bank = BankTestBuilder.aBank().build();
             BankRequest request = BankRequestTestBuilder.aBankRequest().build();
@@ -210,6 +219,7 @@ class BankServiceImplTest {
         }
 
         @Test
+        @DisplayName("test should throw UniquePhoneNumberException with expected message")
         void testShouldThrowUniquePhoneNumberExceptionWithExpectedMessage() {
             String phoneNumber = "+7 (495) 222-22-22";
             String expectedMessage = "Bank with phone number " + phoneNumber + " is already exist";
@@ -238,6 +248,7 @@ class BankServiceImplTest {
     class DeleteTest {
 
         @Test
+        @DisplayName("test should return expected response")
         void testShouldReturnExpectedResponse() {
             Bank bank = BankTestBuilder.aBank().build();
             DeleteResponse expected = new DeleteResponse("Bank with ID " + bank.getId() + " was successfully deleted");
@@ -252,7 +263,8 @@ class BankServiceImplTest {
         }
 
         @Test
-        void testShouldThrowUserNotFoundExceptionWithExpectedMessage() {
+        @DisplayName("test should throw BankNotFoundException with expected message")
+        void testShouldThrowBankNotFoundExceptionWithExpectedMessage() {
             long id = 1L;
             String expectedMessage = "No Bank with ID " + id + " to delete";
 

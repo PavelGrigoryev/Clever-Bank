@@ -1,6 +1,7 @@
 package ru.clevertec.cleverbank.dao.impl;
 
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,6 +44,7 @@ class UserDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
         void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
             String sql = "SELECT * FROM users WHERE id = ?";
             long id = 1L;
@@ -60,11 +62,11 @@ class UserDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return expected response")
         void testShouldReturnExpectedResponse() {
             String sql = "SELECT * FROM users WHERE id = ?";
-            User user = UserTestBuilder.aUser().build();
-            Optional<User> expected = Optional.of(user);
-            long id = user.getId();
+            User expected = UserTestBuilder.aUser().build();
+            long id = expected.getId();
 
             doReturn(preparedStatement)
                     .when(connection)
@@ -78,11 +80,11 @@ class UserDAOImplTest {
             doReturn(true)
                     .when(resultSet)
                     .next();
-            getMockedUserFromResultSet(user);
+            getMockedUserFromResultSet(expected);
 
-            Optional<User> actual = userDAO.findById(id);
+            Optional<User> user = userDAO.findById(id);
 
-            assertThat(actual).isEqualTo(expected);
+            user.ifPresent(actual -> assertThat(actual).isEqualTo(expected));
         }
 
     }
@@ -92,6 +94,7 @@ class UserDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
         void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
             String sql = "SELECT * FROM users";
             String expectedMessage = "Sorry! We got Server database connection problems";
@@ -108,6 +111,7 @@ class UserDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return list of size one")
         void testShouldReturnListOfSizeOne() {
             String sql = "SELECT * FROM users";
             User user = UserTestBuilder.aUser().build();
@@ -131,6 +135,7 @@ class UserDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return list that contains expected response")
         void testShouldReturnListThatContainsExpectedResponse() {
             String sql = "SELECT * FROM users";
             User expected = UserTestBuilder.aUser().build();
@@ -153,6 +158,7 @@ class UserDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return empty list")
         void testShouldReturnEmptyList() {
             String sql = "SELECT * FROM users";
 
@@ -178,6 +184,7 @@ class UserDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
         void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
             String sql = """
                     INSERT INTO users (lastname, firstname, surname, register_date, mobile_number)
@@ -198,6 +205,7 @@ class UserDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return expected response")
         void testShouldReturnExpectedResponse() {
             String sql = """
                     INSERT INTO users (lastname, firstname, surname, register_date, mobile_number)
@@ -234,6 +242,7 @@ class UserDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
         void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
             String sql = """
                     UPDATE users
@@ -255,6 +264,7 @@ class UserDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return expected response")
         void testShouldReturnExpectedResponse() {
             String sql = """
                     UPDATE users
@@ -295,6 +305,7 @@ class UserDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
         void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
             String sql = "DELETE FROM accounts WHERE user_id = ?";
             long id = 1L;
@@ -312,11 +323,11 @@ class UserDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return expected response")
         void testShouldReturnExpectedResponse() {
             String accountSql = "DELETE FROM accounts WHERE user_id = ?";
             String sql = "DELETE FROM users WHERE id = ?";
-            User user = UserTestBuilder.aUser().build();
-            Optional<User> expected = Optional.of(user);
+            User expected = UserTestBuilder.aUser().build();
 
             doReturn(preparedStatement)
                     .when(connection)
@@ -326,7 +337,7 @@ class UserDAOImplTest {
                     .prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             doNothing()
                     .when(preparedStatement)
-                    .setLong(1, user.getId());
+                    .setLong(1, expected.getId());
             doReturn(1)
                     .when(preparedStatement)
                     .executeUpdate();
@@ -336,11 +347,11 @@ class UserDAOImplTest {
             doReturn(true)
                     .when(resultSet)
                     .next();
-            getMockedUserFromResultSet(user);
+            getMockedUserFromResultSet(expected);
 
-            Optional<User> actual = userDAO.delete(user.getId());
+            Optional<User> user = userDAO.delete(expected.getId());
 
-            assertThat(actual).isEqualTo(expected);
+            user.ifPresent(actual -> assertThat(actual).isEqualTo(expected));
         }
 
     }

@@ -2,9 +2,6 @@ plugins {
     id 'java'
     id 'war'
     id 'io.freefair.lombok' version '8.2.2'
-    id 'io.freefair.aspectj.post-compile-weaving' version '8.3'
-    id 'by.grigoryev.pavel.git-tag-plugin' version '1.0.0'
-    id 'gradle.plugin.git.tag.gitTask' version '0.0.1'
 }
 
 group 'ru.clevertec'
@@ -28,6 +25,7 @@ ext {
     junitVersion = '5.10.0'
     assertjVersion = '3.24.2'
     mockitoVersion = '5.5.0'
+    memoryFileSystemVersion = '2.6.1'
 }
 
 sourceCompatibility = targetCompatibility = '17'
@@ -37,31 +35,31 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 dependencies {
-    compileOnly "jakarta.servlet:jakarta.servlet-api:${servletVersion}"
+    compileOnly "jakarta.servlet:jakarta.servlet-api:$servletVersion"
 
-    runtimeOnly "org.postgresql:postgresql:${postgresqlVersion}"
-    runtimeOnly "org.aspectj:aspectjrt:${aspectjVersion}"
-    runtimeOnly "org.aspectj:aspectjweaver:${aspectjVersion}"
+    runtimeOnly "org.postgresql:postgresql:$postgresqlVersion"
 
-    implementation "com.google.code.gson:gson:${gsonVersion}"
-    implementation "org.slf4j:slf4j-api:${slf4jVersion}"
-    implementation "ch.qos.logback:logback-core:${logbackVersion}"
-    implementation "ch.qos.logback:logback-classic:${logbackVersion}"
-    implementation "org.yaml:snakeyaml:${snakeYamlVersion}"
-    implementation "org.liquibase:liquibase-core:${liquibaseVersion}"
-    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
-    implementation "org.aspectj:aspectjtools:${aspectjVersion}"
+    implementation "org.aspectj:aspectjrt:$aspectjVersion"
+    implementation "org.aspectj:aspectjweaver:$aspectjVersion"
+    implementation "com.google.code.gson:gson:$gsonVersion"
+    implementation "org.slf4j:slf4j-api:$slf4jVersion"
+    implementation "ch.qos.logback:logback-core:$logbackVersion"
+    implementation "ch.qos.logback:logback-classic:$logbackVersion"
+    implementation "org.yaml:snakeyaml:$snakeYamlVersion"
+    implementation "org.liquibase:liquibase-core:$liquibaseVersion"
+    implementation "org.mapstruct:mapstruct:$mapstructVersion"
 
-    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+    annotationProcessor "org.mapstruct:mapstruct-processor:$mapstructVersion"
 
-    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
-    testImplementation "org.assertj:assertj-core:${assertjVersion}"
-    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
-    testImplementation "org.junit.jupiter:junit-jupiter-params:${junitVersion}"
-    testImplementation "org.mockito:mockito-core:${mockitoVersion}"
-    testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testImplementation "org.assertj:assertj-core:$assertjVersion"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testImplementation "org.junit.jupiter:junit-jupiter-params:$junitVersion"
+    testImplementation "org.mockito:mockito-core:$mockitoVersion"
+    testImplementation "org.mockito:mockito-junit-jupiter:$mockitoVersion"
+    testImplementation "com.github.marschall:memoryfilesystem:$memoryFileSystemVersion"
 
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
 }
 
 compileJava {

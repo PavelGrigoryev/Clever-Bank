@@ -1,5 +1,6 @@
 package ru.clevertec.cleverbank.service.impl;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,6 +59,7 @@ class AccountServiceImplTest {
     class FindByIdTest {
 
         @Test
+        @DisplayName("test should throw AccountNotFoundException with expected message")
         void testShouldThrowAccountNotFoundExceptionWithExpectedMessage() {
             String id = "0J2O 6O3P 1CUB VZUT 91SJ X3FU MUR4";
             String expectedMessage = "Account with ID " + id + " is not found!";
@@ -69,6 +71,7 @@ class AccountServiceImplTest {
         }
 
         @Test
+        @DisplayName("test should return expected response")
         void testShouldReturnExpectedResponse() {
             AccountResponse expected = AccountResponseTestBuilder.aAccountResponse().build();
             Account account = AccountTestBuilder.aAccount().build();
@@ -92,6 +95,7 @@ class AccountServiceImplTest {
     class FindAllTest {
 
         @Test
+        @DisplayName("test should return list of size one")
         void testShouldReturnListOfSizeOne() {
             AccountResponse response = AccountResponseTestBuilder.aAccountResponse().build();
             Account account = AccountTestBuilder.aAccount().build();
@@ -110,6 +114,7 @@ class AccountServiceImplTest {
         }
 
         @Test
+        @DisplayName("test should return list that contains expected response")
         void testShouldReturnListThatContainsExpectedResponse() {
             AccountResponse expected = AccountResponseTestBuilder.aAccountResponse().build();
             Account account = AccountTestBuilder.aAccount().build();
@@ -127,6 +132,7 @@ class AccountServiceImplTest {
         }
 
         @Test
+        @DisplayName("test should return empty list")
         void testShouldReturnEmptyList() {
             doReturn(List.of())
                     .when(accountDAO)
@@ -144,6 +150,7 @@ class AccountServiceImplTest {
 
         @ParameterizedTest(name = "{arguments} test")
         @MethodSource("ru.clevertec.cleverbank.service.impl.AccountServiceImplTest#getArgumentsForSaveTest")
+        @DisplayName("test should capture value and return expected response")
         void testShouldCaptureValue(Account expected) {
             User user = UserTestBuilder.aUser().build();
             Bank bank = BankTestBuilder.aBank().build();
@@ -182,6 +189,7 @@ class AccountServiceImplTest {
     class UpdateBalanceTest {
 
         @Test
+        @DisplayName("test should return updated response")
         void testShouldReturnUpdatedResponse() {
             BigDecimal newBalance = BigDecimal.valueOf(1);
             Account expected = AccountTestBuilder.aAccount()
@@ -203,6 +211,7 @@ class AccountServiceImplTest {
     class CloseAccountTest {
 
         @Test
+        @DisplayName("test should return updated response")
         void testShouldReturnUpdatedResponse() {
             Account account = AccountTestBuilder.aAccount().build();
             AccountResponse expected = AccountResponseTestBuilder.aAccountResponse().build();
@@ -223,6 +232,7 @@ class AccountServiceImplTest {
         }
 
         @Test
+        @DisplayName("test should throw AccountNotFoundException with expected message")
         void testShouldThrowAccountNotFoundExceptionWithExpectedMessage() {
             String id = "0J2O 6O3P 1CUB VZUT 91SJ X3FU MUR4";
             String expectedMessage = "Account with ID " + id + " is not found!";
@@ -239,6 +249,7 @@ class AccountServiceImplTest {
     class DeleteTest {
 
         @Test
+        @DisplayName("test should return expected response")
         void testShouldReturnExpectedResponse() {
             Account account = AccountTestBuilder.aAccount().build();
             DeleteResponse expected = new DeleteResponse("Account with ID " + account.getId() + " was successfully deleted");
@@ -253,6 +264,7 @@ class AccountServiceImplTest {
         }
 
         @Test
+        @DisplayName("test should throw AccountNotFoundException with expected message")
         void testShouldThrowAccountNotFoundExceptionWithExpectedMessage() {
             String id = "0J2O 6O3P 1CUB VZUT 91SJ X3FU MUR4";
             String expectedMessage = "No Account with ID " + id + " to delete";

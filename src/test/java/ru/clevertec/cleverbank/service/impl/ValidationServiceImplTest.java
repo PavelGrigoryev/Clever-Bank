@@ -1,6 +1,7 @@
 package ru.clevertec.cleverbank.service.impl;
 
 import com.google.gson.Gson;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,6 +35,7 @@ class ValidationServiceImplTest {
     private Gson gson;
 
     @Test
+    @DisplayName("test validateAccountForClosingDate should throw AccountClosedException with expected message")
     void testValidateAccountForClosingDateShouldThrowAccountClosedExceptionWithExpectedMessage() {
         LocalDate date = LocalDate.of(2020, Month.APRIL, 12);
         String id = "0J2O 6O3P 1CUB VZUT 91SJ X3FU MUR4";
@@ -47,6 +49,7 @@ class ValidationServiceImplTest {
     }
 
     @Test
+    @DisplayName("test validateAccountForCurrency should throw BadCurrencyException with expected message")
     void testValidateAccountForCurrencyShouldThrowBadCurrencyExceptionWithExpectedMessage() {
         Currency senderCurrency = Currency.BYN;
         Currency recipientCurrency = Currency.EUR;
@@ -60,6 +63,7 @@ class ValidationServiceImplTest {
     }
 
     @Test
+    @DisplayName("test validateAccountForSufficientBalance should throw InsufficientFundsException with expected message")
     void testValidateAccountForSufficientBalanceShouldThrowInsufficientFundsExceptionWithExpectedMessage() {
         Type type = Type.WITHDRAWAL;
         BigDecimal sum = BigDecimal.TEN;
@@ -76,6 +80,7 @@ class ValidationServiceImplTest {
     }
 
     @Test
+    @DisplayName("test validateFieldByPattern should contains pattern Violation")
     void testValidateFieldByPatternShouldContainsPatternViolation() {
         String field = "Юра!";
         String fieldName = "firstname";
@@ -89,6 +94,7 @@ class ValidationServiceImplTest {
     }
 
     @Test
+    @DisplayName("test validateFieldByPattern should contains null Violation")
     void testValidateFieldByPatternShouldContainsNullViolation() {
         String fieldName = "firstname";
         String patternString = "^[a-zA-Zа-яА-ЯёЁ]+$";
@@ -101,6 +107,7 @@ class ValidationServiceImplTest {
     }
 
     @Test
+    @DisplayName("test validateRequestForNull should throw ValidationException with expected message")
     void testValidateRequestForNullShouldThrowValidationExceptionWithExpectedMessage() {
         String requestName = "name";
         String expectedMessage = "%s can not be null".formatted(requestName);
@@ -117,6 +124,7 @@ class ValidationServiceImplTest {
     }
 
     @Test
+    @DisplayName("test validateBigDecimalFieldForPositive should contains null Violation")
     void testValidateBigDecimalFieldForPositiveShouldContainsNullViolation() {
         String fieldName = "sum";
         Violation violation = new Violation(fieldName, "Field can not be null");
@@ -128,6 +136,7 @@ class ValidationServiceImplTest {
     }
 
     @Test
+    @DisplayName("test validateBigDecimalFieldForPositive should contains positive Violation")
     void testValidateBigDecimalFieldForPositiveShouldContainsPositiveViolation() {
         BigDecimal field = BigDecimal.ZERO;
         String fieldName = "sum";
@@ -140,6 +149,7 @@ class ValidationServiceImplTest {
     }
 
     @Test
+    @DisplayName("test validateLongFieldForPositive should contains null Violation")
     void testValidateLongFieldForPositiveShouldContainsNullViolation() {
         String fieldName = "id";
         Violation violation = new Violation(fieldName, "Field can not be null");
@@ -151,6 +161,7 @@ class ValidationServiceImplTest {
     }
 
     @Test
+    @DisplayName("test validateLongFieldForPositive should contains positive Violation")
     void testValidateLongFieldForPositiveShouldContainsPositiveViolation() {
         long field = -1L;
         String fieldName = "id";

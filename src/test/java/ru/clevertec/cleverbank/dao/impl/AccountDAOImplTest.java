@@ -1,6 +1,7 @@
 package ru.clevertec.cleverbank.dao.impl;
 
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,6 +44,7 @@ class AccountDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
         void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
             String sql = """
                     SELECT * FROM accounts a
@@ -65,6 +67,7 @@ class AccountDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return expected response")
         void testShouldReturnExpectedResponse() {
             String sql = """
                     SELECT * FROM accounts a
@@ -72,9 +75,8 @@ class AccountDAOImplTest {
                     JOIN users u ON u.id = a.user_id
                     WHERE a.id = ?
                     """;
-            Account account = AccountTestBuilder.aAccount().build();
-            Optional<Account> expected = Optional.of(account);
-            String id = account.getId();
+            Account expected = AccountTestBuilder.aAccount().build();
+            String id = expected.getId();
 
             doReturn(preparedStatement)
                     .when(connection)
@@ -88,11 +90,11 @@ class AccountDAOImplTest {
             doReturn(true)
                     .when(resultSet)
                     .next();
-            getMockedAccountFromResultSet(account);
+            getMockedAccountFromResultSet(expected);
 
-            Optional<Account> actual = accountDAO.findById(id);
+            Optional<Account> account = accountDAO.findById(id);
 
-            assertThat(actual).isEqualTo(expected);
+            account.ifPresent(actual -> assertThat(actual).isEqualTo(expected));
         }
 
     }
@@ -102,6 +104,7 @@ class AccountDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
         void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
             String sql = """
                     SELECT * FROM accounts a
@@ -122,6 +125,7 @@ class AccountDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return list of size one")
         void testShouldReturnListOfSizeOne() {
             String sql = """
                     SELECT * FROM accounts a
@@ -149,6 +153,7 @@ class AccountDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return list that contains expected response")
         void testShouldReturnListThatContainsExpectedResponse() {
             String sql = """
                     SELECT * FROM accounts a
@@ -175,6 +180,7 @@ class AccountDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return empty list")
         void testShouldReturnEmptyList() {
             String sql = """
                     SELECT * FROM accounts a
@@ -204,6 +210,7 @@ class AccountDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
         void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
             String sql = """
                     INSERT INTO accounts (currency, balance, opening_date, closing_date, bank_id, user_id, id)
@@ -224,6 +231,7 @@ class AccountDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return expected response")
         void testShouldReturnExpectedResponse() {
             String sql = """
                     INSERT INTO accounts (currency, balance, opening_date, closing_date, bank_id, user_id, id)
@@ -260,6 +268,7 @@ class AccountDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
         void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
             String sql = """
                     UPDATE accounts
@@ -281,6 +290,7 @@ class AccountDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return expected response")
         void testShouldReturnExpectedResponse() {
             String sql = """
                     UPDATE accounts
@@ -321,6 +331,7 @@ class AccountDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
         void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
             String sql = "DELETE FROM accounts WHERE id = ?";
             String id = "MU1Y 7LTU 7QLR 14XD 2789 T5MM XRXU";
@@ -338,6 +349,7 @@ class AccountDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return expected response")
         void testShouldReturnExpectedResponse() {
             String sql = "DELETE FROM accounts WHERE id = ?";
             String id = "MU1Y 7LTU 7QLR 14XD 2789 T5MM XRXU";

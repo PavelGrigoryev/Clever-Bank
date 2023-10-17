@@ -15,8 +15,8 @@ public interface AccountMapper {
 
     List<AccountResponse> toResponseList(List<Account> accounts);
 
-    @Mapping(target = "user.id", source = "bankId")
-    @Mapping(target = "bank.id", source = "userId")
+    @Mapping(target = "user.id", source = "userId")
+    @Mapping(target = "bank.id", source = "bankId")
     Account fromRequest(AccountRequest request);
 
 }

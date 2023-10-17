@@ -1,11 +1,13 @@
 package ru.clevertec.cleverbank.service;
 
+import java.nio.file.Path;
+
 public interface UploadFileService {
 
-    void uploadCheck(String check);
+    Path uploadCheck(String check);
 
-    void uploadStatement(String statement);
+    Path uploadStatement(String statement);
 
-    void  uploadAmount(String amount);
+    Path uploadAmount(String amount);
 
 }

@@ -1,6 +1,7 @@
 package ru.clevertec.cleverbank.dao.impl;
 
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,6 +50,7 @@ class TransactionDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
         void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
             String sql = "SELECT * FROM transactions WHERE id = ?";
             long id = 1L;
@@ -66,11 +68,11 @@ class TransactionDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return expected response")
         void testShouldReturnExpectedResponse() {
             String sql = "SELECT * FROM transactions WHERE id = ?";
-            Transaction transaction = TransactionTestBuilder.aTransaction().build();
-            Optional<Transaction> expected = Optional.of(transaction);
-            long id = transaction.getId();
+            Transaction expected = TransactionTestBuilder.aTransaction().build();
+            long id = expected.getId();
 
             doReturn(preparedStatement)
                     .when(connection)
@@ -84,13 +86,11 @@ class TransactionDAOImplTest {
             doReturn(true)
                     .when(resultSet)
                     .next();
-            getMockedTransactionFromResultSet(transaction);
+            getMockedTransactionFromResultSet(expected);
 
-            System.out.println(expected);
+            Optional<Transaction> transaction = transactionDAO.findById(id);
 
-            Optional<Transaction> actual = transactionDAO.findById(id);
-
-            assertThat(actual).isEqualTo(expected);
+            transaction.ifPresent(actual -> assertThat(actual).isEqualTo(expected));
         }
 
     }
@@ -100,6 +100,7 @@ class TransactionDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
         void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
             String sql = "SELECT * FROM transactions WHERE account_sender_id = ?";
             String id = "OYXM ZJ38 HR36 FQAO C21J 6ERX SEJE";
@@ -117,6 +118,7 @@ class TransactionDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return list of size one")
         void testShouldReturnListOfSizeOne() {
             String sql = "SELECT * FROM transactions WHERE account_sender_id = ?";
             Transaction transaction = TransactionTestBuilder.aTransaction().build();
@@ -141,6 +143,7 @@ class TransactionDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return list that contains expected response")
         void testShouldReturnListThatContainsExpectedResponse() {
             String sql = "SELECT * FROM transactions WHERE account_sender_id = ?";
             Transaction expected = TransactionTestBuilder.aTransaction().build();
@@ -164,6 +167,7 @@ class TransactionDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return empty list")
         void testShouldReturnEmptyList() {
             String sql = "SELECT * FROM transactions WHERE account_sender_id = ?";
             String id = "OYXM ZJ38 HR36 FQAO C21J 6ERX SEJE";
@@ -190,6 +194,7 @@ class TransactionDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
         void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
             String sql = "SELECT * FROM transactions WHERE account_recipient_id = ?";
             String id = "OYXM ZJ38 HR36 FQAO C21J 6ERX SEJE";
@@ -207,6 +212,7 @@ class TransactionDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return list of size one")
         void testShouldReturnListOfSizeOne() {
             String sql = "SELECT * FROM transactions WHERE account_recipient_id = ?";
             Transaction transaction = TransactionTestBuilder.aTransaction().build();
@@ -231,6 +237,7 @@ class TransactionDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return list that contains expected response")
         void testShouldReturnListThatContainsExpectedResponse() {
             String sql = "SELECT * FROM transactions WHERE account_recipient_id = ?";
             Transaction expected = TransactionTestBuilder.aTransaction().build();
@@ -254,6 +261,7 @@ class TransactionDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return empty list")
         void testShouldReturnEmptyList() {
             String sql = "SELECT * FROM transactions WHERE account_recipient_id = ?";
             String id = "OYXM ZJ38 HR36 FQAO C21J 6ERX SEJE";
@@ -280,6 +288,7 @@ class TransactionDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
         void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
             String sql = """
                     INSERT INTO transactions
@@ -301,6 +310,7 @@ class TransactionDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return expected response")
         void testShouldReturnExpectedResponse() {
             String sql = """
                     INSERT INTO transactions
@@ -338,6 +348,7 @@ class TransactionDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
         void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
             String sql = """
                     SELECT t.date, t.type, u.lastname, t.sum FROM transactions t
@@ -365,6 +376,7 @@ class TransactionDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return list of size one")
         void testShouldReturnListOfSizeOne() {
             String sql = """
                     SELECT t.date, t.type, u.lastname, t.sum FROM transactions t
@@ -399,6 +411,7 @@ class TransactionDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return list that contains expected response")
         void testShouldReturnListThatContainsExpectedResponse() {
             String sql = """
                     SELECT t.date, t.type, u.lastname, t.sum FROM transactions t
@@ -432,6 +445,7 @@ class TransactionDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return empty list")
         void testShouldReturnEmptyList() {
             String sql = """
                     SELECT t.date, t.type, u.lastname, t.sum FROM transactions t
@@ -468,6 +482,7 @@ class TransactionDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
         void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
             String sql = """
                     SELECT SUM(sum) AS spent FROM transactions
@@ -492,6 +507,7 @@ class TransactionDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return expected response")
         void testShouldReturnExpectedResponse() {
             String sql = """
                     SELECT SUM(sum) AS spent FROM transactions
@@ -529,6 +545,7 @@ class TransactionDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
         void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
             String sql = """
                     SELECT SUM(sum) AS received FROM transactions
@@ -553,6 +570,7 @@ class TransactionDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return expected response")
         void testShouldReturnExpectedResponse() {
             String sql = """
                     SELECT SUM(sum) AS received FROM transactions

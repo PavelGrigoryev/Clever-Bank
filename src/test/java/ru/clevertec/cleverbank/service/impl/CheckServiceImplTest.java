@@ -1,5 +1,6 @@
 package ru.clevertec.cleverbank.service.impl;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Spy;
@@ -22,6 +23,7 @@ class CheckServiceImplTest {
     private CheckServiceImpl checkService;
 
     @Test
+    @DisplayName("test createChangeBalanceCheck should return expected string")
     void testCreateChangeBalanceCheck() {
         ChangeBalanceResponse response = ChangeBalanceResponseTestBuilder.aChangeBalanceResponse().build();
         String expected = """
@@ -44,6 +46,7 @@ class CheckServiceImplTest {
     }
 
     @Test
+    @DisplayName("test createTransferBalanceCheck should return expected string")
     void testCreateTransferBalanceCheck() {
         TransferBalanceResponse response = TransferBalanceResponseTestBuilder.aTransferBalanceResponse().build();
         String expected = """
@@ -67,6 +70,7 @@ class CheckServiceImplTest {
     }
 
     @Test
+    @DisplayName("test createTransactionStatement should return expected string")
     void testCreateTransactionStatement() {
         TransactionStatementResponse response = TransactionStatementResponseTestBuilder.aTransactionStatementResponse().build();
         String expected = """
@@ -91,6 +95,7 @@ class CheckServiceImplTest {
     }
 
     @Test
+    @DisplayName("test createAmountStatement should return expected string")
     void testCreateAmountStatement() {
         AmountStatementResponse response = AmountStatementResponseTestBuilder.aAmountStatementResponse().build();
         String expected = """

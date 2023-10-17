@@ -1,6 +1,7 @@
 package ru.clevertec.cleverbank.dao.impl;
 
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,6 +43,7 @@ class BankDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
         void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
             String sql = "SELECT * FROM banks WHERE id = ?";
             long id = 1L;
@@ -59,11 +61,11 @@ class BankDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return expected response")
         void testShouldReturnExpectedResponse() {
             String sql = "SELECT * FROM banks WHERE id = ?";
-            Bank bank = BankTestBuilder.aBank().build();
-            Optional<Bank> expected = Optional.of(bank);
-            long id = bank.getId();
+            Bank expected = BankTestBuilder.aBank().build();
+            long id = expected.getId();
 
             doReturn(preparedStatement)
                     .when(connection)
@@ -77,11 +79,11 @@ class BankDAOImplTest {
             doReturn(true)
                     .when(resultSet)
                     .next();
-            getMockedBankFromResultSet(bank);
+            getMockedBankFromResultSet(expected);
 
-            Optional<Bank> actual = bankDAO.findById(id);
+            Optional<Bank> bank = bankDAO.findById(id);
 
-            assertThat(actual).isEqualTo(expected);
+            bank.ifPresent(actual -> assertThat(actual).isEqualTo(expected));
         }
 
     }
@@ -91,6 +93,7 @@ class BankDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
         void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
             String sql = "SELECT * FROM banks";
             String expectedMessage = "Sorry! We got Server database connection problems";
@@ -107,6 +110,7 @@ class BankDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return list of size one")
         void testShouldReturnListOfSizeOne() {
             String sql = "SELECT * FROM banks";
             Bank bank = BankTestBuilder.aBank().build();
@@ -130,6 +134,7 @@ class BankDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return list that contains expected response")
         void testShouldReturnListThatContainsExpectedResponse() {
             String sql = "SELECT * FROM banks";
             Bank expected = BankTestBuilder.aBank().build();
@@ -152,6 +157,7 @@ class BankDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return empty list")
         void testShouldReturnEmptyList() {
             String sql = "SELECT * FROM banks";
 
@@ -177,6 +183,7 @@ class BankDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
         void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
             String sql = """
                     INSERT INTO banks (name, address, phone_number)
@@ -197,6 +204,7 @@ class BankDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return expected response")
         void testShouldReturnExpectedResponse() {
             String sql = """
                     INSERT INTO banks (name, address, phone_number)
@@ -233,6 +241,7 @@ class BankDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
         void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
             String sql = """
                     UPDATE banks
@@ -254,6 +263,7 @@ class BankDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should return expected response")
         void testShouldReturnExpectedResponse() {
             String sql = """
                     UPDATE banks
@@ -294,6 +304,7 @@ class BankDAOImplTest {
 
         @Test
         @SneakyThrows
+        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
         void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
             String sql = "DELETE FROM accounts WHERE bank_id = ?";
             long id = 1L;
@@ -314,8 +325,7 @@ class BankDAOImplTest {
         void testShouldReturnExpectedResponse() {
             String accountSql = "DELETE FROM accounts WHERE bank_id = ?";
             String sql = "DELETE FROM banks WHERE id = ?";
-            Bank bank = BankTestBuilder.aBank().build();
-            Optional<Bank> expected = Optional.of(bank);
+            Bank expected = BankTestBuilder.aBank().build();
 
             doReturn(preparedStatement)
                     .when(connection)
@@ -325,7 +335,7 @@ class BankDAOImplTest {
                     .prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             doNothing()
                     .when(preparedStatement)
-                    .setLong(1, bank.getId());
+                    .setLong(1, expected.getId());
             doReturn(1)
                     .when(preparedStatement)
                     .executeUpdate();
@@ -335,11 +345,11 @@ class BankDAOImplTest {
             doReturn(true)
                     .when(resultSet)
                     .next();
-            getMockedBankFromResultSet(bank);
+            getMockedBankFromResultSet(expected);
 
-            Optional<Bank> actual = bankDAO.delete(bank.getId());
+            Optional<Bank> bank = bankDAO.delete(expected.getId());
 
-            assertThat(actual).isEqualTo(expected);
+            bank.ifPresent(actual -> assertThat(actual).isEqualTo(expected));
         }
 
     }

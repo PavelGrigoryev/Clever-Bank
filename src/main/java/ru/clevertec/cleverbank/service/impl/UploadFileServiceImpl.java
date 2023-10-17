@@ -20,33 +20,36 @@ public class UploadFileServiceImpl implements UploadFileService {
      * Реализует метод uploadCheck, который загружает чек по транзакции в формате txt.
      *
      * @param check String, представляющая чек по транзакции
+     * @return Path, представляющая путь к файлу
      */
     @Override
-    public void uploadCheck(String check) {
+    public Path uploadCheck(String check) {
         Path path = Paths.get(findPaths("BankCheck.txt"));
-        writeFile(check, path);
+        return writeFile(check, path);
     }
 
     /**
      * Реализует метод uploadStatement, который загружает выписку по транзакциям в формате txt.
      *
      * @param statement String, представляющая выписку по транзакциям
+     * @return Path, представляющая путь к файлу
      */
     @Override
-    public void uploadStatement(String statement) {
+    public Path uploadStatement(String statement) {
         Path path = Paths.get(findPaths("TransactionStatement.txt"));
-        writeFile(statement, path);
+        return writeFile(statement, path);
     }
 
     /**
      * Реализует метод uploadAmount, который загружает выписку по суммам транзакций в формате txt.
      *
      * @param amount String, представляющая выписку по суммам транзакций
+     * @return Path, представляющая путь к файлу
      */
     @Override
-    public void uploadAmount(String amount) {
+    public Path uploadAmount(String amount) {
         Path path = Paths.get(findPaths("AmountStatement.txt"));
-        writeFile(amount, path);
+        return writeFile(amount, path);
     }
 
     /**
@@ -54,11 +57,12 @@ public class UploadFileServiceImpl implements UploadFileService {
      *
      * @param file String, которую нужно записать в файл
      * @param path объект Path, представляющий путь к файлу на сервере
+     * @return Path, представляющая путь к файлу
      */
-    private static void writeFile(String file, Path path) {
+    private static Path writeFile(String file, Path path) {
         log.info("File download link: {}", path);
         try {
-            Files.write(path, file.getBytes(), StandardOpenOption.APPEND, StandardOpenOption.CREATE);
+            return Files.write(path, file.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
             log.error(e.getMessage());
             throw new UploadFileException("Sorry! We got Server upload file problems");
