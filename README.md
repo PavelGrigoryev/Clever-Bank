@@ -9,6 +9,7 @@
 * Lombok plugin 8.2.2
 * Servlet API 6.0.0
 * Postgresql 42.6.0
+* HikariCP 5.0.1
 * Gson 2.10.1
 * Slf4j-API 2.0.7
 * Logback logger 1.4.11
