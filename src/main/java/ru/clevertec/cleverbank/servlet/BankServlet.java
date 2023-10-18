@@ -5,6 +5,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
 import ru.clevertec.cleverbank.dto.DeleteResponse;
 import ru.clevertec.cleverbank.dto.bank.BankRequest;
 import ru.clevertec.cleverbank.dto.bank.BankResponse;
@@ -15,11 +16,17 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
+@AllArgsConstructor
 @WebServlet(urlPatterns = "/banks")
 public class BankServlet extends HttpServlet {
 
-    private final transient BankService bankService = new BankServiceImpl();
-    private final transient Gson gson = new Gson();
+    private final transient BankService bankService;
+    private final transient Gson gson;
+
+    public BankServlet() {
+        bankService = new BankServiceImpl();
+        gson = new Gson();
+    }
 
     /**
      * Переопределяет метод doGet, который обрабатывает GET-запросы к ресурсу /banks.
