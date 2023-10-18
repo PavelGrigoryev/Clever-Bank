@@ -1,10 +1,10 @@
-package ru.clevertec.cleverbank.util.transaction;
+package ru.clevertec.cleverbank.builder.transaction;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.With;
+import ru.clevertec.cleverbank.builder.TestBuilder;
 import ru.clevertec.cleverbank.dto.transaction.TransferBalanceRequest;
-import ru.clevertec.cleverbank.util.TestBuilder;
 
 import java.math.BigDecimal;
 

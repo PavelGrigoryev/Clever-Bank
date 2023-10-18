@@ -1,10 +1,10 @@
-package ru.clevertec.cleverbank.util.user;
+package ru.clevertec.cleverbank.builder.user;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.With;
 import ru.clevertec.cleverbank.model.User;
-import ru.clevertec.cleverbank.util.TestBuilder;
+import ru.clevertec.cleverbank.builder.TestBuilder;
 
 import java.time.LocalDate;
 import java.time.Month;

@@ -1,11 +1,11 @@
-package ru.clevertec.cleverbank.util.transaction;
+package ru.clevertec.cleverbank.builder.transaction;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.With;
-import ru.clevertec.cleverbank.model.Transaction;
+import ru.clevertec.cleverbank.dto.transaction.TransactionResponse;
 import ru.clevertec.cleverbank.model.Type;
-import ru.clevertec.cleverbank.util.TestBuilder;
+import ru.clevertec.cleverbank.builder.TestBuilder;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -13,9 +13,9 @@ import java.time.LocalTime;
 import java.time.Month;
 
 @AllArgsConstructor
-@NoArgsConstructor(staticName = "aTransaction")
+@NoArgsConstructor(staticName = "aTransactionResponse")
 @With
-public class TransactionTestBuilder implements TestBuilder<Transaction> {
+public class TransactionResponseTestBuilder implements TestBuilder<TransactionResponse> {
 
     private Long id = 1L;
     private LocalDate date = LocalDate.of(2020, Month.APRIL, 12);
@@ -27,19 +27,11 @@ public class TransactionTestBuilder implements TestBuilder<Transaction> {
     private String accountRecipientId = "55JN NKDA XKNN Z0QV 5LGL FXF7 XJT9";
     private BigDecimal sum = BigDecimal.valueOf(2000);
 
+
     @Override
-    public Transaction build() {
-        return Transaction.builder()
-                .id(id)
-                .date(date)
-                .time(time)
-                .type(type)
-                .bankSenderId(bankSenderId)
-                .bankRecipientId(bankRecipientId)
-                .accountSenderId(accountSenderId)
-                .accountRecipientId(accountRecipientId)
-                .sum(sum)
-                .build();
+    public TransactionResponse build() {
+        return new TransactionResponse(id, date, time, type, bankSenderId, bankRecipientId, accountSenderId,
+                accountRecipientId, sum);
     }
 
 }

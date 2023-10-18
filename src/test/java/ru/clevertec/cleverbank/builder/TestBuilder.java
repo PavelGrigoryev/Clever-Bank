@@ -1,4 +1,4 @@
-package ru.clevertec.cleverbank.util;
+package ru.clevertec.cleverbank.builder;
 
 public interface TestBuilder<T> {
 

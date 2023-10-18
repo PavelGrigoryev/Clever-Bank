@@ -1,10 +1,10 @@
-package ru.clevertec.cleverbank.util.bank;
+package ru.clevertec.cleverbank.builder.bank;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.With;
 import ru.clevertec.cleverbank.dto.bank.BankResponse;
-import ru.clevertec.cleverbank.util.TestBuilder;
+import ru.clevertec.cleverbank.builder.TestBuilder;
 
 @AllArgsConstructor
 @NoArgsConstructor(staticName = "aBankResponse")

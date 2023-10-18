@@ -9,10 +9,10 @@ import ru.clevertec.cleverbank.dto.transaction.AmountStatementResponse;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransactionStatementResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransferBalanceResponse;
-import ru.clevertec.cleverbank.util.transaction.AmountStatementResponseTestBuilder;
-import ru.clevertec.cleverbank.util.transaction.ChangeBalanceResponseTestBuilder;
-import ru.clevertec.cleverbank.util.transaction.TransactionStatementResponseTestBuilder;
-import ru.clevertec.cleverbank.util.transaction.TransferBalanceResponseTestBuilder;
+import ru.clevertec.cleverbank.builder.transaction.AmountStatementResponseTestBuilder;
+import ru.clevertec.cleverbank.builder.transaction.ChangeBalanceResponseTestBuilder;
+import ru.clevertec.cleverbank.builder.transaction.TransactionStatementResponseTestBuilder;
+import ru.clevertec.cleverbank.builder.transaction.TransferBalanceResponseTestBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

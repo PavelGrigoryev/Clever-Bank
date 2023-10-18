@@ -11,8 +11,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ru.clevertec.cleverbank.dto.transaction.TransactionStatement;
 import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
 import ru.clevertec.cleverbank.model.Transaction;
-import ru.clevertec.cleverbank.util.transaction.TransactionStatementTestBuilder;
-import ru.clevertec.cleverbank.util.transaction.TransactionTestBuilder;
+import ru.clevertec.cleverbank.builder.transaction.TransactionStatementTestBuilder;
+import ru.clevertec.cleverbank.builder.transaction.TransactionTestBuilder;
 
 import java.math.BigDecimal;
 import java.sql.Connection;

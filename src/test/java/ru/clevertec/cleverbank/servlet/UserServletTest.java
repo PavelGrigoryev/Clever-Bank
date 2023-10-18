@@ -17,8 +17,8 @@ import ru.clevertec.cleverbank.dto.DeleteResponse;
 import ru.clevertec.cleverbank.dto.user.UserRequest;
 import ru.clevertec.cleverbank.dto.user.UserResponse;
 import ru.clevertec.cleverbank.service.UserService;
-import ru.clevertec.cleverbank.util.user.UserRequestTestBuilder;
-import ru.clevertec.cleverbank.util.user.UserResponseTestBuilder;
+import ru.clevertec.cleverbank.builder.user.UserRequestTestBuilder;
+import ru.clevertec.cleverbank.builder.user.UserResponseTestBuilder;
 
 import java.io.PrintWriter;
 import java.util.List;

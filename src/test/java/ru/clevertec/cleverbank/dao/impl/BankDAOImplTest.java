@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
 import ru.clevertec.cleverbank.model.Bank;
-import ru.clevertec.cleverbank.util.bank.BankTestBuilder;
+import ru.clevertec.cleverbank.builder.bank.BankTestBuilder;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

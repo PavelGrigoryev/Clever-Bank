@@ -21,9 +21,9 @@ import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionExcep
 import ru.clevertec.cleverbank.exception.notfound.BankNotFoundException;
 import ru.clevertec.cleverbank.mapper.BankMapper;
 import ru.clevertec.cleverbank.model.Bank;
-import ru.clevertec.cleverbank.util.bank.BankRequestTestBuilder;
-import ru.clevertec.cleverbank.util.bank.BankResponseTestBuilder;
-import ru.clevertec.cleverbank.util.bank.BankTestBuilder;
+import ru.clevertec.cleverbank.builder.bank.BankRequestTestBuilder;
+import ru.clevertec.cleverbank.builder.bank.BankResponseTestBuilder;
+import ru.clevertec.cleverbank.builder.bank.BankTestBuilder;
 
 import java.util.List;
 import java.util.Optional;

@@ -18,8 +18,8 @@ import ru.clevertec.cleverbank.dto.account.AccountRequest;
 import ru.clevertec.cleverbank.dto.account.AccountResponse;
 import ru.clevertec.cleverbank.model.Currency;
 import ru.clevertec.cleverbank.service.AccountService;
-import ru.clevertec.cleverbank.util.account.AccountRequestTestBuilder;
-import ru.clevertec.cleverbank.util.account.AccountResponseTestBuilder;
+import ru.clevertec.cleverbank.builder.account.AccountRequestTestBuilder;
+import ru.clevertec.cleverbank.builder.account.AccountResponseTestBuilder;
 
 import java.io.PrintWriter;
 import java.math.BigDecimal;

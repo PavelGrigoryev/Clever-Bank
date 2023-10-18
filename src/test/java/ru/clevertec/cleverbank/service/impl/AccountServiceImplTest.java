@@ -23,11 +23,11 @@ import ru.clevertec.cleverbank.model.Bank;
 import ru.clevertec.cleverbank.model.User;
 import ru.clevertec.cleverbank.service.BankService;
 import ru.clevertec.cleverbank.service.UserService;
-import ru.clevertec.cleverbank.util.account.AccountRequestTestBuilder;
-import ru.clevertec.cleverbank.util.account.AccountResponseTestBuilder;
-import ru.clevertec.cleverbank.util.account.AccountTestBuilder;
-import ru.clevertec.cleverbank.util.bank.BankTestBuilder;
-import ru.clevertec.cleverbank.util.user.UserTestBuilder;
+import ru.clevertec.cleverbank.builder.account.AccountRequestTestBuilder;
+import ru.clevertec.cleverbank.builder.account.AccountResponseTestBuilder;
+import ru.clevertec.cleverbank.builder.account.AccountTestBuilder;
+import ru.clevertec.cleverbank.builder.bank.BankTestBuilder;
+import ru.clevertec.cleverbank.builder.user.UserTestBuilder;
 
 import java.math.BigDecimal;
 import java.util.List;

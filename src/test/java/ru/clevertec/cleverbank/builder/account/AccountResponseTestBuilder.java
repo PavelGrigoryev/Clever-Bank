@@ -1,4 +1,4 @@
-package ru.clevertec.cleverbank.util.account;
+package ru.clevertec.cleverbank.builder.account;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -7,9 +7,9 @@ import ru.clevertec.cleverbank.dto.account.AccountResponse;
 import ru.clevertec.cleverbank.dto.bank.BankResponse;
 import ru.clevertec.cleverbank.dto.user.UserResponse;
 import ru.clevertec.cleverbank.model.Currency;
-import ru.clevertec.cleverbank.util.TestBuilder;
-import ru.clevertec.cleverbank.util.bank.BankResponseTestBuilder;
-import ru.clevertec.cleverbank.util.user.UserResponseTestBuilder;
+import ru.clevertec.cleverbank.builder.TestBuilder;
+import ru.clevertec.cleverbank.builder.bank.BankResponseTestBuilder;
+import ru.clevertec.cleverbank.builder.user.UserResponseTestBuilder;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
