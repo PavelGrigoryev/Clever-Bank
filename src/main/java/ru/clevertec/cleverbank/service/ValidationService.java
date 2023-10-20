@@ -25,4 +25,6 @@ public interface ValidationService {
 
     void validateLongFieldForPositive(Long field, String fieldName, List<Violation> violations);
 
+    void validateAccountId(String accountId, String fieldName, List<Violation> violations);
+
 }

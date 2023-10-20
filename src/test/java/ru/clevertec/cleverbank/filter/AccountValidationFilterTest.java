@@ -174,9 +174,9 @@ class AccountValidationFilterTest {
         String json = gson.toJson(accountRequest);
         String expectedMessage = """
                 {"violations":[{"fieldName":"currency","exception":"Available currencies are: BYN, RUB, USD or EUR"},\
-                {"fieldName":"balance","exception":"Field must be grater than 0"},\
-                {"fieldName":"bank_id","exception":"Field must be grater than 0"},\
-                {"fieldName":"user_id","exception":"Field must be grater than 0"}]}""";
+                {"fieldName":"balance","exception":"Field must be greater than 0"},\
+                {"fieldName":"bank_id","exception":"Field must be greater than 0"},\
+                {"fieldName":"user_id","exception":"Field must be greater than 0"}]}""";
 
         doReturn("POST")
                 .when(req)

@@ -140,7 +140,7 @@ class ValidationServiceImplTest {
     void testValidateBigDecimalFieldForPositiveShouldContainsPositiveViolation() {
         BigDecimal field = BigDecimal.ZERO;
         String fieldName = "sum";
-        Violation violation = new Violation(fieldName, "Field must be grater than 0");
+        Violation violation = new Violation(fieldName, "Field must be greater than 0");
         List<Violation> violations = new ArrayList<>();
 
         validationService.validateBigDecimalFieldForPositive(field, fieldName, violations);
@@ -165,7 +165,7 @@ class ValidationServiceImplTest {
     void testValidateLongFieldForPositiveShouldContainsPositiveViolation() {
         long field = -1L;
         String fieldName = "id";
-        Violation violation = new Violation(fieldName, "Field must be grater than 0");
+        Violation violation = new Violation(fieldName, "Field must be greater than 0");
         List<Violation> violations = new ArrayList<>();
 
         validationService.validateLongFieldForPositive(field, fieldName, violations);

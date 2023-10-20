@@ -73,11 +73,12 @@ public class TransactionValidationFilter implements Filter {
         ChangeBalanceRequest request = gson.fromJson(jsonObject.toString(), ChangeBalanceRequest.class);
         List<Violation> violations = new ArrayList<>();
 
+        validationService.validateAccountId(request.accountRecipientId(), "account_recipient_id", violations);
+        validationService.validateAccountId(request.accountSenderId(), "account_sender_id", violations);
         if (request.type() == null || request.type() == Type.TRANSFER) {
             Violation violation = new Violation("type", "Available types are: REPLENISHMENT or WITHDRAWAL");
             violations.add(violation);
         }
-
         validationService.validateBigDecimalFieldForPositive(request.sum(), "sum", violations);
 
         if (!violations.isEmpty()) {
@@ -99,6 +100,8 @@ public class TransactionValidationFilter implements Filter {
         TransferBalanceRequest request = gson.fromJson(jsonObject.toString(), TransferBalanceRequest.class);
         List<Violation> violations = new ArrayList<>();
 
+        validationService.validateAccountId(request.accountRecipientId(), "account_recipient_id", violations);
+        validationService.validateAccountId(request.accountSenderId(), "account_sender_id", violations);
         validationService.validateBigDecimalFieldForPositive(request.sum(), "sum", violations);
 
         if (!violations.isEmpty()) {
@@ -117,7 +120,7 @@ public class TransactionValidationFilter implements Filter {
      * @param jsonObject объект JsonObject, содержащий JSON-данные из тела запроса
      */
     private void validateStatementRequest(HttpServletRequest req, JsonObject jsonObject) {
-        TransactionStatementRequest request = gson.fromJson(jsonObject.toString(), TransactionStatementRequest.class);
+        TransactionStatementRequest request = validateTransactionStatementRequest(jsonObject);
         req.setAttribute("statementRequest", request);
     }
 
@@ -129,8 +132,26 @@ public class TransactionValidationFilter implements Filter {
      * @param jsonObject объект JsonObject, содержащий JSON-данные из тела запроса
      */
     private void validateAmountRequest(HttpServletRequest req, JsonObject jsonObject) {
-        TransactionStatementRequest request = gson.fromJson(jsonObject.toString(), TransactionStatementRequest.class);
+        TransactionStatementRequest request = validateTransactionStatementRequest(jsonObject);
         req.setAttribute("amountRequest", request);
+    }
+
+    /**
+     * Валидирует данные в запросе на изменение суммы транзакции.
+     *
+     * @param jsonObject объект JsonObject, содержащий JSON-данные из тела запроса
+     * @return валидный TransactionStatementRequest
+     */
+    private TransactionStatementRequest validateTransactionStatementRequest(JsonObject jsonObject) {
+        TransactionStatementRequest request = gson.fromJson(jsonObject.toString(), TransactionStatementRequest.class);
+        List<Violation> violations = new ArrayList<>();
+
+        validationService.validateAccountId(request.accountId(), "account_id", violations);
+        if (!violations.isEmpty()) {
+            String validationJson = gson.toJson(new ValidationResponse(violations));
+            throw new ValidationException(validationJson);
+        }
+        return request;
     }
 
     /**

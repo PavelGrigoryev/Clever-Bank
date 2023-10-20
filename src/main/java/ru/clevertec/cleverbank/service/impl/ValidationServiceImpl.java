@@ -119,7 +119,7 @@ public class ValidationServiceImpl implements ValidationService {
             Violation violation = new Violation(fieldName, "Field can not be null");
             violations.add(violation);
         } else if (field.compareTo(BigDecimal.ZERO) <= 0) {
-            Violation violation = new Violation(fieldName, "Field must be grater than 0");
+            Violation violation = new Violation(fieldName, "Field must be greater than 0");
             violations.add(violation);
         }
     }
@@ -137,7 +137,22 @@ public class ValidationServiceImpl implements ValidationService {
             Violation violation = new Violation(fieldName, "Field can not be null");
             violations.add(violation);
         } else if (field <= 0) {
-            Violation violation = new Violation(fieldName, "Field must be grater than 0");
+            Violation violation = new Violation(fieldName, "Field must be greater than 0");
+            violations.add(violation);
+        }
+    }
+
+    /**
+     * Реализует метод validateStringFieldForNullOrEmpty, который проверяет, что поле типа String не null и не пуста.
+     *
+     * @param accountId  String, представляющее поле для проверки
+     * @param fieldName  String, представляющая название поля для проверки
+     * @param violations список объектов Violation, в который добавляются нарушения при проверке поля
+     */
+    @Override
+    public void validateAccountId(String accountId, String fieldName, List<Violation> violations) {
+        if (accountId == null || accountId.isEmpty() || accountId.isBlank()) {
+            Violation violation = new Violation(fieldName, "Field can not be null, blank or empty");
             violations.add(violation);
         }
     }
