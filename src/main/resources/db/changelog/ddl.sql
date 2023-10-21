@@ -42,3 +42,13 @@ CREATE TABLE IF NOT EXISTS transactions
     account_recipient_id VARCHAR(40) NOT NULL,
     sum                  NUMERIC     NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS nb_rb_currency
+(
+    id          BIGSERIAL PRIMARY KEY,
+    currency_id INT     NOT NULL,
+    currency    VARCHAR NOT NULL,
+    scale       INT     NOT NULL,
+    rate        NUMERIC NOT NULL,
+    update_date DATE    NOT NULL
+);

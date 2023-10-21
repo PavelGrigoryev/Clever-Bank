@@ -7,3 +7,7 @@ scheduler:
   monthPercentage: "1.0"
   initialDelay: "10"
   period: "30"
+NbRBScheduler:
+  url: "https://api.nbrb.by/exrates/rates/"
+  initialDelay: "6"
+  period: "3600"
