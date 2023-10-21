@@ -1,6 +1,7 @@
 package ru.clevertec.cleverbank.dto.transaction;
 
 import com.google.gson.annotations.SerializedName;
+import ru.clevertec.cleverbank.model.Type;
 
 import java.math.BigDecimal;
 
@@ -10,5 +11,6 @@ public record TransferBalanceRequest(@SerializedName("account_sender_id")
                                      @SerializedName("account_recipient_id")
                                      String accountRecipientId,
 
-                                     BigDecimal sum) {
+                                     BigDecimal sum,
+                                     Type type) {
 }

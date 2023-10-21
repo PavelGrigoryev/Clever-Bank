@@ -23,6 +23,7 @@ public class Transaction {
     private Long bankRecipientId;
     private String accountSenderId;
     private String accountRecipientId;
-    private BigDecimal sum;
+    private BigDecimal sumSender;
+    private BigDecimal sumRecipient;
 
 }

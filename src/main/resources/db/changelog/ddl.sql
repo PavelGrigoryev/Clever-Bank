@@ -40,7 +40,8 @@ CREATE TABLE IF NOT EXISTS transactions
     bank_recipient_id    BIGINT      NOT NULL,
     account_sender_id    VARCHAR(40) NOT NULL,
     account_recipient_id VARCHAR(40) NOT NULL,
-    sum                  NUMERIC     NOT NULL
+    sum_sender           NUMERIC     NOT NULL,
+    sum_recipient        NUMERIC     NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS nb_rb_currency

@@ -9,7 +9,8 @@ public enum Type {
 
     REPLENISHMENT("Пополнение"),
     WITHDRAWAL("Снятие"),
-    TRANSFER("Перевод");
+    TRANSFER("Перевод"),
+    EXCHANGE("Обмен");
 
     private final String name;
 

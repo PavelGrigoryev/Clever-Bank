@@ -16,5 +16,9 @@ public record TransactionStatement(@JsonAdapter(LocalDateAdapter.class)
                                    @SerializedName("user_lastname")
                                    String userLastname,
 
-                                   BigDecimal sum) {
+                                   @SerializedName("sum_sender")
+                                   BigDecimal sumSender,
+
+                                   @SerializedName("sum_recipient")
+                                   BigDecimal sumRecipient) {
 }

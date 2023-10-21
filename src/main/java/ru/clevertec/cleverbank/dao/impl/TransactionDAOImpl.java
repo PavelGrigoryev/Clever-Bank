@@ -96,8 +96,8 @@ public class TransactionDAOImpl implements TransactionDAO {
     public Transaction save(Transaction transaction) {
         String sql = """
                 INSERT INTO transactions
-                (date, time, type, bank_sender_id, bank_recipient_id, account_sender_id, account_recipient_id, sum)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                (date, time, type, bank_sender_id, bank_recipient_id, account_sender_id, account_recipient_id, sum_sender, sum_recipient)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             setTransactionValuesInStatement(preparedStatement, transaction);
@@ -128,7 +128,7 @@ public class TransactionDAOImpl implements TransactionDAO {
     public List<TransactionStatement> findAllByPeriodOfDateAndAccountId(LocalDate from, LocalDate to, String id) {
         List<TransactionStatement> statements = new ArrayList<>();
         String sql = """
-                SELECT t.date, t.type, u.lastname, t.sum FROM transactions t
+                SELECT t.date, t.type, u.lastname, t.sum_sender, t.sum_recipient FROM transactions t
                 JOIN accounts a ON t.account_sender_id = a.id
                 JOIN accounts b ON t.account_recipient_id = b.id
                 JOIN users u ON a.user_id = u.id
@@ -146,7 +146,8 @@ public class TransactionDAOImpl implements TransactionDAO {
                             resultSet.getDate("date").toLocalDate(),
                             Type.valueOf(resultSet.getString("type")),
                             resultSet.getString("lastname"),
-                            resultSet.getBigDecimal("sum"));
+                            resultSet.getBigDecimal("sum_sender"),
+                            resultSet.getBigDecimal("sum_recipient"));
                     statements.add(statement);
                 }
             }
@@ -171,9 +172,10 @@ public class TransactionDAOImpl implements TransactionDAO {
     public BigDecimal findSumOfSpentFundsByPeriodOfDateAndAccountId(LocalDate from, LocalDate to, String id) {
         BigDecimal spentFunds = BigDecimal.ZERO;
         String sql = """
-                SELECT SUM(sum) AS spent FROM transactions
+                SELECT SUM(sum_sender) AS spent FROM transactions
                 WHERE date BETWEEN ? AND ?
-                AND ((account_sender_id = ? AND type = 'TRANSFER') OR (account_recipient_id = ? AND type = 'WITHDRAWAL'))
+                AND ((account_sender_id = ? AND type IN ('TRANSFER', 'EXCHANGE'))
+                OR (account_recipient_id = ? AND type = 'WITHDRAWAL'))
                 """;
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setObject(1, from);
@@ -206,7 +208,7 @@ public class TransactionDAOImpl implements TransactionDAO {
     public BigDecimal findSumOfReceivedFundsByPeriodOfDateAndAccountId(LocalDate from, LocalDate to, String id) {
         BigDecimal receivedFunds = BigDecimal.ZERO;
         String sql = """
-                SELECT SUM(sum) AS received FROM transactions
+                SELECT SUM(sum_recipient) AS received FROM transactions
                 WHERE date BETWEEN ? AND ?
                 AND (account_recipient_id = ? AND type != 'WITHDRAWAL')
                 """;
@@ -262,7 +264,8 @@ public class TransactionDAOImpl implements TransactionDAO {
                 .bankRecipientId(resultSet.getLong("bank_recipient_id"))
                 .accountSenderId(resultSet.getString("account_sender_id"))
                 .accountRecipientId(resultSet.getString("account_recipient_id"))
-                .sum(resultSet.getBigDecimal("sum"))
+                .sumSender(resultSet.getBigDecimal("sum_sender"))
+                .sumRecipient(resultSet.getBigDecimal("sum_recipient"))
                 .build();
     }
 
@@ -274,7 +277,8 @@ public class TransactionDAOImpl implements TransactionDAO {
         preparedStatement.setLong(5, transaction.getBankRecipientId());
         preparedStatement.setString(6, transaction.getAccountSenderId());
         preparedStatement.setString(7, transaction.getAccountRecipientId());
-        preparedStatement.setBigDecimal(8, transaction.getSum());
+        preparedStatement.setBigDecimal(8, transaction.getSumSender());
+        preparedStatement.setBigDecimal(9, transaction.getSumRecipient());
     }
 
 }

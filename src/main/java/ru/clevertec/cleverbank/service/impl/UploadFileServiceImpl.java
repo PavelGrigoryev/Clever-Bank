@@ -62,7 +62,7 @@ public class UploadFileServiceImpl implements UploadFileService {
     private static Path writeFile(String file, Path path) {
         log.info("File download link: {}", path);
         try {
-            return Files.write(path, file.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            return Files.write(path, file.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         } catch (IOException e) {
             log.error(e.getMessage());
             throw new UploadFileException("Sorry! We got Server upload file problems");

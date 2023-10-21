@@ -8,6 +8,7 @@ import ru.clevertec.cleverbank.dao.impl.TransactionDAOImpl;
 import ru.clevertec.cleverbank.dto.transaction.AmountStatementResponse;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceRequest;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceResponse;
+import ru.clevertec.cleverbank.dto.transaction.ExchangeBalanceResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransactionResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransactionStatement;
 import ru.clevertec.cleverbank.dto.transaction.TransactionStatementRequest;
@@ -24,6 +25,7 @@ import ru.clevertec.cleverbank.model.Type;
 import ru.clevertec.cleverbank.model.User;
 import ru.clevertec.cleverbank.service.AccountService;
 import ru.clevertec.cleverbank.service.CheckService;
+import ru.clevertec.cleverbank.service.NbRBCurrencyService;
 import ru.clevertec.cleverbank.service.TransactionService;
 import ru.clevertec.cleverbank.service.UploadFileService;
 import ru.clevertec.cleverbank.service.ValidationService;
@@ -43,6 +45,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final CheckService checkService;
     private final UploadFileService uploadFileService;
     private final ValidationService validationService;
+    private final NbRBCurrencyService nbRBCurrencyService;
     private final Connection connection;
 
     public TransactionServiceImpl() {
@@ -53,6 +56,7 @@ public class TransactionServiceImpl implements TransactionService {
         uploadFileService = new UploadFileServiceImpl();
         validationService = new ValidationServiceImpl();
         connection = HikariConnectionManager.getConnection();
+        nbRBCurrencyService = new NbRBCurrencyServiceImpl();
     }
 
     /**
@@ -129,6 +133,43 @@ public class TransactionServiceImpl implements TransactionService {
                     accountSender.getCurrency(), bankSender.getName(), bankRecipient.getName(), senderOldBalance,
                     senderNewBalance, recipientOldBalance, recipientNewBalance);
             String check = checkService.createTransferBalanceCheck(response);
+            uploadFileService.uploadCheck(check);
+            return response;
+        } catch (Exception e) {
+            connection.rollback();
+            throw new TransactionException("Transaction rollback, cause: " + e.getMessage());
+        } finally {
+            connection.setAutoCommit(true);
+        }
+    }
+
+    @Override
+    @ServiceLoggable
+    public ExchangeBalanceResponse exchangeBalance(TransferBalanceRequest request) throws SQLException {
+        connection.setAutoCommit(false);
+        try {
+            Account accountSender = accountService.findById(request.accountSenderId());
+            BigDecimal senderOldBalance = accountSender.getBalance();
+            validationService.validateAccountForClosingDate(accountSender.getClosingDate(), accountSender.getId());
+            validationService.validateAccountForSufficientBalance(Type.EXCHANGE, request.sum(), senderOldBalance);
+            Account accountRecipient = accountService.findById(request.accountRecipientId());
+            BigDecimal recipientOldBalance = accountRecipient.getBalance();
+            validationService.validateAccountForClosingDate(accountRecipient.getClosingDate(), accountRecipient.getId());
+            BigDecimal exchangedSum = nbRBCurrencyService
+                    .exchangeSumByCurrency(accountSender.getCurrency(), accountRecipient.getCurrency(), request.sum());
+            Account updatedAccountSender = accountService
+                    .updateBalance(accountSender, accountSender.getBalance().subtract(request.sum()));
+            Account updatedAccountRecipient = accountService
+                    .updateBalance(accountRecipient, accountRecipient.getBalance().add(exchangedSum));
+            Transaction transaction = transactionMapper.toExchangeTransaction(Type.EXCHANGE, accountSender.getBank().getId(),
+                    accountRecipient.getBank().getId(), accountSender.getId(), accountRecipient.getId(), request.sum(),
+                    exchangedSum);
+            Transaction savedTransaction = transactionDAO.save(transaction);
+            ExchangeBalanceResponse response = transactionMapper.toExchangeResponse(savedTransaction,
+                    accountSender.getCurrency(), accountRecipient.getCurrency(), accountSender.getBank().getName(),
+                    accountRecipient.getBank().getName(), senderOldBalance, updatedAccountSender.getBalance(),
+                    recipientOldBalance, updatedAccountRecipient.getBalance());
+            String check = checkService.createExchangeBalanceCheck(response);
             uploadFileService.uploadCheck(check);
             return response;
         } catch (Exception e) {

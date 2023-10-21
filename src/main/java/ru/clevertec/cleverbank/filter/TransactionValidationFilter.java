@@ -49,15 +49,17 @@ public class TransactionValidationFilter implements Filter {
             validationService.validateRequestForNull(jsonObject, "Transaction", gson);
             if (jsonObject.has("type")) {
                 validateChangeBalanceRequest(req, jsonObject);
-            } else if (jsonObject.has("from")) {
-                validateStatementRequest(req, jsonObject);
             } else {
-                validateTransferBalanceRequest(req, jsonObject);
+                validateStatementRequest(req, jsonObject);
             }
         } else if ("PUT".equalsIgnoreCase(req.getMethod())) {
             JsonObject jsonObject = gson.fromJson(extractJsonFromBody(req), JsonObject.class);
             validationService.validateRequestForNull(jsonObject, "Transaction", gson);
-            validateAmountRequest(req, jsonObject);
+            if (jsonObject.has("type")) {
+                validateTransferBalanceRequest(req, jsonObject);
+            } else {
+                validateAmountRequest(req, jsonObject);
+            }
         }
         chain.doFilter(request, response);
     }
@@ -75,7 +77,7 @@ public class TransactionValidationFilter implements Filter {
 
         validationService.validateAccountId(request.accountRecipientId(), "account_recipient_id", violations);
         validationService.validateAccountId(request.accountSenderId(), "account_sender_id", violations);
-        if (request.type() == null || request.type() == Type.TRANSFER) {
+        if (request.type() == null || request.type() == Type.TRANSFER || request.type() == Type.EXCHANGE) {
             Violation violation = new Violation("type", "Available types are: REPLENISHMENT or WITHDRAWAL");
             violations.add(violation);
         }
@@ -102,6 +104,10 @@ public class TransactionValidationFilter implements Filter {
 
         validationService.validateAccountId(request.accountRecipientId(), "account_recipient_id", violations);
         validationService.validateAccountId(request.accountSenderId(), "account_sender_id", violations);
+        if (request.type() == null || request.type() == Type.REPLENISHMENT || request.type() == Type.WITHDRAWAL) {
+            Violation violation = new Violation("type", "Available types are: TRANSFER or EXCHANGE");
+            violations.add(violation);
+        }
         validationService.validateBigDecimalFieldForPositive(request.sum(), "sum", violations);
 
         if (!violations.isEmpty()) {

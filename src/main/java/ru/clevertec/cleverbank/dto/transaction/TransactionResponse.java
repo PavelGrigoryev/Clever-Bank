@@ -32,5 +32,9 @@ public record TransactionResponse(Long id,
                                   @SerializedName("account_recipient_id")
                                   String accountRecipientId,
 
-                                  BigDecimal sum) {
+                                  @SerializedName("sum_sender")
+                                  BigDecimal sumSender,
+
+                                  @SerializedName("sum_recipient")
+                                  BigDecimal sumRecipient) {
 }

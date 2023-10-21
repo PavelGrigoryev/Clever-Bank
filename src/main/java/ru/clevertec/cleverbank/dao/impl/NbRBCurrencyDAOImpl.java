@@ -35,15 +35,17 @@ public class NbRBCurrencyDAOImpl implements NbRBCurrencyDAO {
     @Override
     public Optional<NbRBCurrency> findByCurrencyId(Integer currencyId) {
         String sql = """
-                SELECT * FROM nb_rb_currency
-                WHERE currency_id = ?
-                AND update_date = (SELECT max(update_date) WHERE currency_id = ?)
-                LIMIT 1
+                SELECT n.* FROM nb_rb_currency n
+                JOIN (SELECT currency_id, max(update_date) AS max_date
+                FROM nb_rb_currency
+                GROUP BY currency_id) m
+                ON n.currency_id = m.currency_id AND n.update_date = m.max_date
+                WHERE n.currency_id = ?
+                LIMIT 1;
                 """;
         Optional<NbRBCurrency> nbRBCurrency = Optional.empty();
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setInt(1, currencyId);
-            preparedStatement.setInt(2, currencyId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     nbRBCurrency = Optional.of(getNbRBCurrencyFromResultSet(resultSet));

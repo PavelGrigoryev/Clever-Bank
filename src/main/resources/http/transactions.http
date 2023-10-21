@@ -10,13 +10,25 @@ Content-Type: application/json
 }
 
 ###перевод с одного счёта на другой
-POST http://localhost:8080/transactions
+PUT http://localhost:8080/transactions
 Content-Type: application/json
 
 {
   "account_sender_id": "0J2O 6O3P 1CUB VZUT 91SJ X3FU MUR4",
   "account_recipient_id": "G5QZ 6B43 A6XG AHNK CO6S PSO6 718Q",
-  "sum": 1200
+  "sum": 1200,
+  "type": "TRANSFER"
+}
+
+###перевод с одного счёта на другой с обменом валют по курсу НБ РБ
+PUT http://localhost:8080/transactions
+Content-Type: application/json
+
+{
+  "account_sender_id": "G5QZ 6B43 A6XG AHNK CO6S PSO6 718Q",
+  "account_recipient_id": "FUCB OY0M VHZ4 U8Y6 11DQ RQ3Y 5T62",
+  "sum": 10,
+  "type": "EXCHANGE"
 }
 
 ###формирования выписки по транзакциям пользователя за период времени
@@ -24,8 +36,8 @@ POST http://localhost:8080/transactions
 Content-Type: application/json
 
 {
-  "from": "2023-09-02",
-  "to": "2023-09-02",
+  "from": "2023-10-22",
+  "to": "2023-10-22",
   "account_id": "G5QZ 6B43 A6XG AHNK CO6S PSO6 718Q"
 }
 
@@ -34,8 +46,8 @@ PUT http://localhost:8080/transactions
 Content-Type: application/json
 
 {
-  "from": "2023-09-02",
-  "to": "2023-09-02",
+  "from": "2023-10-22",
+  "to": "2023-10-22",
   "account_id": "G5QZ 6B43 A6XG AHNK CO6S PSO6 718Q"
 }
 
