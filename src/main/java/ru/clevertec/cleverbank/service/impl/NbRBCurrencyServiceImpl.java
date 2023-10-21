@@ -13,7 +13,6 @@ import ru.clevertec.cleverbank.service.NbRBCurrencyService;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.function.Supplier;
 
 @AllArgsConstructor
 public class NbRBCurrencyServiceImpl implements NbRBCurrencyService {
@@ -36,7 +35,8 @@ public class NbRBCurrencyServiceImpl implements NbRBCurrencyService {
     @Override
     public NbRBCurrency findByCurrencyId(Integer currencyId) {
         return nbRBCurrencyDAO.findByCurrencyId(currencyId)
-                .orElseThrow(throwNbRBCurrencyNotFoundException(currencyId));
+                .orElseThrow(() -> new NbRBCurrencyNotFoundException("NbRBCurrency with currencyId " + currencyId
+                                                                     + " is not found!"));
     }
 
     /**
@@ -65,30 +65,22 @@ public class NbRBCurrencyServiceImpl implements NbRBCurrencyService {
         if (currencySender.equals(currencyRecipient)) {
             return sum;
         } else if (currencyRecipient.equals(Currency.BYN)) {
-            return nbRBCurrencyDAO.findByCurrencyId(currencySender.getCode())
-                    .map(nbRBCurrency -> sum.multiply(nbRBCurrency.getRate())
-                            .divide(BigDecimal.valueOf(nbRBCurrency.getScale()), 2, RoundingMode.UP))
-                    .orElseThrow(throwNbRBCurrencyNotFoundException(currencySender.getCode()));
+            NbRBCurrency nbRBCurrency = findByCurrencyId(currencySender.getCode());
+            return sum.multiply(nbRBCurrency.getRate())
+                    .divide(BigDecimal.valueOf(nbRBCurrency.getScale()), 2, RoundingMode.UP);
         } else if (currencySender.equals(Currency.BYN)) {
-            return nbRBCurrencyDAO.findByCurrencyId(currencyRecipient.getCode())
-                    .map(nbRbCurrency -> sum.divide(nbRbCurrency.getRate(), 2, RoundingMode.UP)
-                            .multiply(BigDecimal.valueOf(nbRbCurrency.getScale())))
-                    .orElseThrow(throwNbRBCurrencyNotFoundException(currencyRecipient.getCode()));
+            NbRBCurrency nbRBCurrency = findByCurrencyId(currencyRecipient.getCode());
+            return sum.divide(nbRBCurrency.getRate(), 2, RoundingMode.UP)
+                    .multiply(BigDecimal.valueOf(nbRBCurrency.getScale()));
         } else {
-            NbRBCurrency nbRBCurrencySender = nbRBCurrencyDAO.findByCurrencyId(currencySender.getCode())
-                    .orElseThrow(throwNbRBCurrencyNotFoundException(currencySender.getCode()));
-            NbRBCurrency nbRBCurrencyRecipient = nbRBCurrencyDAO.findByCurrencyId(currencyRecipient.getCode())
-                    .orElseThrow(throwNbRBCurrencyNotFoundException(currencyRecipient.getCode()));
+            NbRBCurrency nbRBCurrencySender = findByCurrencyId(currencySender.getCode());
+            NbRBCurrency nbRBCurrencyRecipient = findByCurrencyId(currencyRecipient.getCode());
             return sum.multiply(nbRBCurrencySender.getRate())
                     .divide(BigDecimal.valueOf(nbRBCurrencySender.getScale()), 2, RoundingMode.UP)
                     .divide(nbRBCurrencyRecipient.getRate(), 2, RoundingMode.UP)
                     .multiply(BigDecimal.valueOf(nbRBCurrencyRecipient.getScale()))
                     .setScale(2, RoundingMode.UP);
         }
-    }
-
-    private static Supplier<NbRBCurrencyNotFoundException> throwNbRBCurrencyNotFoundException(Integer currencyId) {
-        return () -> new NbRBCurrencyNotFoundException("NbRBCurrency with currencyId " + currencyId + " is not found!");
     }
 
 }
