@@ -16,7 +16,7 @@ public class NbRBCurrency {
 
     private Long id;
     private Integer currencyId;
-    private String currency;
+    private Currency currency;
     private Integer scale;
     private BigDecimal rate;
     private LocalDate updateDate;

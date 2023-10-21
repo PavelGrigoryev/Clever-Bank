@@ -5,13 +5,11 @@ import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
 import lombok.extern.slf4j.Slf4j;
-import org.mapstruct.factory.Mappers;
-import ru.clevertec.cleverbank.dao.NbRBCurrencyDAO;
-import ru.clevertec.cleverbank.dao.impl.NbRBCurrencyDAOImpl;
 import ru.clevertec.cleverbank.dto.nbrbcurrency.NbRBCurrencyResponse;
-import ru.clevertec.cleverbank.mapper.NbRBCurrencyMapper;
 import ru.clevertec.cleverbank.model.Currency;
 import ru.clevertec.cleverbank.model.NbRBCurrency;
+import ru.clevertec.cleverbank.service.NbRBCurrencyService;
+import ru.clevertec.cleverbank.service.impl.NbRBCurrencyServiceImpl;
 import ru.clevertec.cleverbank.util.YamlUtil;
 
 import java.io.BufferedReader;
@@ -33,16 +31,14 @@ public class NbRBCurrencyListener implements ServletContextListener {
 
     private final ScheduledExecutorService scheduler;
     private final Lock lock;
-    private final NbRBCurrencyDAO nbRBCurrencyDAO;
+    private final NbRBCurrencyService nbRBCurrencyService;
     private final Gson gson;
-    private final NbRBCurrencyMapper currencyMapper;
 
     public NbRBCurrencyListener() {
         scheduler = Executors.newScheduledThreadPool(3);
         lock = new ReentrantLock();
-        nbRBCurrencyDAO = new NbRBCurrencyDAOImpl();
+        nbRBCurrencyService = new NbRBCurrencyServiceImpl();
         gson = new Gson();
-        currencyMapper = Mappers.getMapper(NbRBCurrencyMapper.class);
     }
 
     /**
@@ -75,9 +71,8 @@ public class NbRBCurrencyListener implements ServletContextListener {
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 String result = readResponseFromNbRB(connection);
                 NbRBCurrencyResponse response = gson.fromJson(result, NbRBCurrencyResponse.class);
-                NbRBCurrency nbRBCurrency = currencyMapper.fromResponse(response);
                 lock.lock();
-                NbRBCurrency saved = nbRBCurrencyDAO.save(nbRBCurrency);
+                NbRBCurrency saved = nbRBCurrencyService.save(response);
                 lock.unlock();
                 log.info("Saving currency on schedule:\n{}", saved);
             } else {

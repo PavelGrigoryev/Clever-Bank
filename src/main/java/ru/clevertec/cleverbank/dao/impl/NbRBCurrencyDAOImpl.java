@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.clevertec.cleverbank.dao.NbRBCurrencyDAO;
 import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
+import ru.clevertec.cleverbank.model.Currency;
 import ru.clevertec.cleverbank.model.NbRBCurrency;
 import ru.clevertec.cleverbank.util.HikariConnectionManager;
 
@@ -12,6 +13,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Optional;
 
 @Slf4j
 @AllArgsConstructor
@@ -21,6 +23,37 @@ public class NbRBCurrencyDAOImpl implements NbRBCurrencyDAO {
 
     public NbRBCurrencyDAOImpl() {
         connection = HikariConnectionManager.getConnection();
+    }
+
+    /**
+     * Находит курс валюты НБ РБ по ее currencyId в базе данных и возвращает ее в виде объекта Optional.
+     *
+     * @param currencyId Integer, представляющее идентификатор курса по НБ РБ
+     * @return объект Optional, содержащий курс, если он найден, или пустой, если нет
+     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     */
+    @Override
+    public Optional<NbRBCurrency> findByCurrencyId(Integer currencyId) {
+        String sql = """
+                SELECT * FROM nb_rb_currency
+                WHERE currency_id = ?
+                AND update_date = (SELECT max(update_date) WHERE currency_id = ?)
+                LIMIT 1
+                """;
+        Optional<NbRBCurrency> nbRBCurrency = Optional.empty();
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, currencyId);
+            preparedStatement.setInt(2, currencyId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    nbRBCurrency = Optional.of(getNbRBCurrencyFromResultSet(resultSet));
+                }
+            }
+        } catch (SQLException e) {
+            log.error(e.getMessage());
+            throw new JDBCConnectionException();
+        }
+        return nbRBCurrency;
     }
 
     /**
@@ -52,9 +85,20 @@ public class NbRBCurrencyDAOImpl implements NbRBCurrencyDAO {
         return nbRBCurrency;
     }
 
+    private NbRBCurrency getNbRBCurrencyFromResultSet(ResultSet resultSet) throws SQLException {
+        return NbRBCurrency.builder()
+                .id(resultSet.getLong("id"))
+                .currencyId(resultSet.getInt("currency_id"))
+                .currency(Currency.valueOf(resultSet.getString("currency")))
+                .scale(resultSet.getInt("scale"))
+                .rate(resultSet.getBigDecimal("rate"))
+                .updateDate(resultSet.getDate("update_date").toLocalDate())
+                .build();
+    }
+
     private void setNbRBCurrencyValuesInStatement(PreparedStatement preparedStatement, NbRBCurrency nbRBCurrency) throws SQLException {
         preparedStatement.setInt(1, nbRBCurrency.getCurrencyId());
-        preparedStatement.setString(2, nbRBCurrency.getCurrency());
+        preparedStatement.setString(2, String.valueOf(nbRBCurrency.getCurrency()));
         preparedStatement.setInt(3, nbRBCurrency.getScale());
         preparedStatement.setBigDecimal(4, nbRBCurrency.getRate());
         preparedStatement.setObject(5, nbRBCurrency.getUpdateDate());
