@@ -10,4 +10,4 @@ scheduler:
 NbRBScheduler:
   url: "https://api.nbrb.by/exrates/rates/"
   initialDelay: "6"
-  period: "3600"
+  period: "86400"

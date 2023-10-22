@@ -47,9 +47,9 @@ CREATE TABLE IF NOT EXISTS transactions
 CREATE TABLE IF NOT EXISTS nb_rb_currency
 (
     id          BIGSERIAL PRIMARY KEY,
-    currency_id INT     NOT NULL,
-    currency    VARCHAR NOT NULL,
-    scale       INT     NOT NULL,
-    rate        NUMERIC NOT NULL,
-    update_date DATE    NOT NULL
+    currency_id INT       NOT NULL,
+    currency    VARCHAR   NOT NULL,
+    scale       INT       NOT NULL,
+    rate        NUMERIC   NOT NULL,
+    update_date TIMESTAMP NOT NULL
 );

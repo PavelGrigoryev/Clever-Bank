@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -19,6 +19,6 @@ public class NbRBCurrency {
     private Currency currency;
     private Integer scale;
     private BigDecimal rate;
-    private LocalDate updateDate;
+    private LocalDateTime updateDate;
 
 }
