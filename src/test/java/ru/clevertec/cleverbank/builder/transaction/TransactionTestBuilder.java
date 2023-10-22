@@ -25,7 +25,8 @@ public class TransactionTestBuilder implements TestBuilder<Transaction> {
     private Long bankRecipientId = 4L;
     private String accountSenderId = "5X92 ISKH ZUAT 2YF5 D0A9 C2Z4 7UIZ";
     private String accountRecipientId = "55JN NKDA XKNN Z0QV 5LGL FXF7 XJT9";
-    private BigDecimal sum = BigDecimal.valueOf(2000);
+    private BigDecimal sumSender = BigDecimal.valueOf(2000);
+    private BigDecimal sumRecipient = BigDecimal.valueOf(2000);
 
     @Override
     public Transaction build() {
@@ -38,7 +39,8 @@ public class TransactionTestBuilder implements TestBuilder<Transaction> {
                 .bankRecipientId(bankRecipientId)
                 .accountSenderId(accountSenderId)
                 .accountRecipientId(accountRecipientId)
-                .sum(sum)
+                .sumSender(sumSender)
+                .sumRecipient(sumRecipient)
                 .build();
     }
 

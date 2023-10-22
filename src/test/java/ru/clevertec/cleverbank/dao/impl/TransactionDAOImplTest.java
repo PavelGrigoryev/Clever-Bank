@@ -292,8 +292,8 @@ class TransactionDAOImplTest {
         void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
             String sql = """
                     INSERT INTO transactions
-                    (date, time, type, bank_sender_id, bank_recipient_id, account_sender_id, account_recipient_id, sum)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    (date, time, type, bank_sender_id, bank_recipient_id, account_sender_id, account_recipient_id, sum_sender, sum_recipient)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """;
             Transaction transaction = TransactionTestBuilder.aTransaction().build();
             String expectedMessage = "Sorry! We got Server database connection problems";
@@ -314,8 +314,8 @@ class TransactionDAOImplTest {
         void testShouldReturnExpectedResponse() {
             String sql = """
                     INSERT INTO transactions
-                    (date, time, type, bank_sender_id, bank_recipient_id, account_sender_id, account_recipient_id, sum)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    (date, time, type, bank_sender_id, bank_recipient_id, account_sender_id, account_recipient_id, sum_sender, sum_recipient)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """;
             Transaction transaction = TransactionTestBuilder.aTransaction().build();
 
@@ -351,7 +351,7 @@ class TransactionDAOImplTest {
         @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
         void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
             String sql = """
-                    SELECT t.date, t.type, u.lastname, t.sum FROM transactions t
+                    SELECT t.date, t.type, u.lastname, t.sum_sender, t.sum_recipient FROM transactions t
                     JOIN accounts a ON t.account_sender_id = a.id
                     JOIN accounts b ON t.account_recipient_id = b.id
                     JOIN users u ON a.user_id = u.id
@@ -379,7 +379,7 @@ class TransactionDAOImplTest {
         @DisplayName("test should return list of size one")
         void testShouldReturnListOfSizeOne() {
             String sql = """
-                    SELECT t.date, t.type, u.lastname, t.sum FROM transactions t
+                    SELECT t.date, t.type, u.lastname, t.sum_sender, t.sum_recipient FROM transactions t
                     JOIN accounts a ON t.account_sender_id = a.id
                     JOIN accounts b ON t.account_recipient_id = b.id
                     JOIN users u ON a.user_id = u.id
@@ -414,7 +414,7 @@ class TransactionDAOImplTest {
         @DisplayName("test should return list that contains expected response")
         void testShouldReturnListThatContainsExpectedResponse() {
             String sql = """
-                    SELECT t.date, t.type, u.lastname, t.sum FROM transactions t
+                    SELECT t.date, t.type, u.lastname, t.sum_sender, t.sum_recipient FROM transactions t
                     JOIN accounts a ON t.account_sender_id = a.id
                     JOIN accounts b ON t.account_recipient_id = b.id
                     JOIN users u ON a.user_id = u.id
@@ -448,7 +448,7 @@ class TransactionDAOImplTest {
         @DisplayName("test should return empty list")
         void testShouldReturnEmptyList() {
             String sql = """
-                    SELECT t.date, t.type, u.lastname, t.sum FROM transactions t
+                    SELECT t.date, t.type, u.lastname, t.sum_sender, t.sum_recipient FROM transactions t
                     JOIN accounts a ON t.account_sender_id = a.id
                     JOIN accounts b ON t.account_recipient_id = b.id
                     JOIN users u ON a.user_id = u.id
@@ -485,9 +485,10 @@ class TransactionDAOImplTest {
         @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
         void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
             String sql = """
-                    SELECT SUM(sum) AS spent FROM transactions
+                    SELECT SUM(sum_sender) AS spent FROM transactions
                     WHERE date BETWEEN ? AND ?
-                    AND ((account_sender_id = ? AND type = 'TRANSFER') OR (account_recipient_id = ? AND type = 'WITHDRAWAL'))
+                    AND ((account_sender_id = ? AND type IN ('TRANSFER', 'EXCHANGE'))
+                    OR (account_recipient_id = ? AND type = 'WITHDRAWAL'))
                     """;
             String id = "OYXM ZJ38 HR36 FQAO C21J 6ERX SEJE";
             LocalDate from = LocalDate.of(2020, Month.APRIL, 12);
@@ -510,9 +511,10 @@ class TransactionDAOImplTest {
         @DisplayName("test should return expected response")
         void testShouldReturnExpectedResponse() {
             String sql = """
-                    SELECT SUM(sum) AS spent FROM transactions
+                    SELECT SUM(sum_sender) AS spent FROM transactions
                     WHERE date BETWEEN ? AND ?
-                    AND ((account_sender_id = ? AND type = 'TRANSFER') OR (account_recipient_id = ? AND type = 'WITHDRAWAL'))
+                    AND ((account_sender_id = ? AND type IN ('TRANSFER', 'EXCHANGE'))
+                    OR (account_recipient_id = ? AND type = 'WITHDRAWAL'))
                     """;
             BigDecimal expected = BigDecimal.TEN;
             String id = "OYXM ZJ38 HR36 FQAO C21J 6ERX SEJE";
@@ -548,7 +550,7 @@ class TransactionDAOImplTest {
         @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
         void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
             String sql = """
-                    SELECT SUM(sum) AS received FROM transactions
+                    SELECT SUM(sum_recipient) AS received FROM transactions
                     WHERE date BETWEEN ? AND ?
                     AND (account_recipient_id = ? AND type != 'WITHDRAWAL')
                     """;
@@ -573,7 +575,7 @@ class TransactionDAOImplTest {
         @DisplayName("test should return expected response")
         void testShouldReturnExpectedResponse() {
             String sql = """
-                    SELECT SUM(sum) AS received FROM transactions
+                    SELECT SUM(sum_recipient) AS received FROM transactions
                     WHERE date BETWEEN ? AND ?
                     AND (account_recipient_id = ? AND type != 'WITHDRAWAL')
                     """;
@@ -636,9 +638,12 @@ class TransactionDAOImplTest {
         doReturn(statement.userLastname())
                 .when(resultSet)
                 .getString("lastname");
-        doReturn(statement.sum())
+        doReturn(statement.sumSender())
                 .when(resultSet)
-                .getBigDecimal("sum");
+                .getBigDecimal("sum_sender");
+        doReturn(statement.sumRecipient())
+                .when(resultSet)
+                .getBigDecimal("sum_recipient");
     }
 
     private void setMockedTransactionInStatement(Transaction transaction) throws SQLException {
@@ -665,7 +670,10 @@ class TransactionDAOImplTest {
                 .setString(7, transaction.getAccountRecipientId());
         doNothing()
                 .when(preparedStatement)
-                .setBigDecimal(8, transaction.getSum());
+                .setBigDecimal(8, transaction.getSumSender());
+        doNothing()
+                .when(preparedStatement)
+                .setBigDecimal(9, transaction.getSumRecipient());
     }
 
     private void getMockedTransactionFromResultSet(Transaction transaction) throws SQLException {
@@ -693,9 +701,12 @@ class TransactionDAOImplTest {
         doReturn(transaction.getAccountRecipientId())
                 .when(resultSet)
                 .getString("account_recipient_id");
-        doReturn(transaction.getSum())
+        doReturn(transaction.getSumSender())
                 .when(resultSet)
-                .getBigDecimal("sum");
+                .getBigDecimal("sum_sender");
+        doReturn(transaction.getSumRecipient())
+                .when(resultSet)
+                .getBigDecimal("sum_recipient");
     }
 
 }

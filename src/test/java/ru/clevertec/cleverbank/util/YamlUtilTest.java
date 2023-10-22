@@ -56,4 +56,23 @@ class YamlUtilTest {
         );
     }
 
+    @Test
+    @DisplayName("test should return Map of NbRBScheduler params")
+    void testShouldReturnMapOfNbRBSchedulerParams() {
+        Map<String, String> shedulerMap = new YamlUtil().getYamlMap().get("NbRBScheduler");
+        String expectedUrl = "https://api.nbrb.by/exrates/rates/";
+        String expectedInitialDelay = "6";
+        String expectedPeriod = "86400";
+
+        String actualUrl = shedulerMap.get("url");
+        String actualInitialDelay = shedulerMap.get("initialDelay");
+        String actualPeriod = shedulerMap.get("period");
+
+        assertAll(
+                () -> assertThat(actualUrl).isEqualTo(expectedUrl),
+                () -> assertThat(actualInitialDelay).isEqualTo(expectedInitialDelay),
+                () -> assertThat(actualPeriod).isEqualTo(expectedPeriod)
+        );
+    }
+
 }

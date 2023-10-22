@@ -86,7 +86,7 @@ class CheckServiceImplTest {
                 Остаток                        | 3000 BYN
                     Дата      |           Примечание                  |    Сумма
                 ----------------------------------------------------------------------
-                2020-04-12    | Перевод         от Иванов             | 2000 BYN
+                2020-04-12    | Перевод         от Иванов             | -2000 BYN
                 """;
 
         String actual = checkService.createTransactionStatement(response);

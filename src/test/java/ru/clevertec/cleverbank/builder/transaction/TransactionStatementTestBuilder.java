@@ -19,11 +19,12 @@ public class TransactionStatementTestBuilder implements TestBuilder<TransactionS
     private LocalDate date = LocalDate.of(2020, Month.APRIL, 12);
     private Type type = Type.TRANSFER;
     private String userLastname = "Иванов";
-    private BigDecimal sum = BigDecimal.valueOf(2000);
+    private BigDecimal sumSender = BigDecimal.valueOf(2000);
+    private BigDecimal sumRecipient = BigDecimal.valueOf(2000);
 
     @Override
     public TransactionStatement build() {
-        return new TransactionStatement(date, type, userLastname, sum);
+        return new TransactionStatement(date, type, userLastname, sumSender, sumRecipient);
     }
 
 }

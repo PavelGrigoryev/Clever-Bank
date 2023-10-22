@@ -18,23 +18,22 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.clevertec.cleverbank.dto.transaction.AmountStatementResponse;
-import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceRequest;
-import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceResponse;
-import ru.clevertec.cleverbank.dto.transaction.TransactionResponse;
-import ru.clevertec.cleverbank.dto.transaction.TransactionStatementRequest;
-import ru.clevertec.cleverbank.dto.transaction.TransactionStatementResponse;
-import ru.clevertec.cleverbank.dto.transaction.TransferBalanceRequest;
-import ru.clevertec.cleverbank.dto.transaction.TransferBalanceResponse;
-import ru.clevertec.cleverbank.service.TransactionService;
 import ru.clevertec.cleverbank.builder.transaction.AmountStatementResponseTestBuilder;
-import ru.clevertec.cleverbank.builder.transaction.ChangeBalanceRequestTestBuilder;
 import ru.clevertec.cleverbank.builder.transaction.ChangeBalanceResponseTestBuilder;
+import ru.clevertec.cleverbank.builder.transaction.TransactionRequestTestBuilder;
 import ru.clevertec.cleverbank.builder.transaction.TransactionResponseTestBuilder;
 import ru.clevertec.cleverbank.builder.transaction.TransactionStatementRequestTestBuilder;
 import ru.clevertec.cleverbank.builder.transaction.TransactionStatementResponseTestBuilder;
-import ru.clevertec.cleverbank.builder.transaction.TransferBalanceRequestTestBuilder;
 import ru.clevertec.cleverbank.builder.transaction.TransferBalanceResponseTestBuilder;
+import ru.clevertec.cleverbank.dto.transaction.AmountStatementResponse;
+import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceResponse;
+import ru.clevertec.cleverbank.dto.transaction.TransactionRequest;
+import ru.clevertec.cleverbank.dto.transaction.TransactionResponse;
+import ru.clevertec.cleverbank.dto.transaction.TransactionStatementRequest;
+import ru.clevertec.cleverbank.dto.transaction.TransactionStatementResponse;
+import ru.clevertec.cleverbank.dto.transaction.TransferBalanceResponse;
+import ru.clevertec.cleverbank.model.Type;
+import ru.clevertec.cleverbank.service.TransactionService;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -82,9 +81,9 @@ class TransactionServletTest {
 
         @SneakyThrows
         @RepeatedTest(5)
-        @DisplayName("test doPost changeBalance should capture expected json from PrintWriter and status 201")
-        void testDoPostChangeBalanceShouldCaptureExpectedJsonFromPrintWriter() {
-            ChangeBalanceRequest request = ChangeBalanceRequestTestBuilder.aChangeBalanceRequest().build();
+        @DisplayName("test doPost TransactionRequest should capture expected json from PrintWriter and status 201")
+        void testDoPostTransactionRequestShouldCaptureExpectedJsonFromPrintWriter() {
+            TransactionRequest request = TransactionRequestTestBuilder.aTransactionRequest().build();
             ChangeBalanceResponse response = ChangeBalanceResponseTestBuilder.aChangeBalanceResponse().build();
             String expectedJson = gson.toJson(response);
 
@@ -94,9 +93,6 @@ class TransactionServletTest {
             doReturn(request)
                     .when(servletRequest)
                     .getAttribute("changeBalanceRequest");
-            doReturn(null)
-                    .when(servletRequest)
-                    .getAttribute("transferBalanceRequest");
             doReturn(servletRequest)
                     .when(asyncContext)
                     .getRequest();
@@ -130,57 +126,9 @@ class TransactionServletTest {
 
         @SneakyThrows
         @RepeatedTest(5)
-        @DisplayName("test doPost transferBalance should capture expected json from PrintWriter and status 201")
-        void testDoPostTransferBalanceShouldCaptureExpectedJsonFromPrintWriter() {
-            TransferBalanceRequest request = TransferBalanceRequestTestBuilder.aTransferBalanceRequest().build();
-            TransferBalanceResponse response = TransferBalanceResponseTestBuilder.aTransferBalanceResponse().build();
-            String expectedJson = gson.toJson(response);
-
-            doReturn(asyncContext)
-                    .when(req)
-                    .startAsync();
-            doReturn(null)
-                    .when(servletRequest)
-                    .getAttribute("changeBalanceRequest");
-            doReturn(request)
-                    .when(servletRequest)
-                    .getAttribute("transferBalanceRequest");
-            doReturn(servletRequest)
-                    .when(asyncContext)
-                    .getRequest();
-            doReturn(response)
-                    .when(transactionService)
-                    .transferBalance(request);
-            doReturn(resp)
-                    .when(asyncContext)
-                    .getResponse();
-            doReturn(printWriter)
-                    .when(resp)
-                    .getWriter();
-            doAnswer(invocation -> {
-                latch.countDown();
-                return null;
-            })
-                    .when(asyncContext)
-                    .complete();
-
-            transactionServlet.doPost(req, resp);
-            latch.await(5, TimeUnit.SECONDS);
-
-            verify(resp).setStatus(201);
-            verify(printWriter).print(captor.capture());
-            verify(printWriter).flush();
-
-            String actualJson = captor.getValue();
-
-            assertThat(actualJson).isEqualTo(expectedJson);
-        }
-
-        @SneakyThrows
-        @RepeatedTest(5)
         @DisplayName("test doPost transferBalance should catch SQLException and redirect to exception handler")
         void testDoPostTransferBalanceShouldCatchSQLException() {
-            TransferBalanceRequest request = TransferBalanceRequestTestBuilder.aTransferBalanceRequest().build();
+            TransactionRequest request = TransactionRequestTestBuilder.aTransactionRequest().build();
             String expectedPath = "/exception_handler";
 
             doReturn(asyncContext)
@@ -229,9 +177,6 @@ class TransactionServletTest {
             doReturn(null)
                     .when(servletRequest)
                     .getAttribute("changeBalanceRequest");
-            doReturn(null)
-                    .when(servletRequest)
-                    .getAttribute("transferBalanceRequest");
             doReturn(request)
                     .when(servletRequest)
                     .getAttribute("statementRequest");
@@ -268,6 +213,53 @@ class TransactionServletTest {
 
         @SneakyThrows
         @RepeatedTest(5)
+        @DisplayName("test doPut TransactionRequest should capture expected json from PrintWriter and status 201")
+        void testDoPutTransactionRequestShouldCaptureExpectedJsonFromPrintWriter() {
+            TransactionRequest request = TransactionRequestTestBuilder.aTransactionRequest()
+                    .withType(Type.TRANSFER)
+                    .build();
+            TransferBalanceResponse response = TransferBalanceResponseTestBuilder.aTransferBalanceResponse().build();
+            String expectedJson = gson.toJson(response);
+
+            doReturn(asyncContext)
+                    .when(req)
+                    .startAsync();
+            doReturn(request)
+                    .when(servletRequest)
+                    .getAttribute("transferBalanceRequest");
+            doReturn(servletRequest)
+                    .when(asyncContext)
+                    .getRequest();
+            doReturn(response)
+                    .when(transactionService)
+                    .transferBalance(request);
+            doReturn(resp)
+                    .when(asyncContext)
+                    .getResponse();
+            doReturn(printWriter)
+                    .when(resp)
+                    .getWriter();
+            doAnswer(invocation -> {
+                latch.countDown();
+                return null;
+            })
+                    .when(asyncContext)
+                    .complete();
+
+            transactionServlet.doPut(req, resp);
+            latch.await(5, TimeUnit.SECONDS);
+
+            verify(resp).setStatus(201);
+            verify(printWriter).print(captor.capture());
+            verify(printWriter).flush();
+
+            String actualJson = captor.getValue();
+
+            assertThat(actualJson).isEqualTo(expectedJson);
+        }
+
+        @SneakyThrows
+        @RepeatedTest(5)
         @DisplayName("test doPut should capture expected json from PrintWriter and status 201")
         void testDoPutShouldCaptureExpectedJsonFromPrintWriter() {
             TransactionStatementRequest request = TransactionStatementRequestTestBuilder.aTransactionStatementRequest().build();
@@ -277,6 +269,9 @@ class TransactionServletTest {
             doReturn(asyncContext)
                     .when(req)
                     .startAsync();
+            doReturn(null)
+                    .when(servletRequest)
+                    .getAttribute("transferBalanceRequest");
             doReturn(request)
                     .when(servletRequest)
                     .getAttribute("amountRequest");

@@ -18,12 +18,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.clevertec.cleverbank.builder.transaction.ChangeBalanceRequestTestBuilder;
 import ru.clevertec.cleverbank.builder.transaction.TransactionStatementRequestTestBuilder;
-import ru.clevertec.cleverbank.builder.transaction.TransferBalanceRequestTestBuilder;
-import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceRequest;
+import ru.clevertec.cleverbank.builder.transaction.TransactionRequestTestBuilder;
+import ru.clevertec.cleverbank.dto.transaction.TransactionRequest;
 import ru.clevertec.cleverbank.dto.transaction.TransactionStatementRequest;
-import ru.clevertec.cleverbank.dto.transaction.TransferBalanceRequest;
 import ru.clevertec.cleverbank.exception.conflict.ValidationException;
 import ru.clevertec.cleverbank.model.Type;
 
@@ -65,8 +63,8 @@ class TransactionValidationFilterTest {
     @SneakyThrows
     @DisplayName("verify chain should doFilter without validation exceptions")
     void testChainShouldDoFilter() {
-        ChangeBalanceRequest changeBalanceRequest = ChangeBalanceRequestTestBuilder.aChangeBalanceRequest().build();
-        String json = gson.toJson(changeBalanceRequest);
+        TransactionRequest transactionRequest = TransactionRequestTestBuilder.aTransactionRequest().build();
+        String json = gson.toJson(transactionRequest);
 
         doReturn("POST")
                 .when(req)
@@ -88,12 +86,12 @@ class TransactionValidationFilterTest {
 
     @Test
     @SneakyThrows
-    @DisplayName("test doFilter should capture ChangeBalanceRequest values")
-    void testDoFilterShouldCaptureChangeBalanceRequestValues() {
-        ChangeBalanceRequest expectedChangeBalance = ChangeBalanceRequestTestBuilder.aChangeBalanceRequest().build();
-        String json = gson.toJson(expectedChangeBalance);
+    @DisplayName("test doFilter POST should capture TransactionRequest values")
+    void testDoFilterPOSTShouldCaptureChangeBalanceRequestValues() {
+        TransactionRequest expectedTransactionRequest = TransactionRequestTestBuilder.aTransactionRequest().build();
+        String json = gson.toJson(expectedTransactionRequest);
         ArgumentCaptor<String> stringCaptor = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<ChangeBalanceRequest> changeBalanceRequestCaptor = ArgumentCaptor.forClass(ChangeBalanceRequest.class);
+        ArgumentCaptor<TransactionRequest> changeBalanceRequestCaptor = ArgumentCaptor.forClass(TransactionRequest.class);
         String expectedString = "changeBalanceRequest";
 
         doReturn("POST")
@@ -111,26 +109,28 @@ class TransactionValidationFilterTest {
         verify(req).setAttribute(stringCaptor.capture(), changeBalanceRequestCaptor.capture());
 
         String actualString = stringCaptor.getValue();
-        ChangeBalanceRequest actualChangeBalance = changeBalanceRequestCaptor.getValue();
+        TransactionRequest actualTransactionRequest = changeBalanceRequestCaptor.getValue();
 
         assertAll(
                 () -> assertThat(actualString).isEqualTo(expectedString),
-                () -> assertThat(actualChangeBalance).isEqualTo(expectedChangeBalance)
+                () -> assertThat(actualTransactionRequest).isEqualTo(expectedTransactionRequest)
         );
     }
 
     @Test
     @SneakyThrows
-    @DisplayName("test doFilter should capture TransferBalanceRequest values")
-    void testDoFilterShouldCaptureTransferBalanceRequestValues() {
-        TransferBalanceRequest expectedTransferBalance = TransferBalanceRequestTestBuilder.aTransferBalanceRequest().build();
-        String json = gson.toJson(expectedTransferBalance);
+    @DisplayName("test doFilter PUT should capture TransactionRequest values")
+    void testDoFilterPUTShouldCaptureTransactionRequestValues() {
+        TransactionRequest expectedTransactionRequest = TransactionRequestTestBuilder.aTransactionRequest()
+                .withType(Type.TRANSFER)
+                .build();
+        String json = gson.toJson(expectedTransactionRequest);
         ArgumentCaptor<String> stringCaptor = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<TransferBalanceRequest> transferBalanceCaptor = ArgumentCaptor
-                .forClass(TransferBalanceRequest.class);
+        ArgumentCaptor<TransactionRequest> transferBalanceCaptor = ArgumentCaptor
+                .forClass(TransactionRequest.class);
         String expectedString = "transferBalanceRequest";
 
-        doReturn("POST")
+        doReturn("PUT")
                 .when(req)
                 .getMethod();
         doReturn(bufferedReader)
@@ -145,11 +145,11 @@ class TransactionValidationFilterTest {
         verify(req).setAttribute(stringCaptor.capture(), transferBalanceCaptor.capture());
 
         String actualString = stringCaptor.getValue();
-        TransferBalanceRequest actualTransferBalance = transferBalanceCaptor.getValue();
+        TransactionRequest actualTransactionRequest = transferBalanceCaptor.getValue();
 
         assertAll(
                 () -> assertThat(actualString).isEqualTo(expectedString),
-                () -> assertThat(actualTransferBalance).isEqualTo(expectedTransferBalance)
+                () -> assertThat(actualTransactionRequest).isEqualTo(expectedTransactionRequest)
         );
     }
 
@@ -275,10 +275,10 @@ class TransactionValidationFilterTest {
     @SneakyThrows
     @DisplayName("test doFilter POST should throw ValidationException with field can not be null message")
     void testDoFilterPOSTShouldThrowValidationExceptionWithFieldCanNotBeNullMessage() {
-        ChangeBalanceRequest changeBalanceRequest = ChangeBalanceRequestTestBuilder.aChangeBalanceRequest()
+        TransactionRequest transactionRequest = TransactionRequestTestBuilder.aTransactionRequest()
                 .withSum(null)
                 .build();
-        String json = gson.toJson(changeBalanceRequest);
+        String json = gson.toJson(transactionRequest);
         String expectedMessage = """
                 {"violations":[{"fieldName":"sum","exception":"Field can not be null"}]}""";
 
@@ -330,10 +330,10 @@ class TransactionValidationFilterTest {
 
     @SneakyThrows
     @ParameterizedTest
-    @MethodSource("getChangeBalanceRequestArguments")
-    @DisplayName("test doFilter should throw ValidationException with list of violations for ChangeBalanceRequest")
-    void testDoFilterShouldThrowValidationExceptionWithListOfViolationsForChangeBalanceRequest(ChangeBalanceRequest changeBalanceRequest) {
-        String json = gson.toJson(changeBalanceRequest);
+    @MethodSource("getTransactionRequestArguments")
+    @DisplayName("test doFilter POST should throw ValidationException with list of violations for TransactionRequest")
+    void testDoFilterPOSTShouldThrowValidationExceptionWithListOfViolationsForTransactionRequest(TransactionRequest transactionRequest) {
+        String json = gson.toJson(transactionRequest);
         String expectedMessage = """
                 {"violations":[{"fieldName":"account_recipient_id","exception":"Field can not be null, blank or empty"},\
                 {"fieldName":"account_sender_id","exception":"Field can not be null, blank or empty"},\
@@ -359,16 +359,16 @@ class TransactionValidationFilterTest {
 
     @SneakyThrows
     @ParameterizedTest
-    @MethodSource("getTransferBalanceRequestArguments")
-    @DisplayName("test doFilter should throw ValidationException with list of violations for TransferBalanceRequest")
-    void testDoFilterShouldThrowValidationExceptionWithListOfViolationsForTransferBalanceRequest(TransferBalanceRequest transferBalanceRequest) {
-        String json = gson.toJson(transferBalanceRequest);
+    @MethodSource("getTransactionRequestArguments")
+    @DisplayName("test doFilter PUT should throw ValidationException with list of violations for TransactionRequest")
+    void testDoFilterPUTShouldThrowValidationExceptionWithListOfViolationsForTransactionRequest(TransactionRequest transactionRequest) {
+        String json = gson.toJson(transactionRequest);
         String expectedMessage = """
                 {"violations":[{"fieldName":"account_recipient_id","exception":"Field can not be null, blank or empty"},\
                 {"fieldName":"account_sender_id","exception":"Field can not be null, blank or empty"},\
                 {"fieldName":"sum","exception":"Field must be greater than 0"}]}""";
 
-        doReturn("POST")
+        doReturn("PUT")
                 .when(req)
                 .getMethod();
         doReturn(bufferedReader)
@@ -385,30 +385,17 @@ class TransactionValidationFilterTest {
         assertThat(actualMessage).isEqualTo(expectedMessage);
     }
 
-    private static Stream<Arguments> getChangeBalanceRequestArguments() {
-        return Stream.of(Arguments.of(ChangeBalanceRequestTestBuilder.aChangeBalanceRequest()
+    private static Stream<Arguments> getTransactionRequestArguments() {
+        return Stream.of(Arguments.of(TransactionRequestTestBuilder.aTransactionRequest()
                         .withType(Type.TRANSFER)
                         .withSum(BigDecimal.ZERO)
                         .withAccountSenderId("")
                         .withAccountRecipientId(null)
                         .build()),
-                Arguments.of(ChangeBalanceRequestTestBuilder.aChangeBalanceRequest()
+                Arguments.of(TransactionRequestTestBuilder.aTransactionRequest()
                         .withType(Type.TRANSFER)
                         .withSum(BigDecimal.valueOf(-5))
                         .withAccountSenderId(" ")
-                        .withAccountRecipientId("")
-                        .build()));
-    }
-
-    private static Stream<Arguments> getTransferBalanceRequestArguments() {
-        return Stream.of(Arguments.of(TransferBalanceRequestTestBuilder.aTransferBalanceRequest()
-                        .withSum(BigDecimal.ZERO)
-                        .withAccountSenderId("  ")
-                        .withAccountRecipientId(null)
-                        .build()),
-                Arguments.of(TransferBalanceRequestTestBuilder.aTransferBalanceRequest()
-                        .withSum(BigDecimal.valueOf(-66))
-                        .withAccountSenderId("")
                         .withAccountRecipientId("")
                         .build()));
     }

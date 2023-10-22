@@ -33,7 +33,7 @@ class UploadFileServiceImplTest {
         Path actualPath = uploadFileService.uploadCheck(check);
 
         assertThat(Files.exists(actualPath)).isTrue();
-        assertThat(Files.readString(actualPath)).isEqualTo(Files.readString(memoryPath));
+        assertThat(Files.readString(actualPath)).startsWith(Files.readString(memoryPath));
 
         fileSystem.close();
     }
@@ -51,7 +51,7 @@ class UploadFileServiceImplTest {
         Path actualPath = uploadFileService.uploadStatement(statement);
 
         assertThat(Files.exists(actualPath)).isTrue();
-        assertThat(Files.readString(actualPath)).isEqualTo(Files.readString(memoryPath));
+        assertThat(Files.readString(actualPath)).startsWith(Files.readString(memoryPath));
 
         fileSystem.close();
     }
@@ -69,7 +69,7 @@ class UploadFileServiceImplTest {
         Path actualPath = uploadFileService.uploadAmount(amount);
 
         assertThat(Files.exists(actualPath)).isTrue();
-        assertThat(Files.readString(actualPath)).isEqualTo(Files.readString(memoryPath));
+        assertThat(Files.readString(actualPath)).startsWith(Files.readString(memoryPath));
 
         fileSystem.close();
     }

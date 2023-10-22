@@ -10,13 +10,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.clevertec.cleverbank.dao.TransactionDAO;
 import ru.clevertec.cleverbank.dto.transaction.AmountStatementResponse;
-import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceRequest;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceResponse;
+import ru.clevertec.cleverbank.dto.transaction.TransactionRequest;
 import ru.clevertec.cleverbank.dto.transaction.TransactionResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransactionStatement;
 import ru.clevertec.cleverbank.dto.transaction.TransactionStatementRequest;
 import ru.clevertec.cleverbank.dto.transaction.TransactionStatementResponse;
-import ru.clevertec.cleverbank.dto.transaction.TransferBalanceRequest;
 import ru.clevertec.cleverbank.dto.transaction.TransferBalanceResponse;
 import ru.clevertec.cleverbank.exception.internalservererror.TransactionException;
 import ru.clevertec.cleverbank.exception.notfound.AccountNotFoundException;
@@ -31,14 +30,13 @@ import ru.clevertec.cleverbank.service.UploadFileService;
 import ru.clevertec.cleverbank.service.ValidationService;
 import ru.clevertec.cleverbank.builder.account.AccountTestBuilder;
 import ru.clevertec.cleverbank.builder.transaction.AmountStatementResponseTestBuilder;
-import ru.clevertec.cleverbank.builder.transaction.ChangeBalanceRequestTestBuilder;
 import ru.clevertec.cleverbank.builder.transaction.ChangeBalanceResponseTestBuilder;
 import ru.clevertec.cleverbank.builder.transaction.TransactionResponseTestBuilder;
 import ru.clevertec.cleverbank.builder.transaction.TransactionStatementRequestTestBuilder;
 import ru.clevertec.cleverbank.builder.transaction.TransactionStatementResponseTestBuilder;
 import ru.clevertec.cleverbank.builder.transaction.TransactionStatementTestBuilder;
 import ru.clevertec.cleverbank.builder.transaction.TransactionTestBuilder;
-import ru.clevertec.cleverbank.builder.transaction.TransferBalanceRequestTestBuilder;
+import ru.clevertec.cleverbank.builder.transaction.TransactionRequestTestBuilder;
 import ru.clevertec.cleverbank.builder.transaction.TransferBalanceResponseTestBuilder;
 
 import java.math.BigDecimal;
@@ -80,7 +78,7 @@ class TransactionServiceImplTest {
         @DisplayName("test should return expected response with adding balance")
         void testShouldReturnExpectedResponseWithAddingBalance() {
             ChangeBalanceResponse expected = ChangeBalanceResponseTestBuilder.aChangeBalanceResponse().build();
-            ChangeBalanceRequest request = ChangeBalanceRequestTestBuilder.aChangeBalanceRequest().build();
+            TransactionRequest request = TransactionRequestTestBuilder.aTransactionRequest().build();
             Account accountRecipient = AccountTestBuilder.aAccount().build();
             Account accountSender = AccountTestBuilder.aAccount().withBalance(BigDecimal.TEN).build();
             Transaction transaction = TransactionTestBuilder.aTransaction().build();
@@ -129,7 +127,7 @@ class TransactionServiceImplTest {
         @DisplayName("test should return expected response with subtracting balance")
         void testShouldReturnExpectedResponseWithSubtractingBalance() {
             ChangeBalanceResponse expected = ChangeBalanceResponseTestBuilder.aChangeBalanceResponse().build();
-            ChangeBalanceRequest request = ChangeBalanceRequestTestBuilder.aChangeBalanceRequest()
+            TransactionRequest request = TransactionRequestTestBuilder.aTransactionRequest()
                     .withType(Type.WITHDRAWAL)
                     .build();
             Account accountRecipient = AccountTestBuilder.aAccount().build();
@@ -185,7 +183,9 @@ class TransactionServiceImplTest {
         @SneakyThrows
         @DisplayName("test should return expected response")
         void testShouldReturnExpectedResponse() {
-            TransferBalanceRequest request = TransferBalanceRequestTestBuilder.aTransferBalanceRequest().build();
+            TransactionRequest request = TransactionRequestTestBuilder.aTransactionRequest()
+                    .withType(Type.TRANSFER)
+                    .build();
             TransferBalanceResponse expected = TransferBalanceResponseTestBuilder.aTransferBalanceResponse().build();
             Transaction transaction = TransactionTestBuilder.aTransaction().build();
             Account accountRecipient = AccountTestBuilder.aAccount().build();
@@ -256,7 +256,7 @@ class TransactionServiceImplTest {
             String id = "0J2O 6O3P 1CUB VZUT 91SJ X3FU MUR4";
             String message = "Account with ID " + id + " is not found!";
             String expectedMessage = "Transaction rollback, cause: " + message;
-            TransferBalanceRequest request = TransferBalanceRequestTestBuilder.aTransferBalanceRequest()
+            TransactionRequest request = TransactionRequestTestBuilder.aTransactionRequest()
                     .withAccountSenderId(id)
                     .build();
 
