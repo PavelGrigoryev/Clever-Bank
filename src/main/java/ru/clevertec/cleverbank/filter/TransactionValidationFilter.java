@@ -10,9 +10,8 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import ru.clevertec.cleverbank.aspect.annotation.ExceptionLoggable;
-import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceRequest;
+import ru.clevertec.cleverbank.dto.transaction.TransactionRequest;
 import ru.clevertec.cleverbank.dto.transaction.TransactionStatementRequest;
-import ru.clevertec.cleverbank.dto.transaction.TransferBalanceRequest;
 import ru.clevertec.cleverbank.exception.conflict.ValidationException;
 import ru.clevertec.cleverbank.exception.handler.ValidationResponse;
 import ru.clevertec.cleverbank.exception.handler.Violation;
@@ -72,7 +71,7 @@ public class TransactionValidationFilter implements Filter {
      * @param jsonObject объект JsonObject, содержащий JSON-данные из тела запроса
      */
     private void validateChangeBalanceRequest(HttpServletRequest req, JsonObject jsonObject) {
-        ChangeBalanceRequest request = gson.fromJson(jsonObject.toString(), ChangeBalanceRequest.class);
+        TransactionRequest request = gson.fromJson(jsonObject.toString(), TransactionRequest.class);
         List<Violation> violations = new ArrayList<>();
 
         validationService.validateAccountId(request.accountRecipientId(), "account_recipient_id", violations);
@@ -93,13 +92,13 @@ public class TransactionValidationFilter implements Filter {
 
     /**
      * Валидирует данные в запросе на перевод средств между счетами и устанавливает атрибут "transferBalanceRequest"
-     * с объектом TransferBalanceRequest в запросе.
+     * с объектом TransactionRequest в запросе.
      *
      * @param req        объект HttpServletRequest, содержащий данные запроса
      * @param jsonObject объект JsonObject, содержащий JSON-данные из тела запроса
      */
     private void validateTransferBalanceRequest(HttpServletRequest req, JsonObject jsonObject) {
-        TransferBalanceRequest request = gson.fromJson(jsonObject.toString(), TransferBalanceRequest.class);
+        TransactionRequest request = gson.fromJson(jsonObject.toString(), TransactionRequest.class);
         List<Violation> violations = new ArrayList<>();
 
         validationService.validateAccountId(request.accountRecipientId(), "account_recipient_id", violations);

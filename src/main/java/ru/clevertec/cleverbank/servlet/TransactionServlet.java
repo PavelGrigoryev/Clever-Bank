@@ -9,13 +9,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.clevertec.cleverbank.dto.transaction.AmountStatementResponse;
-import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceRequest;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceResponse;
 import ru.clevertec.cleverbank.dto.transaction.ExchangeBalanceResponse;
+import ru.clevertec.cleverbank.dto.transaction.TransactionRequest;
 import ru.clevertec.cleverbank.dto.transaction.TransactionResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransactionStatementRequest;
 import ru.clevertec.cleverbank.dto.transaction.TransactionStatementResponse;
-import ru.clevertec.cleverbank.dto.transaction.TransferBalanceRequest;
 import ru.clevertec.cleverbank.dto.transaction.TransferBalanceResponse;
 import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
 import ru.clevertec.cleverbank.model.Type;
@@ -55,10 +54,10 @@ public class TransactionServlet extends HttpServlet {
         CompletableFuture.runAsync(() -> {
             try {
                 String transactionJson;
-                ChangeBalanceRequest changeRequest = (ChangeBalanceRequest) asyncContext.getRequest()
+                TransactionRequest request = (TransactionRequest) asyncContext.getRequest()
                         .getAttribute("changeBalanceRequest");
-                if (changeRequest != null) {
-                    transactionJson = changeBalance(gson, changeRequest);
+                if (request != null) {
+                    transactionJson = changeBalance(gson, request);
                 } else {
                     TransactionStatementRequest statementRequest = (TransactionStatementRequest) asyncContext.getRequest()
                             .getAttribute("statementRequest");
@@ -91,13 +90,13 @@ public class TransactionServlet extends HttpServlet {
         CompletableFuture.runAsync(() -> {
             try {
                 String transactionJson;
-                TransferBalanceRequest transferRequest = (TransferBalanceRequest) asyncContext.getRequest()
+                TransactionRequest request = (TransactionRequest) asyncContext.getRequest()
                         .getAttribute("transferBalanceRequest");
-                if (transferRequest != null) {
-                    if (transferRequest.type() == Type.EXCHANGE) {
-                        transactionJson = exchangeBalance(gson, transferRequest);
+                if (request != null) {
+                    if (request.type() == Type.EXCHANGE) {
+                        transactionJson = exchangeBalance(gson, request);
                     } else {
-                        transactionJson = transferBalance(gson, transferRequest);
+                        transactionJson = transferBalance(gson, request);
                     }
                 } else {
                     TransactionStatementRequest statementRequest = (TransactionStatementRequest) asyncContext.getRequest()
@@ -144,10 +143,10 @@ public class TransactionServlet extends HttpServlet {
      * Метод changeBalance, который выполняет операцию изменения баланса счёта и возвращает строку JSON с данными о транзакции.
      *
      * @param gson    объект Gson, представляющий парсер JSON
-     * @param request объект ChangeBalanceRequest, представляющий запрос на изменение баланса счета
+     * @param request объект TransactionRequest, представляющий запрос на изменение баланса счета
      * @return String JSON, представляющая ответ с данными о транзакции
      */
-    private String changeBalance(Gson gson, ChangeBalanceRequest request) {
+    private String changeBalance(Gson gson, TransactionRequest request) {
         ChangeBalanceResponse response = transactionService.changeBalance(request);
         return gson.toJson(response);
     }
@@ -157,10 +156,10 @@ public class TransactionServlet extends HttpServlet {
      * с данными о транзакции.
      *
      * @param gson    объект Gson, представляющий парсер JSON
-     * @param request объект TransferBalanceRequest, представляющий запрос на перевод средств между счетами
+     * @param request объект TransactionRequest, представляющий запрос на перевод средств между счетами
      * @return String JSON, представляющая ответ с данными о транзакции
      */
-    private String transferBalance(Gson gson, TransferBalanceRequest request) {
+    private String transferBalance(Gson gson, TransactionRequest request) {
         TransferBalanceResponse response;
         try {
             response = transactionService.transferBalance(request);
@@ -176,10 +175,10 @@ public class TransactionServlet extends HttpServlet {
      * с данными о транзакции.
      *
      * @param gson    объект Gson, представляющий парсер JSON
-     * @param request объект TransferBalanceRequest, представляющий запрос на перевод средств между счетами
+     * @param request объект TransactionRequest, представляющий запрос на перевод средств между счетами
      * @return String JSON, представляющая ответ с данными о транзакции
      */
-    private String exchangeBalance(Gson gson, TransferBalanceRequest request) {
+    private String exchangeBalance(Gson gson, TransactionRequest request) {
         ExchangeBalanceResponse response;
         try {
             response = transactionService.exchangeBalance(request);

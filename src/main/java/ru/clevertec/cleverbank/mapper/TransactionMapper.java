@@ -3,9 +3,9 @@ package ru.clevertec.cleverbank.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import ru.clevertec.cleverbank.dto.transaction.AmountStatementResponse;
-import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceRequest;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceResponse;
 import ru.clevertec.cleverbank.dto.transaction.ExchangeBalanceResponse;
+import ru.clevertec.cleverbank.dto.transaction.TransactionRequest;
 import ru.clevertec.cleverbank.dto.transaction.TransactionResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransactionStatement;
 import ru.clevertec.cleverbank.dto.transaction.TransactionStatementRequest;
@@ -32,7 +32,7 @@ public interface TransactionMapper {
     Transaction toChangeTransaction(Type type,
                                     Long bankRecipientId,
                                     Long bankSenderId,
-                                    ChangeBalanceRequest request);
+                                    TransactionRequest request);
 
     @Mapping(target = "transactionId", source = "transaction.id")
     @Mapping(target = "sum", source = "transaction.sumSender")

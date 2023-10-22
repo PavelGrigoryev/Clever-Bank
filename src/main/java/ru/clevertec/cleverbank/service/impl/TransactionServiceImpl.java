@@ -6,14 +6,13 @@ import ru.clevertec.cleverbank.aspect.annotation.ServiceLoggable;
 import ru.clevertec.cleverbank.dao.TransactionDAO;
 import ru.clevertec.cleverbank.dao.impl.TransactionDAOImpl;
 import ru.clevertec.cleverbank.dto.transaction.AmountStatementResponse;
-import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceRequest;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceResponse;
 import ru.clevertec.cleverbank.dto.transaction.ExchangeBalanceResponse;
+import ru.clevertec.cleverbank.dto.transaction.TransactionRequest;
 import ru.clevertec.cleverbank.dto.transaction.TransactionResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransactionStatement;
 import ru.clevertec.cleverbank.dto.transaction.TransactionStatementRequest;
 import ru.clevertec.cleverbank.dto.transaction.TransactionStatementResponse;
-import ru.clevertec.cleverbank.dto.transaction.TransferBalanceRequest;
 import ru.clevertec.cleverbank.dto.transaction.TransferBalanceResponse;
 import ru.clevertec.cleverbank.exception.internalservererror.TransactionException;
 import ru.clevertec.cleverbank.exception.notfound.TransactionNotFoundException;
@@ -62,12 +61,12 @@ public class TransactionServiceImpl implements TransactionService {
     /**
      * Реализует метод changeBalance, который изменяет баланс счёта в базе данных по данным из запроса.
      *
-     * @param request объект ChangeBalanceRequest, представляющий запрос с данными для изменения баланса счёта
+     * @param request объект TransactionRequest, представляющий запрос с данными для изменения баланса счёта
      * @return объект ChangeBalanceResponse, представляющий ответ с данными об измененном балансе счёта
      */
     @Override
     @ServiceLoggable
-    public ChangeBalanceResponse changeBalance(ChangeBalanceRequest request) {
+    public ChangeBalanceResponse changeBalance(TransactionRequest request) {
         Account accountRecipient = accountService.findById(request.accountRecipientId());
         Account accountSender = accountService.findById(request.accountSenderId());
         validationService.validateAccountForClosingDate(accountRecipient.getClosingDate(), accountRecipient.getId());
@@ -97,13 +96,13 @@ public class TransactionServiceImpl implements TransactionService {
     /**
      * Реализует метод transferBalance, который переводит средства между двумя счётами в базе данных по данным из запроса.
      *
-     * @param request объект TransferBalanceRequest, представляющий запрос с данными для перевода средств между счетами
+     * @param request объект TransactionRequest, представляющий запрос с данными для перевода средств между счетами
      * @return объект TransferBalanceResponse, представляющий ответ с данными о переведенных средствах между счетами
      * @throws SQLException если произошла ошибка при работе с базой данных
      */
     @Override
     @ServiceLoggable
-    public TransferBalanceResponse transferBalance(TransferBalanceRequest request) throws SQLException {
+    public TransferBalanceResponse transferBalance(TransactionRequest request) throws SQLException {
         connection.setAutoCommit(false);
         try {
             Account accountSender = accountService.findById(request.accountSenderId());
@@ -143,9 +142,17 @@ public class TransactionServiceImpl implements TransactionService {
         }
     }
 
+    /**
+     * Реализует метод exchangeBalance, который переводит средства между двумя счётами с обменом валют по курсу НБ РБ
+     * в базе данных по данным из запроса.
+     *
+     * @param request объект TransactionRequest, представляющий запрос с данными для перевода средств между счетами
+     * @return объект ExchangeBalanceResponse, представляющий ответ с данными о переведенных средствах между счетами
+     * @throws SQLException если произошла ошибка при работе с базой данных
+     */
     @Override
     @ServiceLoggable
-    public ExchangeBalanceResponse exchangeBalance(TransferBalanceRequest request) throws SQLException {
+    public ExchangeBalanceResponse exchangeBalance(TransactionRequest request) throws SQLException {
         connection.setAutoCommit(false);
         try {
             Account accountSender = accountService.findById(request.accountSenderId());
@@ -165,6 +172,7 @@ public class TransactionServiceImpl implements TransactionService {
                     accountRecipient.getBank().getId(), accountSender.getId(), accountRecipient.getId(), request.sum(),
                     exchangedSum);
             Transaction savedTransaction = transactionDAO.save(transaction);
+            connection.commit();
             ExchangeBalanceResponse response = transactionMapper.toExchangeResponse(savedTransaction,
                     accountSender.getCurrency(), accountRecipient.getCurrency(), accountSender.getBank().getName(),
                     accountRecipient.getBank().getName(), senderOldBalance, updatedAccountSender.getBalance(),
