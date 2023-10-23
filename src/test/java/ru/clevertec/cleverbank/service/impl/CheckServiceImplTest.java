@@ -5,14 +5,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.clevertec.cleverbank.dto.transaction.AmountStatementResponse;
-import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceResponse;
-import ru.clevertec.cleverbank.dto.transaction.TransactionStatementResponse;
-import ru.clevertec.cleverbank.dto.transaction.TransferBalanceResponse;
 import ru.clevertec.cleverbank.builder.transaction.AmountStatementResponseTestBuilder;
 import ru.clevertec.cleverbank.builder.transaction.ChangeBalanceResponseTestBuilder;
+import ru.clevertec.cleverbank.builder.transaction.ExchangeBalanceResponseTestBuilder;
 import ru.clevertec.cleverbank.builder.transaction.TransactionStatementResponseTestBuilder;
 import ru.clevertec.cleverbank.builder.transaction.TransferBalanceResponseTestBuilder;
+import ru.clevertec.cleverbank.dto.transaction.AmountStatementResponse;
+import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceResponse;
+import ru.clevertec.cleverbank.dto.transaction.ExchangeBalanceResponse;
+import ru.clevertec.cleverbank.dto.transaction.TransactionStatementResponse;
+import ru.clevertec.cleverbank.dto.transaction.TransferBalanceResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -65,6 +67,31 @@ class CheckServiceImplTest {
                 """;
 
         String actual = checkService.createTransferBalanceCheck(response);
+
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("test createExchangeBalanceCheck should return expected string")
+    void testCreateExchangeBalanceCheck() {
+        ExchangeBalanceResponse response = ExchangeBalanceResponseTestBuilder.aExchangeBalanceResponse().build();
+        String expected = """
+                                
+                -------------------------------------------------------------
+                |                       Банковский чек                      |
+                | Чек:                                                    1 |
+                | 2020-04-12                                       14:20:33 |
+                | Тип транзакции:                                     Обмен |
+                | Банк отправителя:                             Клевер-Банк |
+                | Банк получателя:                               Альфа-Банк |
+                | Счет отправителя:      G5QZ 6B43 A6XG AHNK CO6S PSO6 718Q |
+                | Счет получателя:       FUCB OY0M VHZ4 U8Y6 11DQ RQ3Y 5T62 |
+                | Сумма отправителя:                                 10 BYN |
+                | Сумма получателя:                                2.89 EUR |
+                -------------------------------------------------------------
+                """;
+
+        String actual = checkService.createExchangeBalanceCheck(response);
 
         assertThat(actual).isEqualTo(expected);
     }
