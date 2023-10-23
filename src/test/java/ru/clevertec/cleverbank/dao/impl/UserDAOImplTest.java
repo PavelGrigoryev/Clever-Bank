@@ -8,9 +8,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
-import ru.clevertec.cleverbank.model.User;
 import ru.clevertec.cleverbank.builder.user.UserTestBuilder;
+import ru.clevertec.cleverbank.model.User;
 
 import java.sql.Connection;
 import java.sql.Date;
@@ -19,9 +18,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -44,8 +43,8 @@ class UserDAOImplTest {
 
         @Test
         @SneakyThrows
-        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
-        void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
+        @DisplayName("test should throw SQLException with expected message if there is no connection")
+        void testShouldThrowSQLExceptionWithExpectedMessage() {
             String sql = "SELECT * FROM users WHERE id = ?";
             long id = 1L;
             String expectedMessage = "Sorry! We got Server database connection problems";
@@ -54,7 +53,9 @@ class UserDAOImplTest {
                     .when(connection)
                     .prepareStatement(sql);
 
-            Exception exception = assertThrows(JDBCConnectionException.class, () -> userDAO.findById(id));
+            assertDoesNotThrow(() -> userDAO.findById(id));
+
+            Exception exception = assertThrows(SQLException.class, () -> connection.prepareStatement(sql));
             String actualMessage = exception.getMessage();
 
             assertThat(actualMessage).isEqualTo(expectedMessage);
@@ -82,9 +83,8 @@ class UserDAOImplTest {
                     .next();
             getMockedUserFromResultSet(expected);
 
-            Optional<User> user = userDAO.findById(id);
-
-            user.ifPresent(actual -> assertThat(actual).isEqualTo(expected));
+            userDAO.findById(id)
+                    .ifPresent(actual -> assertThat(actual).isEqualTo(expected));
         }
 
     }
@@ -94,8 +94,8 @@ class UserDAOImplTest {
 
         @Test
         @SneakyThrows
-        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
-        void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
+        @DisplayName("test should throw SQLException with expected message if there is no connection")
+        void testShouldThrowSQLExceptionWithExpectedMessage() {
             String sql = "SELECT * FROM users";
             String expectedMessage = "Sorry! We got Server database connection problems";
 
@@ -103,7 +103,9 @@ class UserDAOImplTest {
                     .when(connection)
                     .prepareStatement(sql);
 
-            Exception exception = assertThrows(JDBCConnectionException.class, () -> userDAO.findAll());
+            assertDoesNotThrow(() -> userDAO.findAll());
+
+            Exception exception = assertThrows(SQLException.class, () -> connection.prepareStatement(sql));
             String actualMessage = exception.getMessage();
 
             assertThat(actualMessage).isEqualTo(expectedMessage);
@@ -184,8 +186,8 @@ class UserDAOImplTest {
 
         @Test
         @SneakyThrows
-        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
-        void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
+        @DisplayName("test should throw SQLException with expected message if there is no connection")
+        void testShouldThrowSQLExceptionWithExpectedMessage() {
             String sql = """
                     INSERT INTO users (lastname, firstname, surname, register_date, mobile_number)
                     VALUES (?, ?, ?, ?, ?)
@@ -197,7 +199,10 @@ class UserDAOImplTest {
                     .when(connection)
                     .prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
-            Exception exception = assertThrows(JDBCConnectionException.class, () -> userDAO.save(user));
+            assertDoesNotThrow(() -> userDAO.save(user));
+
+            Exception exception = assertThrows(SQLException.class,
+                    () -> connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS));
             String actualMessage = exception.getMessage();
 
             assertThat(actualMessage).isEqualTo(expectedMessage);
@@ -230,9 +235,8 @@ class UserDAOImplTest {
                     .when(resultSet)
                     .getLong(1);
 
-            User actual = userDAO.save(user);
-
-            assertThat(actual).isEqualTo(user);
+            userDAO.save(user)
+                    .ifPresent(actual -> assertThat(actual).isEqualTo(user));
         }
 
     }
@@ -242,8 +246,8 @@ class UserDAOImplTest {
 
         @Test
         @SneakyThrows
-        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
-        void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
+        @DisplayName("test should throw SQLException with expected message if there is no connection")
+        void testShouldThrowSQLExceptionWithExpectedMessage() {
             String sql = """
                     UPDATE users
                     SET lastname = ?, firstname = ?, surname = ?, register_date = ?, mobile_number = ?
@@ -256,7 +260,10 @@ class UserDAOImplTest {
                     .when(connection)
                     .prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
-            Exception exception = assertThrows(JDBCConnectionException.class, () -> userDAO.update(user));
+            assertDoesNotThrow(() -> userDAO.update(user));
+
+            Exception exception = assertThrows(SQLException.class,
+                    () -> connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS));
             String actualMessage = exception.getMessage();
 
             assertThat(actualMessage).isEqualTo(expectedMessage);
@@ -293,9 +300,8 @@ class UserDAOImplTest {
                     .when(resultSet)
                     .getLong(1);
 
-            User actual = userDAO.update(user);
-
-            assertThat(actual).isEqualTo(user);
+            userDAO.update(user)
+                    .ifPresent(actual -> assertThat(actual).isEqualTo(user));
         }
 
     }
@@ -305,17 +311,20 @@ class UserDAOImplTest {
 
         @Test
         @SneakyThrows
-        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
-        void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
-            String sql = "DELETE FROM accounts WHERE user_id = ?";
+        @DisplayName("test should throw SQLException with expected message if there is no connection")
+        void testShouldThrowSQLExceptionWithExpectedMessage() {
+            String sql = "DELETE FROM users WHERE id = ?";
             long id = 1L;
             String expectedMessage = "Sorry! We got Server database connection problems";
 
             doThrow(new SQLException(expectedMessage))
                     .when(connection)
-                    .prepareStatement(sql);
+                    .prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
-            Exception exception = assertThrows(JDBCConnectionException.class, () -> userDAO.delete(id));
+            assertDoesNotThrow(() -> userDAO.delete(id));
+
+            Exception exception = assertThrows(SQLException.class,
+                    () -> connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS));
             String actualMessage = exception.getMessage();
 
             assertThat(actualMessage).isEqualTo(expectedMessage);
@@ -349,9 +358,8 @@ class UserDAOImplTest {
                     .next();
             getMockedUserFromResultSet(expected);
 
-            Optional<User> user = userDAO.delete(expected.getId());
-
-            user.ifPresent(actual -> assertThat(actual).isEqualTo(expected));
+            userDAO.delete(expected.getId())
+                    .ifPresent(actual -> assertThat(actual).isEqualTo(expected));
         }
 
     }

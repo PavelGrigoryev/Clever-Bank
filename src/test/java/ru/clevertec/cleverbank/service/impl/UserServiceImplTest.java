@@ -12,18 +12,17 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.clevertec.cleverbank.builder.user.UserRequestTestBuilder;
+import ru.clevertec.cleverbank.builder.user.UserResponseTestBuilder;
+import ru.clevertec.cleverbank.builder.user.UserTestBuilder;
 import ru.clevertec.cleverbank.dao.UserDAO;
 import ru.clevertec.cleverbank.dto.DeleteResponse;
 import ru.clevertec.cleverbank.dto.user.UserRequest;
 import ru.clevertec.cleverbank.dto.user.UserResponse;
 import ru.clevertec.cleverbank.exception.badrequest.UniquePhoneNumberException;
-import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
 import ru.clevertec.cleverbank.exception.notfound.UserNotFoundException;
 import ru.clevertec.cleverbank.mapper.UserMapper;
 import ru.clevertec.cleverbank.model.User;
-import ru.clevertec.cleverbank.builder.user.UserRequestTestBuilder;
-import ru.clevertec.cleverbank.builder.user.UserResponseTestBuilder;
-import ru.clevertec.cleverbank.builder.user.UserTestBuilder;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,7 +31,6 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -152,8 +150,8 @@ class UserServiceImplTest {
 
             doReturn(expected)
                     .when(userMapper)
-                    .fromRequest(request);
-            doReturn(expected)
+                    .fromSaveRequest(request);
+            doReturn(Optional.of(expected))
                     .when(userDAO)
                     .save(expected);
             doReturn(response)
@@ -177,8 +175,8 @@ class UserServiceImplTest {
 
             doReturn(user)
                     .when(userMapper)
-                    .fromRequest(request);
-            doThrow(new JDBCConnectionException())
+                    .fromSaveRequest(request);
+            doReturn(Optional.empty())
                     .when(userDAO)
                     .save(user);
 
@@ -205,8 +203,8 @@ class UserServiceImplTest {
                     .findById(user.getId());
             doReturn(user)
                     .when(userMapper)
-                    .fromRequest(request);
-            doReturn(user)
+                    .fromUpdateRequest(request, user.getId(), user.getRegisterDate());
+            doReturn(Optional.of(user))
                     .when(userDAO)
                     .update(user);
             doReturn(expected)
@@ -231,8 +229,8 @@ class UserServiceImplTest {
                     .findById(user.getId());
             doReturn(user)
                     .when(userMapper)
-                    .fromRequest(request);
-            doThrow(new JDBCConnectionException())
+                    .fromUpdateRequest(request, user.getId(), user.getRegisterDate());
+            doReturn(Optional.empty())
                     .when(userDAO)
                     .update(user);
 

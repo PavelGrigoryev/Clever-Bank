@@ -3,7 +3,6 @@ package ru.clevertec.cleverbank.dao.impl;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.clevertec.cleverbank.dao.UserDAO;
-import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
 import ru.clevertec.cleverbank.model.User;
 import ru.clevertec.cleverbank.util.HikariConnectionManager;
 
@@ -31,7 +30,6 @@ public class UserDAOImpl implements UserDAO {
      *
      * @param id Long, представляющее идентификатор пользователя
      * @return объект Optional, содержащий пользователя, если он найден, или пустой, если нет
-     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
      */
     @Override
     public Optional<User> findById(Long id) {
@@ -46,7 +44,6 @@ public class UserDAOImpl implements UserDAO {
             }
         } catch (SQLException e) {
             log.error(e.getMessage());
-            throw new JDBCConnectionException();
         }
         return user;
     }
@@ -55,7 +52,6 @@ public class UserDAOImpl implements UserDAO {
      * Находит всех пользователей в базе данных и возвращает их в виде списка объектов User.
      *
      * @return список объектов User, представляющих пользователей
-     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
      */
     @Override
     public List<User> findAll() {
@@ -70,7 +66,6 @@ public class UserDAOImpl implements UserDAO {
             }
         } catch (SQLException e) {
             log.error(e.getMessage());
-            throw new JDBCConnectionException();
         }
         return users;
     }
@@ -80,14 +75,14 @@ public class UserDAOImpl implements UserDAO {
      *
      * @param user объект User, представляющий пользователя для сохранения
      * @return объект User, представляющий сохраненного пользователя
-     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
      */
     @Override
-    public User save(User user) {
+    public Optional<User> save(User user) {
         String sql = """
                 INSERT INTO users (lastname, firstname, surname, register_date, mobile_number)
                 VALUES (?, ?, ?, ?, ?)
                 """;
+        Optional<User> optionalUser = Optional.empty();
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             setUserValuesInStatement(preparedStatement, user);
             preparedStatement.executeUpdate();
@@ -95,12 +90,12 @@ public class UserDAOImpl implements UserDAO {
             if (resultSet.next()) {
                 long id = resultSet.getLong(1);
                 user.setId(id);
+                optionalUser = Optional.of(user);
             }
         } catch (SQLException e) {
             log.error(e.getMessage());
-            throw new JDBCConnectionException();
         }
-        return user;
+        return optionalUser;
     }
 
     /**
@@ -108,15 +103,15 @@ public class UserDAOImpl implements UserDAO {
      *
      * @param user объект User, представляющий пользователя для обновления
      * @return объект User, представляющий обновленного пользователя
-     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
      */
     @Override
-    public User update(User user) {
+    public Optional<User> update(User user) {
         String sql = """
                 UPDATE users
                 SET lastname = ?, firstname = ?, surname = ?, register_date = ?, mobile_number = ?
                 WHERE id = ?
                 """;
+        Optional<User> optionalUser = Optional.empty();
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             setUserValuesInStatement(preparedStatement, user);
             preparedStatement.setLong(6, user.getId());
@@ -125,12 +120,12 @@ public class UserDAOImpl implements UserDAO {
             if (resultSet.next()) {
                 Long id = resultSet.getLong(1);
                 user.setId(id);
+                optionalUser = Optional.of(user);
             }
         } catch (SQLException e) {
             log.error(e.getMessage());
-            throw new JDBCConnectionException();
         }
-        return user;
+        return optionalUser;
     }
 
     /**
@@ -138,14 +133,13 @@ public class UserDAOImpl implements UserDAO {
      *
      * @param id Long, представляющее идентификатор пользователя для удаления
      * @return объект Optional, содержащий удаленного пользователя, если он найден, или пустой, если нет
-     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
      */
     @Override
     public Optional<User> delete(Long id) {
-        deleteAllUsersAccounts(id);
         String sql = "DELETE FROM users WHERE id = ?";
         Optional<User> user = Optional.empty();
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            deleteAllUsersAccounts(id);
             preparedStatement.setLong(1, id);
             preparedStatement.executeUpdate();
             ResultSet resultSet = preparedStatement.getGeneratedKeys();
@@ -154,7 +148,6 @@ public class UserDAOImpl implements UserDAO {
             }
         } catch (SQLException e) {
             log.error(e.getMessage());
-            throw new JDBCConnectionException();
         }
         return user;
     }
@@ -163,16 +156,13 @@ public class UserDAOImpl implements UserDAO {
      * Удаляет все счета, принадлежащие пользователю с заданным id, из базы данных.
      *
      * @param userId Long, представляющее идентификатор пользователя, чьи счета нужно удалить
-     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     * @throws SQLException если произошла ошибка при работе с базой данных
      */
-    private void deleteAllUsersAccounts(Long userId) {
+    private void deleteAllUsersAccounts(Long userId) throws SQLException {
         String sql = "DELETE FROM accounts WHERE user_id = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setLong(1, userId);
             preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            log.error(e.getMessage());
-            throw new JDBCConnectionException();
         }
     }
 

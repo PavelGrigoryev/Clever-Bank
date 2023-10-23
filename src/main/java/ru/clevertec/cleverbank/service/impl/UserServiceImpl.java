@@ -9,14 +9,13 @@ import ru.clevertec.cleverbank.dto.DeleteResponse;
 import ru.clevertec.cleverbank.dto.user.UserRequest;
 import ru.clevertec.cleverbank.dto.user.UserResponse;
 import ru.clevertec.cleverbank.exception.badrequest.UniquePhoneNumberException;
-import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
 import ru.clevertec.cleverbank.exception.notfound.UserNotFoundException;
 import ru.clevertec.cleverbank.mapper.UserMapper;
 import ru.clevertec.cleverbank.model.User;
 import ru.clevertec.cleverbank.service.UserService;
 
-import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -75,15 +74,12 @@ public class UserServiceImpl implements UserService {
     @Override
     @ServiceLoggable
     public UserResponse save(UserRequest request) {
-        User user = userMapper.fromRequest(request);
-        user.setRegisterDate(LocalDate.now());
-        User savedUser;
-        try {
-            savedUser = userDAO.save(user);
-        } catch (JDBCConnectionException e) {
-            throw new UniquePhoneNumberException("User with phone number " + request.mobileNumber() + " is already exist");
-        }
-        return userMapper.toResponse(savedUser);
+        return Optional.of(request)
+                .map(userMapper::fromSaveRequest)
+                .flatMap(userDAO::save)
+                .map(userMapper::toResponse)
+                .orElseThrow(() -> new UniquePhoneNumberException("User with phone number " + request.mobileNumber()
+                                                                  + " is already exist"));
     }
 
     /**
@@ -98,17 +94,12 @@ public class UserServiceImpl implements UserService {
     @Override
     @ServiceLoggable
     public UserResponse update(Long id, UserRequest request) {
-        User userById = findById(id);
-        User user = userMapper.fromRequest(request);
-        user.setId(userById.getId());
-        user.setRegisterDate(userById.getRegisterDate());
-        User updatedUser;
-        try {
-            updatedUser = userDAO.update(user);
-        } catch (JDBCConnectionException e) {
-            throw new UniquePhoneNumberException("User with phone number " + request.mobileNumber() + " is already exist");
-        }
-        return userMapper.toResponse(updatedUser);
+        return Optional.of(findById(id))
+                .map(user -> userMapper.fromUpdateRequest(request, user.getId(), user.getRegisterDate()))
+                .flatMap(userDAO::update)
+                .map(userMapper::toResponse)
+                .orElseThrow(() -> new UniquePhoneNumberException("User with phone number " + request.mobileNumber()
+                                                                  + " is already exist"));
     }
 
     /**
