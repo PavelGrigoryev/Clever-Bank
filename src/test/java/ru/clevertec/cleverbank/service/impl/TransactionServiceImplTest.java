@@ -8,9 +8,21 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.clevertec.cleverbank.builder.account.AccountTestBuilder;
+import ru.clevertec.cleverbank.builder.transaction.AmountStatementResponseTestBuilder;
+import ru.clevertec.cleverbank.builder.transaction.ChangeBalanceResponseTestBuilder;
+import ru.clevertec.cleverbank.builder.transaction.ExchangeBalanceResponseTestBuilder;
+import ru.clevertec.cleverbank.builder.transaction.TransactionRequestTestBuilder;
+import ru.clevertec.cleverbank.builder.transaction.TransactionResponseTestBuilder;
+import ru.clevertec.cleverbank.builder.transaction.TransactionStatementRequestTestBuilder;
+import ru.clevertec.cleverbank.builder.transaction.TransactionStatementResponseTestBuilder;
+import ru.clevertec.cleverbank.builder.transaction.TransactionStatementTestBuilder;
+import ru.clevertec.cleverbank.builder.transaction.TransactionTestBuilder;
+import ru.clevertec.cleverbank.builder.transaction.TransferBalanceResponseTestBuilder;
 import ru.clevertec.cleverbank.dao.TransactionDAO;
 import ru.clevertec.cleverbank.dto.transaction.AmountStatementResponse;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceResponse;
+import ru.clevertec.cleverbank.dto.transaction.ExchangeBalanceResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransactionRequest;
 import ru.clevertec.cleverbank.dto.transaction.TransactionResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransactionStatement;
@@ -22,22 +34,14 @@ import ru.clevertec.cleverbank.exception.notfound.AccountNotFoundException;
 import ru.clevertec.cleverbank.exception.notfound.TransactionNotFoundException;
 import ru.clevertec.cleverbank.mapper.TransactionMapper;
 import ru.clevertec.cleverbank.model.Account;
+import ru.clevertec.cleverbank.model.Currency;
 import ru.clevertec.cleverbank.model.Transaction;
 import ru.clevertec.cleverbank.model.Type;
 import ru.clevertec.cleverbank.service.AccountService;
 import ru.clevertec.cleverbank.service.CheckService;
+import ru.clevertec.cleverbank.service.NbRBCurrencyService;
 import ru.clevertec.cleverbank.service.UploadFileService;
 import ru.clevertec.cleverbank.service.ValidationService;
-import ru.clevertec.cleverbank.builder.account.AccountTestBuilder;
-import ru.clevertec.cleverbank.builder.transaction.AmountStatementResponseTestBuilder;
-import ru.clevertec.cleverbank.builder.transaction.ChangeBalanceResponseTestBuilder;
-import ru.clevertec.cleverbank.builder.transaction.TransactionResponseTestBuilder;
-import ru.clevertec.cleverbank.builder.transaction.TransactionStatementRequestTestBuilder;
-import ru.clevertec.cleverbank.builder.transaction.TransactionStatementResponseTestBuilder;
-import ru.clevertec.cleverbank.builder.transaction.TransactionStatementTestBuilder;
-import ru.clevertec.cleverbank.builder.transaction.TransactionTestBuilder;
-import ru.clevertec.cleverbank.builder.transaction.TransactionRequestTestBuilder;
-import ru.clevertec.cleverbank.builder.transaction.TransferBalanceResponseTestBuilder;
 
 import java.math.BigDecimal;
 import java.nio.file.Path;
@@ -68,6 +72,8 @@ class TransactionServiceImplTest {
     private UploadFileService uploadFileService;
     @Mock
     private ValidationService validationService;
+    @Mock
+    private NbRBCurrencyService nbRBCurrencyService;
     @Mock
     private Connection connection;
 
@@ -274,6 +280,143 @@ class TransactionServiceImplTest {
                     .setAutoCommit(true);
 
             Exception exception = assertThrows(TransactionException.class, () -> transactionService.transferBalance(request));
+            String actualMessage = exception.getMessage();
+
+            assertThat(actualMessage).isEqualTo(expectedMessage);
+        }
+
+    }
+
+    @Nested
+    class ExchangeBalanceTest {
+
+        @Test
+        @SneakyThrows
+        @DisplayName("test should return expected response")
+        void testShouldReturnExpectedResponse() {
+            ExchangeBalanceResponse expected = ExchangeBalanceResponseTestBuilder.aExchangeBalanceResponse().build();
+            TransactionRequest request = TransactionRequestTestBuilder.aTransactionRequest()
+                    .withAccountSenderId(expected.accountSenderId())
+                    .withAccountRecipientId(expected.accountRecipientId())
+                    .withSum(expected.sumSender())
+                    .withType(Type.EXCHANGE)
+                    .build();
+            Account accountSender = AccountTestBuilder.aAccount()
+                    .withId(expected.accountSenderId())
+                    .withBalance(expected.senderOldBalance())
+                    .build();
+            BigDecimal senderOldBalance = accountSender.getBalance();
+            Account accountRecipient = AccountTestBuilder.aAccount()
+                    .withId(expected.accountRecipientId())
+                    .withBalance(expected.recipientOldBalance())
+                    .withCurrency(Currency.EUR)
+                    .build();
+            BigDecimal recipientOldBalance = accountRecipient.getBalance();
+            BigDecimal exchangedSum = expected.sumRecipient();
+            Account updatedAccountSender = AccountTestBuilder.aAccount()
+                    .withId(accountSender.getId())
+                    .withBalance(expected.senderNewBalance())
+                    .build();
+            Account updatedAccountRecipient = AccountTestBuilder.aAccount()
+                    .withId(accountRecipient.getId())
+                    .withBalance(expected.recipientNewBalance())
+                    .withCurrency(Currency.EUR)
+                    .build();
+            Transaction transaction = TransactionTestBuilder.aTransaction()
+                    .withType(Type.EXCHANGE)
+                    .withBankSenderId(accountSender.getBank().getId())
+                    .withBankRecipientId(accountRecipient.getBank().getId())
+                    .withAccountSenderId(accountSender.getId())
+                    .withAccountRecipientId(accountRecipient.getId())
+                    .withSumSender(expected.sumSender())
+                    .withSumRecipient(exchangedSum)
+                    .build();
+            String check = "Check";
+            Path path = Path.of("Path");
+
+            doNothing()
+                    .when(connection)
+                    .setAutoCommit(false);
+            doReturn(accountSender)
+                    .when(accountService)
+                    .findById(request.accountSenderId());
+            doNothing()
+                    .when(validationService)
+                    .validateAccountForClosingDate(accountSender.getClosingDate(), accountSender.getId());
+            doNothing()
+                    .when(validationService)
+                    .validateAccountForSufficientBalance(Type.EXCHANGE, request.sum(), senderOldBalance);
+            doReturn(accountRecipient)
+                    .when(accountService)
+                    .findById(request.accountRecipientId());
+            doNothing()
+                    .when(validationService)
+                    .validateAccountForClosingDate(accountRecipient.getClosingDate(), accountRecipient.getId());
+            doReturn(exchangedSum)
+                    .when(nbRBCurrencyService)
+                    .exchangeSumByCurrency(accountSender.getCurrency(), accountRecipient.getCurrency(), request.sum());
+            doReturn(updatedAccountSender)
+                    .when(accountService)
+                    .updateBalance(accountSender, accountSender.getBalance().subtract(request.sum()));
+            doReturn(updatedAccountRecipient)
+                    .when(accountService)
+                    .updateBalance(accountRecipient, accountRecipient.getBalance().add(exchangedSum));
+            doReturn(transaction)
+                    .when(transactionMapper)
+                    .toExchangeTransaction(Type.EXCHANGE, accountSender.getBank().getId(),
+                            accountRecipient.getBank().getId(), accountSender.getId(), accountRecipient.getId(),
+                            request.sum(), exchangedSum);
+            doReturn(transaction)
+                    .when(transactionDAO)
+                    .save(transaction);
+            doNothing()
+                    .when(connection)
+                    .commit();
+            doReturn(expected)
+                    .when(transactionMapper)
+                    .toExchangeResponse(transaction, accountSender.getCurrency(), accountRecipient.getCurrency(),
+                            accountSender.getBank().getName(), accountRecipient.getBank().getName(), senderOldBalance,
+                            updatedAccountSender.getBalance(), recipientOldBalance, updatedAccountRecipient.getBalance());
+            doReturn(check)
+                    .when(checkService)
+                    .createExchangeBalanceCheck(expected);
+            doReturn(path)
+                    .when(uploadFileService)
+                    .uploadCheck(check);
+            doNothing()
+                    .when(connection)
+                    .setAutoCommit(true);
+
+            ExchangeBalanceResponse actual = transactionService.exchangeBalance(request);
+
+            assertThat(actual).isEqualTo(expected);
+        }
+
+        @Test
+        @SneakyThrows
+        @DisplayName("test should throw TransactionException with expected message")
+        void testShouldThrowTransactionExceptionWithExpectedMessage() {
+            String id = "0J2O 6O3P 1CUB VZUT 91SJ X3FU MUR4";
+            String message = "Account with ID " + id + " is not found!";
+            String expectedMessage = "Transaction rollback, cause: " + message;
+            TransactionRequest request = TransactionRequestTestBuilder.aTransactionRequest()
+                    .withAccountSenderId(id)
+                    .build();
+
+            doNothing()
+                    .when(connection)
+                    .setAutoCommit(false);
+            doThrow(new AccountNotFoundException(message))
+                    .when(accountService)
+                    .findById(id);
+            doNothing()
+                    .when(connection)
+                    .rollback();
+            doNothing()
+                    .when(connection)
+                    .setAutoCommit(true);
+
+            Exception exception = assertThrows(TransactionException.class, () -> transactionService.exchangeBalance(request));
             String actualMessage = exception.getMessage();
 
             assertThat(actualMessage).isEqualTo(expectedMessage);

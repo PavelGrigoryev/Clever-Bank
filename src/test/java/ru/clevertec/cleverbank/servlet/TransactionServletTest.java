@@ -20,6 +20,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.clevertec.cleverbank.builder.transaction.AmountStatementResponseTestBuilder;
 import ru.clevertec.cleverbank.builder.transaction.ChangeBalanceResponseTestBuilder;
+import ru.clevertec.cleverbank.builder.transaction.ExchangeBalanceResponseTestBuilder;
 import ru.clevertec.cleverbank.builder.transaction.TransactionRequestTestBuilder;
 import ru.clevertec.cleverbank.builder.transaction.TransactionResponseTestBuilder;
 import ru.clevertec.cleverbank.builder.transaction.TransactionStatementRequestTestBuilder;
@@ -27,6 +28,7 @@ import ru.clevertec.cleverbank.builder.transaction.TransactionStatementResponseT
 import ru.clevertec.cleverbank.builder.transaction.TransferBalanceResponseTestBuilder;
 import ru.clevertec.cleverbank.dto.transaction.AmountStatementResponse;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceResponse;
+import ru.clevertec.cleverbank.dto.transaction.ExchangeBalanceResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransactionRequest;
 import ru.clevertec.cleverbank.dto.transaction.TransactionResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransactionStatementRequest;
@@ -126,26 +128,30 @@ class TransactionServletTest {
 
         @SneakyThrows
         @RepeatedTest(5)
-        @DisplayName("test doPost transferBalance should catch SQLException and redirect to exception handler")
-        void testDoPostTransferBalanceShouldCatchSQLException() {
+        @DisplayName("test doPost changeBalance should catch IOException and redirect to exception handler")
+        void testDoPostChangeBalanceShouldCatchIOException() {
             TransactionRequest request = TransactionRequestTestBuilder.aTransactionRequest().build();
+            ChangeBalanceResponse response = ChangeBalanceResponseTestBuilder.aChangeBalanceResponse().build();
             String expectedPath = "/exception_handler";
 
             doReturn(asyncContext)
                     .when(req)
                     .startAsync();
-            doReturn(null)
-                    .when(servletRequest)
-                    .getAttribute("changeBalanceRequest");
             doReturn(request)
                     .when(servletRequest)
-                    .getAttribute("transferBalanceRequest");
+                    .getAttribute("changeBalanceRequest");
             doReturn(servletRequest)
                     .when(asyncContext)
                     .getRequest();
-            doThrow(new SQLException("Error message"))
+            doReturn(response)
                     .when(transactionService)
-                    .transferBalance(request);
+                    .changeBalance(request);
+            doReturn(resp)
+                    .when(asyncContext)
+                    .getResponse();
+            doThrow(new IOException("Error Message!"))
+                    .when(resp)
+                    .getWriter();
             doAnswer(invocation -> {
                 latch.countDown();
                 return null;
@@ -213,8 +219,84 @@ class TransactionServletTest {
 
         @SneakyThrows
         @RepeatedTest(5)
-        @DisplayName("test doPut TransactionRequest should capture expected json from PrintWriter and status 201")
-        void testDoPutTransactionRequestShouldCaptureExpectedJsonFromPrintWriter() {
+        @DisplayName("test doPut transferBalance should catch SQLException and redirect to exception handler")
+        void testDoPutTransferBalanceShouldCatchSQLException() {
+            TransactionRequest request = TransactionRequestTestBuilder.aTransactionRequest()
+                    .withType(Type.TRANSFER)
+                    .build();
+            String expectedPath = "/exception_handler";
+
+            doReturn(asyncContext)
+                    .when(req)
+                    .startAsync();
+            doReturn(request)
+                    .when(servletRequest)
+                    .getAttribute("transferBalanceRequest");
+            doReturn(servletRequest)
+                    .when(asyncContext)
+                    .getRequest();
+            doThrow(new SQLException("Error message"))
+                    .when(transactionService)
+                    .transferBalance(request);
+            doAnswer(invocation -> {
+                latch.countDown();
+                return null;
+            })
+                    .when(asyncContext)
+                    .complete();
+
+            transactionServlet.doPut(req, resp);
+            latch.await(5, TimeUnit.SECONDS);
+
+            verify(asyncContext).dispatch(captor.capture());
+
+            String actualPath = captor.getValue();
+
+            assertThat(actualPath).isEqualTo(expectedPath);
+        }
+
+        @SneakyThrows
+        @RepeatedTest(5)
+        @DisplayName("test doPut exchangeBalance should catch SQLException and redirect to exception handler")
+        void testDoPutExchangeBalanceShouldCatchSQLException() {
+            TransactionRequest request = TransactionRequestTestBuilder.aTransactionRequest()
+                    .withType(Type.EXCHANGE)
+                    .build();
+            String expectedPath = "/exception_handler";
+
+            doReturn(asyncContext)
+                    .when(req)
+                    .startAsync();
+            doReturn(request)
+                    .when(servletRequest)
+                    .getAttribute("transferBalanceRequest");
+            doReturn(servletRequest)
+                    .when(asyncContext)
+                    .getRequest();
+            doThrow(new SQLException("Error message"))
+                    .when(transactionService)
+                    .exchangeBalance(request);
+            doAnswer(invocation -> {
+                latch.countDown();
+                return null;
+            })
+                    .when(asyncContext)
+                    .complete();
+
+            transactionServlet.doPut(req, resp);
+            latch.await(5, TimeUnit.SECONDS);
+
+            verify(asyncContext).dispatch(captor.capture());
+
+            String actualPath = captor.getValue();
+
+            assertThat(actualPath).isEqualTo(expectedPath);
+        }
+
+        @SneakyThrows
+        @RepeatedTest(5)
+        @DisplayName("test doPut transferBalance should capture expected json from PrintWriter and status 201")
+        void testDoPutTransferBalanceShouldCaptureExpectedJsonFromPrintWriter() {
             TransactionRequest request = TransactionRequestTestBuilder.aTransactionRequest()
                     .withType(Type.TRANSFER)
                     .build();
@@ -233,6 +315,53 @@ class TransactionServletTest {
             doReturn(response)
                     .when(transactionService)
                     .transferBalance(request);
+            doReturn(resp)
+                    .when(asyncContext)
+                    .getResponse();
+            doReturn(printWriter)
+                    .when(resp)
+                    .getWriter();
+            doAnswer(invocation -> {
+                latch.countDown();
+                return null;
+            })
+                    .when(asyncContext)
+                    .complete();
+
+            transactionServlet.doPut(req, resp);
+            latch.await(5, TimeUnit.SECONDS);
+
+            verify(resp).setStatus(201);
+            verify(printWriter).print(captor.capture());
+            verify(printWriter).flush();
+
+            String actualJson = captor.getValue();
+
+            assertThat(actualJson).isEqualTo(expectedJson);
+        }
+
+        @SneakyThrows
+        @RepeatedTest(5)
+        @DisplayName("test doPut exchangeBalance should capture expected json from PrintWriter and status 201")
+        void testDoPutExchangeBalanceShouldCaptureExpectedJsonFromPrintWriter() {
+            TransactionRequest request = TransactionRequestTestBuilder.aTransactionRequest()
+                    .withType(Type.EXCHANGE)
+                    .build();
+            ExchangeBalanceResponse response = ExchangeBalanceResponseTestBuilder.aExchangeBalanceResponse().build();
+            String expectedJson = gson.toJson(response);
+
+            doReturn(asyncContext)
+                    .when(req)
+                    .startAsync();
+            doReturn(request)
+                    .when(servletRequest)
+                    .getAttribute("transferBalanceRequest");
+            doReturn(servletRequest)
+                    .when(asyncContext)
+                    .getRequest();
+            doReturn(response)
+                    .when(transactionService)
+                    .exchangeBalance(request);
             doReturn(resp)
                     .when(asyncContext)
                     .getResponse();
