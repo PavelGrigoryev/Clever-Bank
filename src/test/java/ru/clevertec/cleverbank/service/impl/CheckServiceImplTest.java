@@ -9,12 +9,16 @@ import ru.clevertec.cleverbank.builder.transaction.AmountStatementResponseTestBu
 import ru.clevertec.cleverbank.builder.transaction.ChangeBalanceResponseTestBuilder;
 import ru.clevertec.cleverbank.builder.transaction.ExchangeBalanceResponseTestBuilder;
 import ru.clevertec.cleverbank.builder.transaction.TransactionStatementResponseTestBuilder;
+import ru.clevertec.cleverbank.builder.transaction.TransactionStatementTestBuilder;
 import ru.clevertec.cleverbank.builder.transaction.TransferBalanceResponseTestBuilder;
 import ru.clevertec.cleverbank.dto.transaction.AmountStatementResponse;
 import ru.clevertec.cleverbank.dto.transaction.ChangeBalanceResponse;
 import ru.clevertec.cleverbank.dto.transaction.ExchangeBalanceResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransactionStatementResponse;
 import ru.clevertec.cleverbank.dto.transaction.TransferBalanceResponse;
+import ru.clevertec.cleverbank.model.Type;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -114,6 +118,35 @@ class CheckServiceImplTest {
                     Дата      |           Примечание                  |    Сумма
                 ----------------------------------------------------------------------
                 2020-04-12    | Перевод         от Иванов             | -2000 BYN
+                """;
+
+        String actual = checkService.createTransactionStatement(response);
+
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("test createTransactionStatement should return expected string with WITHDRAWAL transaction")
+    void testCreateTransactionStatementWithWITHDRAWAL() {
+        TransactionStatementResponse response = TransactionStatementResponseTestBuilder.aTransactionStatementResponse()
+                .withTransactions(List.of(TransactionStatementTestBuilder.aTransactionStatement()
+                        .withType(Type.WITHDRAWAL)
+                        .build()))
+                .build();
+        String expected = """
+                                
+                                             Выписка
+                                           Клевер-Банк
+                Клиент                         | Иванов Иван Иванович
+                Счет                           | 5X92 ISKH ZUAT 2YF5 D0A9 C2Z4 7UIZ
+                Валюта                         | BYN
+                Дата открытия                  | 2020-03-01
+                Период                         | 2020-04-12 - 2020-05-12
+                Дата и время формирования      | 2023-09-02,  15:30:45
+                Остаток                        | 3000 BYN
+                    Дата      |           Примечание                  |    Сумма
+                ----------------------------------------------------------------------
+                2020-04-12    | Снятие          от Иванов             | -2000 BYN
                 """;
 
         String actual = checkService.createTransactionStatement(response);

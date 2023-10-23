@@ -330,7 +330,7 @@ class TransactionValidationFilterTest {
 
     @SneakyThrows
     @ParameterizedTest
-    @MethodSource("getTransactionRequestArguments")
+    @MethodSource("getTransactionRequestArgumentsForPost")
     @DisplayName("test doFilter POST should throw ValidationException with list of violations for TransactionRequest")
     void testDoFilterPOSTShouldThrowValidationExceptionWithListOfViolationsForTransactionRequest(TransactionRequest transactionRequest) {
         String json = gson.toJson(transactionRequest);
@@ -359,13 +359,14 @@ class TransactionValidationFilterTest {
 
     @SneakyThrows
     @ParameterizedTest
-    @MethodSource("getTransactionRequestArguments")
+    @MethodSource("getTransactionRequestArgumentsForPut")
     @DisplayName("test doFilter PUT should throw ValidationException with list of violations for TransactionRequest")
     void testDoFilterPUTShouldThrowValidationExceptionWithListOfViolationsForTransactionRequest(TransactionRequest transactionRequest) {
         String json = gson.toJson(transactionRequest);
         String expectedMessage = """
                 {"violations":[{"fieldName":"account_recipient_id","exception":"Field can not be null, blank or empty"},\
                 {"fieldName":"account_sender_id","exception":"Field can not be null, blank or empty"},\
+                {"fieldName":"type","exception":"Available types are: TRANSFER or EXCHANGE"},\
                 {"fieldName":"sum","exception":"Field must be greater than 0"}]}""";
 
         doReturn("PUT")
@@ -385,7 +386,7 @@ class TransactionValidationFilterTest {
         assertThat(actualMessage).isEqualTo(expectedMessage);
     }
 
-    private static Stream<Arguments> getTransactionRequestArguments() {
+    private static Stream<Arguments> getTransactionRequestArgumentsForPost() {
         return Stream.of(Arguments.of(TransactionRequestTestBuilder.aTransactionRequest()
                         .withType(Type.TRANSFER)
                         .withSum(BigDecimal.ZERO)
@@ -393,7 +394,22 @@ class TransactionValidationFilterTest {
                         .withAccountRecipientId(null)
                         .build()),
                 Arguments.of(TransactionRequestTestBuilder.aTransactionRequest()
-                        .withType(Type.TRANSFER)
+                        .withType(Type.EXCHANGE)
+                        .withSum(BigDecimal.valueOf(-5))
+                        .withAccountSenderId(" ")
+                        .withAccountRecipientId("")
+                        .build()));
+    }
+
+    private static Stream<Arguments> getTransactionRequestArgumentsForPut() {
+        return Stream.of(Arguments.of(TransactionRequestTestBuilder.aTransactionRequest()
+                        .withType(Type.REPLENISHMENT)
+                        .withSum(BigDecimal.ZERO)
+                        .withAccountSenderId("")
+                        .withAccountRecipientId(null)
+                        .build()),
+                Arguments.of(TransactionRequestTestBuilder.aTransactionRequest()
+                        .withType(Type.WITHDRAWAL)
                         .withSum(BigDecimal.valueOf(-5))
                         .withAccountSenderId(" ")
                         .withAccountRecipientId("")
