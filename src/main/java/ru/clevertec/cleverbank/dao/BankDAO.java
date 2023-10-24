@@ -11,9 +11,9 @@ public interface BankDAO {
 
     List<Bank> findAll();
 
-    Bank save(Bank bank);
+    Optional<Bank> save(Bank bank);
 
-    Bank update(Bank bank);
+    Optional<Bank> update(Bank bank);
 
     Optional<Bank> delete(Long id);
 

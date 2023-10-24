@@ -8,9 +8,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
-import ru.clevertec.cleverbank.model.Bank;
 import ru.clevertec.cleverbank.builder.bank.BankTestBuilder;
+import ru.clevertec.cleverbank.model.Bank;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -18,9 +17,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -43,8 +42,8 @@ class BankDAOImplTest {
 
         @Test
         @SneakyThrows
-        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
-        void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
+        @DisplayName("test should throw SQLException with expected message if there is no connection")
+        void testShouldThrowSQLExceptionWithExpectedMessage() {
             String sql = "SELECT * FROM banks WHERE id = ?";
             long id = 1L;
             String expectedMessage = "Sorry! We got Server database connection problems";
@@ -53,7 +52,9 @@ class BankDAOImplTest {
                     .when(connection)
                     .prepareStatement(sql);
 
-            Exception exception = assertThrows(JDBCConnectionException.class, () -> bankDAO.findById(id));
+            assertDoesNotThrow(() -> bankDAO.findById(id));
+
+            Exception exception = assertThrows(SQLException.class, () -> connection.prepareStatement(sql));
             String actualMessage = exception.getMessage();
 
             assertThat(actualMessage).isEqualTo(expectedMessage);
@@ -81,9 +82,8 @@ class BankDAOImplTest {
                     .next();
             getMockedBankFromResultSet(expected);
 
-            Optional<Bank> bank = bankDAO.findById(id);
-
-            bank.ifPresent(actual -> assertThat(actual).isEqualTo(expected));
+            bankDAO.findById(id)
+                    .ifPresent(actual -> assertThat(actual).isEqualTo(expected));
         }
 
     }
@@ -93,8 +93,8 @@ class BankDAOImplTest {
 
         @Test
         @SneakyThrows
-        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
-        void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
+        @DisplayName("test should throw SQLException with expected message if there is no connection")
+        void testShouldThrowSQLExceptionWithExpectedMessage() {
             String sql = "SELECT * FROM banks";
             String expectedMessage = "Sorry! We got Server database connection problems";
 
@@ -102,7 +102,9 @@ class BankDAOImplTest {
                     .when(connection)
                     .prepareStatement(sql);
 
-            Exception exception = assertThrows(JDBCConnectionException.class, () -> bankDAO.findAll());
+            assertDoesNotThrow(() -> bankDAO.findAll());
+
+            Exception exception = assertThrows(SQLException.class, () -> connection.prepareStatement(sql));
             String actualMessage = exception.getMessage();
 
             assertThat(actualMessage).isEqualTo(expectedMessage);
@@ -183,8 +185,8 @@ class BankDAOImplTest {
 
         @Test
         @SneakyThrows
-        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
-        void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
+        @DisplayName("test should throw SQLException with expected message if there is no connection")
+        void testShouldThrowSQLExceptionWithExpectedMessage() {
             String sql = """
                     INSERT INTO banks (name, address, phone_number)
                     VALUES (?, ?, ?)
@@ -196,7 +198,10 @@ class BankDAOImplTest {
                     .when(connection)
                     .prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
-            Exception exception = assertThrows(JDBCConnectionException.class, () -> bankDAO.save(bank));
+            assertDoesNotThrow(() -> bankDAO.save(bank));
+
+            Exception exception = assertThrows(SQLException.class,
+                    () -> connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS));
             String actualMessage = exception.getMessage();
 
             assertThat(actualMessage).isEqualTo(expectedMessage);
@@ -229,9 +234,8 @@ class BankDAOImplTest {
                     .when(resultSet)
                     .getLong(1);
 
-            Bank actual = bankDAO.save(bank);
-
-            assertThat(actual).isEqualTo(bank);
+            bankDAO.save(bank)
+                    .ifPresent(actual -> assertThat(actual).isEqualTo(bank));
         }
 
     }
@@ -241,8 +245,8 @@ class BankDAOImplTest {
 
         @Test
         @SneakyThrows
-        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
-        void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
+        @DisplayName("test should throw SQLException with expected message if there is no connection")
+        void testShouldThrowSQLExceptionWithExpectedMessage() {
             String sql = """
                     UPDATE banks
                     SET name = ?, address = ?, phone_number = ?
@@ -255,7 +259,10 @@ class BankDAOImplTest {
                     .when(connection)
                     .prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
-            Exception exception = assertThrows(JDBCConnectionException.class, () -> bankDAO.update(bank));
+            assertDoesNotThrow(() -> bankDAO.update(bank));
+
+            Exception exception = assertThrows(SQLException.class,
+                    () -> connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS));
             String actualMessage = exception.getMessage();
 
             assertThat(actualMessage).isEqualTo(expectedMessage);
@@ -292,9 +299,8 @@ class BankDAOImplTest {
                     .when(resultSet)
                     .getLong(1);
 
-            Bank actual = bankDAO.update(bank);
-
-            assertThat(actual).isEqualTo(bank);
+            bankDAO.update(bank)
+                    .ifPresent(actual -> assertThat(actual).isEqualTo(bank));
         }
 
     }
@@ -304,17 +310,20 @@ class BankDAOImplTest {
 
         @Test
         @SneakyThrows
-        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
-        void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
-            String sql = "DELETE FROM accounts WHERE bank_id = ?";
+        @DisplayName("test should throw SQLException with expected message if there is no connection")
+        void testShouldThrowSQLExceptionWithExpectedMessage() {
+            String sql = "DELETE FROM banks WHERE id = ?";
             long id = 1L;
             String expectedMessage = "Sorry! We got Server database connection problems";
 
             doThrow(new SQLException(expectedMessage))
                     .when(connection)
-                    .prepareStatement(sql);
+                    .prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
-            Exception exception = assertThrows(JDBCConnectionException.class, () -> bankDAO.delete(id));
+            assertDoesNotThrow(() -> bankDAO.delete(id));
+
+            Exception exception = assertThrows(SQLException.class,
+                    () -> connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS));
             String actualMessage = exception.getMessage();
 
             assertThat(actualMessage).isEqualTo(expectedMessage);
@@ -347,9 +356,8 @@ class BankDAOImplTest {
                     .next();
             getMockedBankFromResultSet(expected);
 
-            Optional<Bank> bank = bankDAO.delete(expected.getId());
-
-            bank.ifPresent(actual -> assertThat(actual).isEqualTo(expected));
+            bankDAO.delete(expected.getId())
+                    .ifPresent(actual -> assertThat(actual).isEqualTo(expected));
         }
 
     }

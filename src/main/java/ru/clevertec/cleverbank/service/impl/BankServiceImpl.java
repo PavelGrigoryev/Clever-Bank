@@ -9,13 +9,13 @@ import ru.clevertec.cleverbank.dto.DeleteResponse;
 import ru.clevertec.cleverbank.dto.bank.BankRequest;
 import ru.clevertec.cleverbank.dto.bank.BankResponse;
 import ru.clevertec.cleverbank.exception.badrequest.UniquePhoneNumberException;
-import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
 import ru.clevertec.cleverbank.exception.notfound.BankNotFoundException;
 import ru.clevertec.cleverbank.mapper.BankMapper;
 import ru.clevertec.cleverbank.model.Bank;
 import ru.clevertec.cleverbank.service.BankService;
 
 import java.util.List;
+import java.util.Optional;
 
 @AllArgsConstructor
 public class BankServiceImpl implements BankService {
@@ -75,14 +75,12 @@ public class BankServiceImpl implements BankService {
     @Override
     @ServiceLoggable
     public BankResponse save(BankRequest request) {
-        Bank bank = bankMapper.fromRequest(request);
-        Bank savedBank;
-        try {
-            savedBank = bankDAO.save(bank);
-        } catch (JDBCConnectionException e) {
-            throw new UniquePhoneNumberException("Bank with phone number " + request.phoneNumber() + " is already exist");
-        }
-        return bankMapper.toResponse(savedBank);
+        return Optional.of(request)
+                .map(bankMapper::fromSaveRequest)
+                .flatMap(bankDAO::save)
+                .map(bankMapper::toResponse)
+                .orElseThrow(() -> new UniquePhoneNumberException("Bank with phone number " + request.phoneNumber()
+                                                                  + " is already exist"));
     }
 
     /**
@@ -97,16 +95,12 @@ public class BankServiceImpl implements BankService {
     @Override
     @ServiceLoggable
     public BankResponse update(Long id, BankRequest request) {
-        findById(id);
-        Bank bank = bankMapper.fromRequest(request);
-        bank.setId(id);
-        Bank updatedBank;
-        try {
-            updatedBank = bankDAO.update(bank);
-        } catch (JDBCConnectionException e) {
-            throw new UniquePhoneNumberException("Bank with phone number " + request.phoneNumber() + " is already exist");
-        }
-        return bankMapper.toResponse(updatedBank);
+        return Optional.of(findById(id))
+                .map(bank -> bankMapper.fromUpdateRequest(request, bank.getId()))
+                .flatMap(bankDAO::update)
+                .map(bankMapper::toResponse)
+                .orElseThrow(() -> new UniquePhoneNumberException("Bank with phone number " + request.phoneNumber()
+                                                                  + " is already exist"));
     }
 
     /**

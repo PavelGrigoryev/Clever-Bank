@@ -3,7 +3,6 @@ package ru.clevertec.cleverbank.dao.impl;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.clevertec.cleverbank.dao.BankDAO;
-import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
 import ru.clevertec.cleverbank.model.Bank;
 import ru.clevertec.cleverbank.util.HikariConnectionManager;
 
@@ -31,7 +30,6 @@ public class BankDAOImpl implements BankDAO {
      *
      * @param id Long, представляющее идентификатор банка
      * @return объект Optional, содержащий банк, если он найден, или пустой, если нет
-     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
      */
     @Override
     public Optional<Bank> findById(Long id) {
@@ -46,7 +44,6 @@ public class BankDAOImpl implements BankDAO {
             }
         } catch (SQLException e) {
             log.error(e.getMessage());
-            throw new JDBCConnectionException();
         }
         return bank;
     }
@@ -55,7 +52,6 @@ public class BankDAOImpl implements BankDAO {
      * Находит все банки в базе данных и возвращает их в виде списка объектов Bank.
      *
      * @return список объектов Bank, представляющих банки
-     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
      */
     @Override
     public List<Bank> findAll() {
@@ -70,24 +66,23 @@ public class BankDAOImpl implements BankDAO {
             }
         } catch (SQLException e) {
             log.error(e.getMessage());
-            throw new JDBCConnectionException();
         }
         return banks;
     }
 
     /**
-     * Сохраняет банк в базе данных и возвращает его в виде объекта Bank.
+     * Сохраняет банк в базе данных и возвращает его в виде объекта Optional.
      *
      * @param bank объект Bank, представляющий банк для сохранения
-     * @return объект Bank, представляющий сохраненный банк
-     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     * @return объект Optional, представляющий сохраненный банк или пустой, если была SQLException
      */
     @Override
-    public Bank save(Bank bank) {
+    public Optional<Bank> save(Bank bank) {
         String sql = """
                 INSERT INTO banks (name, address, phone_number)
                 VALUES (?, ?, ?)
                 """;
+        Optional<Bank> bankOptional = Optional.empty();
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             setBankValuesInStatement(preparedStatement, bank);
             preparedStatement.executeUpdate();
@@ -95,28 +90,28 @@ public class BankDAOImpl implements BankDAO {
             if (resultSet.next()) {
                 long id = resultSet.getLong(1);
                 bank.setId(id);
+                bankOptional = Optional.of(bank);
             }
         } catch (SQLException e) {
             log.error(e.getMessage());
-            throw new JDBCConnectionException();
         }
-        return bank;
+        return bankOptional;
     }
 
     /**
      * Обновляет банк в базе данных и возвращает его в виде объекта Bank.
      *
      * @param bank объект Bank, представляющий банк для обновления
-     * @return объект Bank, представляющий обновленный банк
-     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     * @return объект Optional, представляющий обновлённый банк или пустой, если была SQLException
      */
     @Override
-    public Bank update(Bank bank) {
+    public Optional<Bank> update(Bank bank) {
         String sql = """
                 UPDATE banks
                 SET name = ?, address = ?, phone_number = ?
                 WHERE id = ?
                 """;
+        Optional<Bank> bankOptional = Optional.empty();
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             setBankValuesInStatement(preparedStatement, bank);
             preparedStatement.setLong(4, bank.getId());
@@ -125,12 +120,12 @@ public class BankDAOImpl implements BankDAO {
             if (resultSet.next()) {
                 Long id = resultSet.getLong(1);
                 bank.setId(id);
+                bankOptional = Optional.of(bank);
             }
         } catch (SQLException e) {
             log.error(e.getMessage());
-            throw new JDBCConnectionException();
         }
-        return bank;
+        return bankOptional;
     }
 
     /**
@@ -138,14 +133,13 @@ public class BankDAOImpl implements BankDAO {
      *
      * @param id Long, представляющее идентификатор банка для удаления
      * @return объект Optional, содержащий удаленный банк, если он найден, или пустой, если нет
-     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
      */
     @Override
     public Optional<Bank> delete(Long id) {
-        deleteAllBanksAccounts(id);
         String sql = "DELETE FROM banks WHERE id = ?";
         Optional<Bank> bank = Optional.empty();
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            deleteAllBanksAccounts(id);
             preparedStatement.setLong(1, id);
             preparedStatement.executeUpdate();
             ResultSet resultSet = preparedStatement.getGeneratedKeys();
@@ -154,7 +148,6 @@ public class BankDAOImpl implements BankDAO {
             }
         } catch (SQLException e) {
             log.error(e.getMessage());
-            throw new JDBCConnectionException();
         }
         return bank;
     }
@@ -163,16 +156,12 @@ public class BankDAOImpl implements BankDAO {
      * Удаляет все счета, принадлежащие банку с заданным id, из базы данных.
      *
      * @param bankId Long, представляющее идентификатор банка, чьи счета нужно удалить
-     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
      */
-    private void deleteAllBanksAccounts(Long bankId) {
+    private void deleteAllBanksAccounts(Long bankId) throws SQLException {
         String sql = "DELETE FROM accounts WHERE bank_id = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setLong(1, bankId);
             preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            log.error(e.getMessage());
-            throw new JDBCConnectionException();
         }
     }
 

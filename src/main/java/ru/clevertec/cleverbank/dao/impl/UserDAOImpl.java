@@ -71,10 +71,10 @@ public class UserDAOImpl implements UserDAO {
     }
 
     /**
-     * Сохраняет пользователя в базе данных и возвращает его в виде объекта User.
+     * Сохраняет пользователя в базе данных и возвращает его в виде объекта Optional.
      *
      * @param user объект User, представляющий пользователя для сохранения
-     * @return объект User, представляющий сохраненного пользователя
+     * @return объект Optional, представляющий сохраненного пользователя или пустой, если была SQLException
      */
     @Override
     public Optional<User> save(User user) {
@@ -99,10 +99,10 @@ public class UserDAOImpl implements UserDAO {
     }
 
     /**
-     * Обновляет пользователя в базе данных и возвращает его в виде объекта User.
+     * Обновляет пользователя в базе данных и возвращает его в виде объекта Optional.
      *
      * @param user объект User, представляющий пользователя для обновления
-     * @return объект User, представляющий обновленного пользователя
+     * @return объект Optional, представляющий обновлённого пользователя или пустой, если была SQLException
      */
     @Override
     public Optional<User> update(User user) {

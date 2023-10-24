@@ -12,18 +12,17 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.clevertec.cleverbank.builder.bank.BankRequestTestBuilder;
+import ru.clevertec.cleverbank.builder.bank.BankResponseTestBuilder;
+import ru.clevertec.cleverbank.builder.bank.BankTestBuilder;
 import ru.clevertec.cleverbank.dao.BankDAO;
 import ru.clevertec.cleverbank.dto.DeleteResponse;
 import ru.clevertec.cleverbank.dto.bank.BankRequest;
 import ru.clevertec.cleverbank.dto.bank.BankResponse;
 import ru.clevertec.cleverbank.exception.badrequest.UniquePhoneNumberException;
-import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
 import ru.clevertec.cleverbank.exception.notfound.BankNotFoundException;
 import ru.clevertec.cleverbank.mapper.BankMapper;
 import ru.clevertec.cleverbank.model.Bank;
-import ru.clevertec.cleverbank.builder.bank.BankRequestTestBuilder;
-import ru.clevertec.cleverbank.builder.bank.BankResponseTestBuilder;
-import ru.clevertec.cleverbank.builder.bank.BankTestBuilder;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,7 +31,6 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -152,8 +150,8 @@ class BankServiceImplTest {
 
             doReturn(expected)
                     .when(bankMapper)
-                    .fromRequest(request);
-            doReturn(expected)
+                    .fromSaveRequest(request);
+            doReturn(Optional.of(expected))
                     .when(bankDAO)
                     .save(expected);
             doReturn(response)
@@ -177,8 +175,8 @@ class BankServiceImplTest {
 
             doReturn(bank)
                     .when(bankMapper)
-                    .fromRequest(request);
-            doThrow(new JDBCConnectionException())
+                    .fromSaveRequest(request);
+            doReturn(Optional.empty())
                     .when(bankDAO)
                     .save(bank);
 
@@ -205,8 +203,8 @@ class BankServiceImplTest {
                     .findById(bank.getId());
             doReturn(bank)
                     .when(bankMapper)
-                    .fromRequest(request);
-            doReturn(bank)
+                    .fromUpdateRequest(request, bank.getId());
+            doReturn(Optional.of(bank))
                     .when(bankDAO)
                     .update(bank);
             doReturn(expected)
@@ -231,8 +229,8 @@ class BankServiceImplTest {
                     .findById(bank.getId());
             doReturn(bank)
                     .when(bankMapper)
-                    .fromRequest(request);
-            doThrow(new JDBCConnectionException())
+                    .fromUpdateRequest(request, bank.getId());
+            doReturn(Optional.empty())
                     .when(bankDAO)
                     .update(bank);
 
