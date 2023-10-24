@@ -3,7 +3,6 @@ package ru.clevertec.cleverbank.dao.impl;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.clevertec.cleverbank.dao.AccountDAO;
-import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
 import ru.clevertec.cleverbank.model.Account;
 import ru.clevertec.cleverbank.model.Bank;
 import ru.clevertec.cleverbank.model.Currency;
@@ -36,7 +35,6 @@ public class AccountDAOImpl implements AccountDAO {
      *
      * @param id String, представляющая идентификатор счета
      * @return объект Optional, содержащий счет, если он найден, или пустой, если нет
-     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
      */
     @Override
     public Optional<Account> findById(String id) {
@@ -56,7 +54,6 @@ public class AccountDAOImpl implements AccountDAO {
             }
         } catch (SQLException e) {
             log.error(e.getMessage());
-            throw new JDBCConnectionException();
         }
         return account;
     }
@@ -65,7 +62,6 @@ public class AccountDAOImpl implements AccountDAO {
      * Находит все счета и связанные с ним банк и юзера в базе данных и возвращает их в виде списка объектов Account.
      *
      * @return список объектов Account, представляющих счета
-     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
      */
     @Override
     public List<Account> findAll() {
@@ -84,7 +80,6 @@ public class AccountDAOImpl implements AccountDAO {
             }
         } catch (SQLException e) {
             log.error(e.getMessage());
-            throw new JDBCConnectionException();
         }
         return accounts;
     }
@@ -93,15 +88,15 @@ public class AccountDAOImpl implements AccountDAO {
      * Сохраняет счёт в базе данных и возвращает его в виде объекта Account.
      *
      * @param account объект Account, представляющий счёт для сохранения
-     * @return объект Account, представляющий сохраненный счёт
-     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     * @return объект Optional, представляющий сохраненный счёт или пустой, если была SQLException
      */
     @Override
-    public Account save(Account account) {
+    public Optional<Account> save(Account account) {
         String sql = """
                 INSERT INTO accounts (currency, balance, opening_date, closing_date, bank_id, user_id, id)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
                 """;
+        Optional<Account> accountOptional = Optional.empty();
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             setAccountValuesInStatement(preparedStatement, account);
             preparedStatement.setString(7, RandomStringGenerator.generateRandomString());
@@ -110,28 +105,28 @@ public class AccountDAOImpl implements AccountDAO {
             if (resultSet.next()) {
                 String id = resultSet.getString(1);
                 account.setId(id);
+                accountOptional = Optional.of(account);
             }
         } catch (SQLException e) {
             log.error(e.getMessage());
-            throw new JDBCConnectionException();
         }
-        return account;
+        return accountOptional;
     }
 
     /**
      * Обновляет счёт в базе данных и возвращает его в виде объекта Account.
      *
      * @param account объект Account, представляющий счёт для обновления
-     * @return объект Account, представляющий обновленный счёт
-     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     * @return объект Optional, представляющий обновлённый счёт или пустой, если была SQLException
      */
     @Override
-    public Account update(Account account) {
+    public Optional<Account> update(Account account) {
         String sql = """
                 UPDATE accounts
                 SET currency = ?, balance = ?, opening_date = ?, closing_date = ?, bank_id = ?, user_id = ?
                 WHERE id = ?
                 """;
+        Optional<Account> accountOptional = Optional.empty();
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             setAccountValuesInStatement(preparedStatement, account);
             preparedStatement.setString(7, account.getId());
@@ -140,12 +135,12 @@ public class AccountDAOImpl implements AccountDAO {
             if (resultSet.next()) {
                 String id = resultSet.getString(1);
                 account.setId(id);
+                accountOptional = Optional.of(account);
             }
         } catch (SQLException e) {
             log.error(e.getMessage());
-            throw new JDBCConnectionException();
         }
-        return account;
+        return accountOptional;
     }
 
     /**
@@ -153,7 +148,6 @@ public class AccountDAOImpl implements AccountDAO {
      *
      * @param id String, представляющая идентификатор счёта для удаления
      * @return объект Optional, содержащий удаленный счет, если он найден, или пустой, если нет
-     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
      */
     @Override
     public Optional<Account> delete(String id) {
@@ -168,7 +162,6 @@ public class AccountDAOImpl implements AccountDAO {
             }
         } catch (SQLException e) {
             log.error(e.getMessage());
-            throw new JDBCConnectionException();
         }
         return account;
     }

@@ -8,18 +8,17 @@ import ru.clevertec.cleverbank.dao.impl.AccountDAOImpl;
 import ru.clevertec.cleverbank.dto.DeleteResponse;
 import ru.clevertec.cleverbank.dto.account.AccountRequest;
 import ru.clevertec.cleverbank.dto.account.AccountResponse;
+import ru.clevertec.cleverbank.exception.internalservererror.FailedConnectionException;
 import ru.clevertec.cleverbank.exception.notfound.AccountNotFoundException;
 import ru.clevertec.cleverbank.mapper.AccountMapper;
 import ru.clevertec.cleverbank.model.Account;
-import ru.clevertec.cleverbank.model.Bank;
-import ru.clevertec.cleverbank.model.User;
 import ru.clevertec.cleverbank.service.AccountService;
 import ru.clevertec.cleverbank.service.BankService;
 import ru.clevertec.cleverbank.service.UserService;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @AllArgsConstructor
 public class AccountServiceImpl implements AccountService {
@@ -87,18 +86,17 @@ public class AccountServiceImpl implements AccountService {
      *
      * @param request объект AccountRequest, представляющий запрос с данными для создания нового счета
      * @return объект AccountResponse, представляющий ответ с данными о созданном счете
+     * @throws FailedConnectionException если счёт не получилось сохранить из отсутствия соединения с базой данных
      */
     @Override
     @ServiceLoggable
     public AccountResponse save(AccountRequest request) {
-        Account account = accountMapper.fromRequest(request);
-        User user = userService.findById(request.userId());
-        Bank bank = bankService.findById(request.bankId());
-        account.setOpeningDate(LocalDate.now());
-        account.setUser(user);
-        account.setBank(bank);
-        Account savedAccount = accountDAO.save(account);
-        return accountMapper.toResponse(savedAccount);
+        return Optional.of(request)
+                .map(accountRequest -> accountMapper.fromSaveRequest(accountRequest,
+                        userService.findById(request.userId()), bankService.findById(request.bankId())))
+                .flatMap(accountDAO::save)
+                .map(accountMapper::toResponse)
+                .orElseThrow(() -> new FailedConnectionException("Failed to save " + request));
     }
 
     /**
@@ -107,11 +105,13 @@ public class AccountServiceImpl implements AccountService {
      * @param account объект Account, представляющий счёт, который нужно обновить
      * @param balance объект BigDecimal, представляющий новое значение баланса счёта
      * @return объект Account, представляющий обновленный счёт
+     * @throws FailedConnectionException если счёт не получилось обновить из отсутствия соединения с базой данных
      */
     @Override
     public Account updateBalance(Account account, BigDecimal balance) {
         account.setBalance(balance);
-        return accountDAO.update(account);
+        return accountDAO.update(account)
+                .orElseThrow(() -> new FailedConnectionException("Failed to update balance " + balance));
     }
 
     /**
@@ -119,17 +119,17 @@ public class AccountServiceImpl implements AccountService {
      *
      * @param id String, представляющая id счёта
      * @return объект AccountResponse, представляющий ответ с данными о закрытом счёте
-     * @throws AccountNotFoundException если счёт с заданным id не найден в базе данных
+     * @throws AccountNotFoundException  если счёт с заданным id не найден в базе данных
+     * @throws FailedConnectionException если счёт не получилось закрыть из отсутствия соединения с базой данных
      */
     @Override
     @ServiceLoggable
     public AccountResponse closeAccount(String id) {
-        Account account = accountDAO.findById(id)
-                .orElseThrow(() -> new AccountNotFoundException("Account with ID " + id + " is not found!"));
-        account.setClosingDate(LocalDate.now());
-        account.setBalance(BigDecimal.ZERO);
-        Account updatedAccount = accountDAO.update(account);
-        return accountMapper.toResponse(updatedAccount);
+        return Optional.of(findById(id))
+                .map(accountMapper::fromCloseRequest)
+                .flatMap(accountDAO::update)
+                .map(accountMapper::toResponse)
+                .orElseThrow(() -> new FailedConnectionException("Failed to close account by id " + id));
     }
 
     /**

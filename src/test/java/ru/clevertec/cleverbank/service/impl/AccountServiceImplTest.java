@@ -12,10 +12,16 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.clevertec.cleverbank.builder.account.AccountRequestTestBuilder;
+import ru.clevertec.cleverbank.builder.account.AccountResponseTestBuilder;
+import ru.clevertec.cleverbank.builder.account.AccountTestBuilder;
+import ru.clevertec.cleverbank.builder.bank.BankTestBuilder;
+import ru.clevertec.cleverbank.builder.user.UserTestBuilder;
 import ru.clevertec.cleverbank.dao.AccountDAO;
 import ru.clevertec.cleverbank.dto.DeleteResponse;
 import ru.clevertec.cleverbank.dto.account.AccountRequest;
 import ru.clevertec.cleverbank.dto.account.AccountResponse;
+import ru.clevertec.cleverbank.exception.internalservererror.FailedConnectionException;
 import ru.clevertec.cleverbank.exception.notfound.AccountNotFoundException;
 import ru.clevertec.cleverbank.mapper.AccountMapper;
 import ru.clevertec.cleverbank.model.Account;
@@ -23,11 +29,6 @@ import ru.clevertec.cleverbank.model.Bank;
 import ru.clevertec.cleverbank.model.User;
 import ru.clevertec.cleverbank.service.BankService;
 import ru.clevertec.cleverbank.service.UserService;
-import ru.clevertec.cleverbank.builder.account.AccountRequestTestBuilder;
-import ru.clevertec.cleverbank.builder.account.AccountResponseTestBuilder;
-import ru.clevertec.cleverbank.builder.account.AccountTestBuilder;
-import ru.clevertec.cleverbank.builder.bank.BankTestBuilder;
-import ru.clevertec.cleverbank.builder.user.UserTestBuilder;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -162,14 +163,14 @@ class AccountServiceImplTest {
 
             doReturn(expected)
                     .when(accountMapper)
-                    .fromRequest(request);
+                    .fromSaveRequest(request, user, bank);
             doReturn(user)
                     .when(userService)
                     .findById(request.userId());
             doReturn(bank)
                     .when(bankService)
                     .findById(request.bankId());
-            doReturn(expected)
+            doReturn(Optional.of(expected))
                     .when(accountDAO)
                     .save(expected);
             doReturn(response)
@@ -181,6 +182,18 @@ class AccountServiceImplTest {
 
             Account accountCaptor = captor.getValue();
             assertThat(accountCaptor).isEqualTo(expected);
+        }
+
+        @Test
+        @DisplayName("test should throw FailedConnectionException with expected message")
+        void testShouldThrowFailedConnectionExceptionWithExpectedMessage() {
+            AccountRequest request = AccountRequestTestBuilder.aAccountRequest().build();
+            String expectedMessage = "Failed to save " + request;
+
+            Exception exception = assertThrows(FailedConnectionException.class, () -> accountService.save(request));
+            String actualMessage = exception.getMessage();
+
+            assertThat(actualMessage).isEqualTo(expectedMessage);
         }
 
     }
@@ -196,13 +209,27 @@ class AccountServiceImplTest {
                     .withBalance(newBalance)
                     .build();
 
-            doReturn(expected)
+            doReturn(Optional.of(expected))
                     .when(accountDAO)
                     .update(expected);
 
             Account actual = accountService.updateBalance(expected, newBalance);
 
             assertThat(actual).isEqualTo(expected);
+        }
+
+        @Test
+        @DisplayName("test should throw FailedConnectionException with expected message")
+        void testShouldThrowFailedConnectionExceptionWithExpectedMessage() {
+            Account account = AccountTestBuilder.aAccount().build();
+            BigDecimal balance = BigDecimal.TEN;
+            String expectedMessage = "Failed to update balance " + balance;
+
+            Exception exception = assertThrows(FailedConnectionException.class,
+                    () -> accountService.updateBalance(account, balance));
+            String actualMessage = exception.getMessage();
+
+            assertThat(actualMessage).isEqualTo(expectedMessage);
         }
 
     }
@@ -220,6 +247,9 @@ class AccountServiceImplTest {
                     .when(accountDAO)
                     .findById(account.getId());
             doReturn(account)
+                    .when(accountMapper)
+                    .fromCloseRequest(account);
+            doReturn(Optional.of(account))
                     .when(accountDAO)
                     .update(account);
             doReturn(expected)
@@ -238,6 +268,23 @@ class AccountServiceImplTest {
             String expectedMessage = "Account with ID " + id + " is not found!";
 
             Exception exception = assertThrows(AccountNotFoundException.class, () -> accountService.closeAccount(id));
+            String actualMessage = exception.getMessage();
+
+            assertThat(actualMessage).isEqualTo(expectedMessage);
+        }
+
+        @Test
+        @DisplayName("test should throw FailedConnectionException with expected message")
+        void testShouldThrowFailedConnectionExceptionWithExpectedMessage() {
+            String id = "0J2O 6O3P 1CUB VZUT 91SJ X3FU MUR4";
+            String expectedMessage = "Failed to close account by id " + id;
+            Account account = AccountTestBuilder.aAccount().build();
+
+            doReturn(Optional.of(account))
+                    .when(accountDAO)
+                    .findById(id);
+
+            Exception exception = assertThrows(FailedConnectionException.class, () -> accountService.closeAccount(id));
             String actualMessage = exception.getMessage();
 
             assertThat(actualMessage).isEqualTo(expectedMessage);

@@ -8,9 +8,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
-import ru.clevertec.cleverbank.model.Account;
 import ru.clevertec.cleverbank.builder.account.AccountTestBuilder;
+import ru.clevertec.cleverbank.model.Account;
 
 import java.sql.Connection;
 import java.sql.Date;
@@ -22,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -44,8 +44,8 @@ class AccountDAOImplTest {
 
         @Test
         @SneakyThrows
-        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
-        void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
+        @DisplayName("test should throw SQLException with expected message if there is no connection")
+        void testShouldThrowSQLExceptionWithExpectedMessage() {
             String sql = """
                     SELECT * FROM accounts a
                     JOIN banks b ON b.id = a.bank_id
@@ -59,7 +59,9 @@ class AccountDAOImplTest {
                     .when(connection)
                     .prepareStatement(sql);
 
-            Exception exception = assertThrows(JDBCConnectionException.class, () -> accountDAO.findById(id));
+            assertDoesNotThrow(() -> accountDAO.findById(id));
+
+            Exception exception = assertThrows(SQLException.class, () -> connection.prepareStatement(sql));
             String actualMessage = exception.getMessage();
 
             assertThat(actualMessage).isEqualTo(expectedMessage);
@@ -92,9 +94,8 @@ class AccountDAOImplTest {
                     .next();
             getMockedAccountFromResultSet(expected);
 
-            Optional<Account> account = accountDAO.findById(id);
-
-            account.ifPresent(actual -> assertThat(actual).isEqualTo(expected));
+            accountDAO.findById(id)
+                    .ifPresent(actual -> assertThat(actual).isEqualTo(expected));
         }
 
     }
@@ -104,8 +105,8 @@ class AccountDAOImplTest {
 
         @Test
         @SneakyThrows
-        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
-        void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
+        @DisplayName("test should throw SQLException with expected message if there is no connection")
+        void testShouldThrowSQLExceptionWithExpectedMessage() {
             String sql = """
                     SELECT * FROM accounts a
                     JOIN banks b ON b.id = a.bank_id
@@ -117,7 +118,9 @@ class AccountDAOImplTest {
                     .when(connection)
                     .prepareStatement(sql);
 
-            Exception exception = assertThrows(JDBCConnectionException.class, () -> accountDAO.findAll());
+            assertDoesNotThrow(() -> accountDAO.findAll());
+
+            Exception exception = assertThrows(SQLException.class, () -> connection.prepareStatement(sql));
             String actualMessage = exception.getMessage();
 
             assertThat(actualMessage).isEqualTo(expectedMessage);
@@ -210,8 +213,8 @@ class AccountDAOImplTest {
 
         @Test
         @SneakyThrows
-        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
-        void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
+        @DisplayName("test should throw SQLException with expected message if there is no connection")
+        void testShouldThrowSQLExceptionWithExpectedMessage() {
             String sql = """
                     INSERT INTO accounts (currency, balance, opening_date, closing_date, bank_id, user_id, id)
                     VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -223,7 +226,10 @@ class AccountDAOImplTest {
                     .when(connection)
                     .prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
-            Exception exception = assertThrows(JDBCConnectionException.class, () -> accountDAO.save(account));
+            assertDoesNotThrow(() -> accountDAO.save(account));
+
+            Exception exception = assertThrows(SQLException.class,
+                    () -> connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS));
             String actualMessage = exception.getMessage();
 
             assertThat(actualMessage).isEqualTo(expectedMessage);
@@ -256,9 +262,8 @@ class AccountDAOImplTest {
                     .when(resultSet)
                     .getString(1);
 
-            Account actual = accountDAO.save(account);
-
-            assertThat(actual).isEqualTo(account);
+            accountDAO.save(account)
+                    .ifPresent(actual -> assertThat(actual).isEqualTo(account));
         }
 
     }
@@ -268,8 +273,8 @@ class AccountDAOImplTest {
 
         @Test
         @SneakyThrows
-        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
-        void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
+        @DisplayName("test should throw SQLException with expected message if there is no connection")
+        void testShouldThrowSQLExceptionWithExpectedMessage() {
             String sql = """
                     UPDATE accounts
                     SET currency = ?, balance = ?, opening_date = ?, closing_date = ?, bank_id = ?, user_id = ?
@@ -282,7 +287,10 @@ class AccountDAOImplTest {
                     .when(connection)
                     .prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
-            Exception exception = assertThrows(JDBCConnectionException.class, () -> accountDAO.update(account));
+            assertDoesNotThrow(() -> accountDAO.update(account));
+
+            Exception exception = assertThrows(SQLException.class,
+                    () -> connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS));
             String actualMessage = exception.getMessage();
 
             assertThat(actualMessage).isEqualTo(expectedMessage);
@@ -319,9 +327,8 @@ class AccountDAOImplTest {
                     .when(resultSet)
                     .getString(1);
 
-            Account actual = accountDAO.update(account);
-
-            assertThat(actual).isEqualTo(account);
+            accountDAO.update(account)
+                    .ifPresent(actual -> assertThat(actual).isEqualTo(account));
         }
 
     }
@@ -331,8 +338,8 @@ class AccountDAOImplTest {
 
         @Test
         @SneakyThrows
-        @DisplayName("test should throw JDBCConnectionException with expected message if there is no connection")
-        void testShouldThrowJDBCConnectionExceptionWithExpectedMessage() {
+        @DisplayName("test should throw SQLException with expected message if there is no connection")
+        void testShouldThrowSQLExceptionWithExpectedMessage() {
             String sql = "DELETE FROM accounts WHERE id = ?";
             String id = "MU1Y 7LTU 7QLR 14XD 2789 T5MM XRXU";
             String expectedMessage = "Sorry! We got Server database connection problems";
@@ -341,7 +348,10 @@ class AccountDAOImplTest {
                     .when(connection)
                     .prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
-            Exception exception = assertThrows(JDBCConnectionException.class, () -> accountDAO.delete(id));
+            assertDoesNotThrow(() -> accountDAO.delete(id));
+
+            Exception exception = assertThrows(SQLException.class,
+                    () -> connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS));
             String actualMessage = exception.getMessage();
 
             assertThat(actualMessage).isEqualTo(expectedMessage);

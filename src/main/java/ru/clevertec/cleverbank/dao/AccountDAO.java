@@ -11,9 +11,9 @@ public interface AccountDAO {
 
     List<Account> findAll();
 
-    Account save(Account account);
+    Optional<Account> save(Account account);
 
-    Account update(Account account);
+    Optional<Account> update(Account account);
 
     Optional<Account> delete(String id);
 
