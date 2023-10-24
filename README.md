@@ -33,10 +33,12 @@
    №4 введите ваш password для Postgresql.
 4. В настройках идеи Run -> Edit Configurations... вы должны поставить Tomcat 10.1. И в графе Deployment
    очистить Application context.
-5. При запуске приложения Liquibase сам создаст таблицы и наполнит их дефолтными значениями. И запустится scheduler
-   который будет регулярно, по расписанию (раз в полминуты), проверять, нужно ли начислять проценты на остаток
-   счета в конце месяца.
-6. Приложение готово к использованию.
+5. При запуске приложения Liquibase сам создаст таблицы и наполнит их дефолтными значениями.
+6. И запустится два scheduler:
+    * Первый будет регулярно, по расписанию (раз в полминуты), проверять, нужно ли начислять проценты на остаток
+      счета в конце месяца.
+    * Второй будет подключаться раз в 24 часа к api НБ РБ и получать актуальный курс валют.
+7. Приложение готово к использованию.
 
 ### Http Запросы
 
@@ -47,13 +49,12 @@
 
 ### Unit тесты
 
-1. Написано 302 unit теста
+1. Написано 305 unit теста
 2. Вы можете запустить тесты для этого проекта, выполнив в корне проекта: `./gradlew test`
 
 ### Банковский чек (в логах будет писаться ссылка на скачивания)
 
 ```text
-
 -------------------------------------------------------------
 |                       Банковский чек                      |
 | Чек:                                                   11 |
@@ -77,6 +78,29 @@
 | Сумма:                                           1200 BYN |
 -------------------------------------------------------------
 
+-------------------------------------------------------------
+|                       Банковский чек                      |
+| Чек:                                                   13 |
+| 2023-10-24                                       17:39:48 |
+| Тип транзакции:                                    Снятие |
+| Банк отправителя:                             Клевер-Банк |
+| Банк получателя:                           Россельхозбанк |
+| Счет получателя:       0J2O 6O3P 1CUB VZUT 91SJ X3FU MUR4 |
+| Сумма:                                          -1200 BYN |
+-------------------------------------------------------------
+
+-------------------------------------------------------------
+|                       Банковский чек                      |
+| Чек:                                                   14 |
+| 2023-10-24                                       17:39:51 |
+| Тип транзакции:                                     Обмен |
+| Банк отправителя:                             Клевер-Банк |
+| Банк получателя:                               Альфа-Банк |
+| Счет отправителя:      G5QZ 6B43 A6XG AHNK CO6S PSO6 718Q |
+| Счет получателя:       FUCB OY0M VHZ4 U8Y6 11DQ RQ3Y 5T62 |
+| Сумма отправителя:                                 10 BYN |
+| Сумма получателя:                                2.93 EUR |
+-------------------------------------------------------------
 ```
 
 ### Выписка по транзакциям (в логах будет писаться ссылка на скачивания)
@@ -205,21 +229,22 @@ Response Status 409:
 }
 ```
 
-#### POST перевод с одного счёта на другой
+#### PUT перевод с одного счёта на другой
 
 Request:
 
 * account_sender_id = номер счёта отправителя
 * account_recipient_id = номер счёта получателя
 * sum = сумма денег
+* type = тип должен может быть TRANSFER(Перевод)
 
 ```json
 {
   "account_sender_id": "0J2O 6O3P 1CUB VZUT 91SJ X3FU MUR4",
   "account_recipient_id": "G5QZ 6B43 A6XG AHNK CO6S PSO6 718Q",
-  "sum": 1200
+  "sum": 1200,
+  "type": "TRANSFER"
 }
-
 ```
 
 Response Status 201:
@@ -260,7 +285,73 @@ Response Status 500:
 
 ```json
 {
-  "exception": "Transaction rollback, cause: Insufficient funds in the account! You want to withdrawal/transfer 1200, but you have only 200.00"
+  "exception": "Transaction rollback, cause: Insufficient funds in the account! You want to change balance 1200, but you have only 200.00"
+}
+```
+
+#### PUT перевод с одного счёта на другой с обменом валют по курсу НБ РБ
+
+Request:
+
+* account_sender_id = номер счёта отправителя
+* account_recipient_id = номер счёта получателя
+* sum = сумма денег
+* type = тип должен может быть EXCHANGE(Обмен)
+
+```json
+{
+  "account_sender_id": "G5QZ 6B43 A6XG AHNK CO6S PSO6 718Q",
+  "account_recipient_id": "FUCB OY0M VHZ4 U8Y6 11DQ RQ3Y 5T62",
+  "sum": 10,
+  "type": "EXCHANGE"
+}
+```
+
+Response Status 201:
+
+```json
+{
+  "transaction_id": 11,
+  "date": "2023-10-24",
+  "time": "17:28:46",
+  "currency_sender": "BYN",
+  "currency_recipient": "EUR",
+  "type": "EXCHANGE",
+  "bank_sender_name": "Клевер-Банк",
+  "bank_recipient_name": "Альфа-Банк",
+  "account_sender_id": "G5QZ 6B43 A6XG AHNK CO6S PSO6 718Q",
+  "account_recipient_id": "FUCB OY0M VHZ4 U8Y6 11DQ RQ3Y 5T62",
+  "sum_sender": 10,
+  "sum_recipient": 2.93,
+  "sender_old_balance": 6910.00,
+  "sender_new_balance": 6900.00,
+  "recipient_old_balance": 3533.33,
+  "recipient_new_balance": 3536.26
+}
+```
+
+Response Status 409:
+
+```json
+{
+  "violations": [
+    {
+      "fieldName": "type",
+      "exception": "Available types are: TRANSFER or EXCHANGE"
+    },
+    {
+      "fieldName": "sum",
+      "exception": "Field must be greater than 0"
+    }
+  ]
+}
+```
+
+Response Status 500:
+
+```json
+{
+  "exception": "Transaction rollback, cause: Insufficient funds in the account! You want to change balance 1200, but you have only 200.00"
 }
 ```
 
@@ -385,14 +476,15 @@ Response Status 200:
 ```json
 {
   "id": 2,
-  "date": "2023-09-01",
-  "time": "21:23:35",
-  "type": "REPLENISHMENT",
-  "bank_sender_id": 1,
-  "bank_recipient_id": 6,
-  "account_sender_id": "G5QZ 6B43 A6XG AHNK CO6S PSO6 718Q",
-  "account_recipient_id": "0J2O 6O3P 1CUB VZUT 91SJ X3FU MUR4",
-  "sum": 1200
+  "date": "2023-10-24",
+  "time": "16:51:23",
+  "type": "TRANSFER",
+  "bank_sender_id": 6,
+  "bank_recipient_id": 1,
+  "account_sender_id": "0J2O 6O3P 1CUB VZUT 91SJ X3FU MUR4",
+  "account_recipient_id": "G5QZ 6B43 A6XG AHNK CO6S PSO6 718Q",
+  "sum_sender": 1200,
+  "sum_recipient": 1200
 }
 ```
 
@@ -416,25 +508,27 @@ Response Status 200:
 [
   {
     "id": 1,
-    "date": "2023-09-01",
-    "time": "21:19:28",
+    "date": "2023-10-24",
+    "time": "16:51:21",
     "type": "REPLENISHMENT",
     "bank_sender_id": 1,
     "bank_recipient_id": 6,
     "account_sender_id": "G5QZ 6B43 A6XG AHNK CO6S PSO6 718Q",
     "account_recipient_id": "0J2O 6O3P 1CUB VZUT 91SJ X3FU MUR4",
-    "sum": 1200
+    "sum_sender": 1200,
+    "sum_recipient": 1200
   },
   {
-    "id": 2,
-    "date": "2023-09-01",
-    "time": "21:23:35",
-    "type": "REPLENISHMENT",
+    "id": 3,
+    "date": "2023-10-24",
+    "time": "16:51:25",
+    "type": "EXCHANGE",
     "bank_sender_id": 1,
-    "bank_recipient_id": 6,
+    "bank_recipient_id": 3,
     "account_sender_id": "G5QZ 6B43 A6XG AHNK CO6S PSO6 718Q",
-    "account_recipient_id": "0J2O 6O3P 1CUB VZUT 91SJ X3FU MUR4",
-    "sum": 1200
+    "account_recipient_id": "FUCB OY0M VHZ4 U8Y6 11DQ RQ3Y 5T62",
+    "sum_sender": 10,
+    "sum_recipient": 2.93
   }
 ]
 ```
@@ -450,26 +544,28 @@ Response Status 200:
 ```json
 [
   {
-    "id": 1,
-    "date": "2023-09-01",
-    "time": "21:19:28",
-    "type": "REPLENISHMENT",
+    "id": 8,
+    "date": "2023-10-24",
+    "time": "17:24:08",
+    "type": "WITHDRAWAL",
     "bank_sender_id": 1,
     "bank_recipient_id": 6,
     "account_sender_id": "G5QZ 6B43 A6XG AHNK CO6S PSO6 718Q",
     "account_recipient_id": "0J2O 6O3P 1CUB VZUT 91SJ X3FU MUR4",
-    "sum": 1200
+    "sum_sender": 1200,
+    "sum_recipient": 1200
   },
   {
-    "id": 2,
-    "date": "2023-09-01",
-    "time": "21:23:35",
+    "id": 9,
+    "date": "2023-10-24",
+    "time": "17:24:16",
     "type": "REPLENISHMENT",
     "bank_sender_id": 1,
     "bank_recipient_id": 6,
     "account_sender_id": "G5QZ 6B43 A6XG AHNK CO6S PSO6 718Q",
     "account_recipient_id": "0J2O 6O3P 1CUB VZUT 91SJ X3FU MUR4",
-    "sum": 1200
+    "sum_sender": 1200,
+    "sum_recipient": 1200
   }
 ]
 ```

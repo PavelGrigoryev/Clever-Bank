@@ -60,7 +60,7 @@ public class ValidationServiceImpl implements ValidationService {
     @Override
     public void validateAccountForSufficientBalance(Type type, BigDecimal sum, BigDecimal oldBalance) {
         if (type != Type.REPLENISHMENT && oldBalance.compareTo(sum) < 0) {
-            throw new InsufficientFundsException("Insufficient funds in the account! You want to withdrawal/transfer "
+            throw new InsufficientFundsException("Insufficient funds in the account! You want to change balance "
                                                  + sum + ", but you have only " + oldBalance);
         }
     }

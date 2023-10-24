@@ -69,7 +69,7 @@ class ValidationServiceImplTest {
         BigDecimal sum = BigDecimal.TEN;
         BigDecimal oldBalance = BigDecimal.valueOf(-1);
 
-        String expectedMessage = "Insufficient funds in the account! You want to withdrawal/transfer "
+        String expectedMessage = "Insufficient funds in the account! You want to change balance "
                                  + sum + ", but you have only " + oldBalance;
 
         Exception exception = assertThrows(InsufficientFundsException.class,
