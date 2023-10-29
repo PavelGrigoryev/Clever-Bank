@@ -27,8 +27,9 @@
 
 1. У вас должна быть
    установлена [Java 17](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html),
-   [Tomcat 10.1](https://tomcat.apache.org/download-10.cgi), [Intellij IDEA Ultimate](https://www.jetbrains.com/idea/download/)
-   и [Postgresql](https://www.postgresql.org/download/) (P.S: Postgresql можно развернуть в докере).
+   [Tomcat 10.1](https://tomcat.apache.org/download-10.cgi), [Intellij IDEA Ultimate](https://www.jetbrains.com/idea/download/),
+   [Postgresql](https://www.postgresql.org/download/) и [MongoDB](https://www.mongodb.com/) (P.S: Postgresql и MongoDB
+   можно развернуть в докере).
 2. В Postgresql нужно создать базу данных. Как пример: "clever_bank" . Sql: CREATE DATABASE clever_bank
 3. В [application.yaml](src/main/resources/application.yaml) в строчке №3 введите ваш username для Postgresql, в строчке
    №4 введите ваш password для Postgresql.
@@ -50,8 +51,9 @@
 
 ### Unit тесты
 
-1. Написано 308 unit теста
-2. Вы можете запустить тесты для этого проекта, выполнив в корне проекта: `./gradlew test`
+1. Написан 361 unit тест
+2. Покрытие классов = 93%, методов = 88%, линий = 90%
+3. Вы можете запустить тесты для этого проекта, выполнив в корне проекта: `./gradlew test`
 
 ### Банковский чек (в логах будет писаться ссылка на скачивания)
 

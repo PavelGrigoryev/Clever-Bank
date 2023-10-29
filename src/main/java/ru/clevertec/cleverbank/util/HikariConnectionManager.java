@@ -31,6 +31,12 @@ public class HikariConnectionManager {
         DATA_SOURCE = new HikariDataSource(CONFIG);
     }
 
+    /**
+     * Возвращает объект Connection, представляющий соединение с базой данных PostgresSQL.
+     *
+     * @return объект Connection, представляющий соединение с базой данных PostgresSQL
+     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     */
     public Connection getConnection() {
         Connection connection;
         try {

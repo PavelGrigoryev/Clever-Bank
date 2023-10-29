@@ -10,13 +10,7 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import lombok.extern.slf4j.Slf4j;
-import ru.clevertec.cleverbank.util.YamlUtil;
-
-import java.lang.reflect.InvocationTargetException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.Map;
+import ru.clevertec.cleverbank.util.HikariConnectionManager;
 
 @Slf4j
 @WebListener
@@ -31,7 +25,7 @@ public class LiquibaseInitializer implements ServletContextListener {
      */
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        try (JdbcConnection jdbcConnection = new JdbcConnection(getDatabaseConnection());
+        try (JdbcConnection jdbcConnection = new JdbcConnection(HikariConnectionManager.getConnection());
              ClassLoaderResourceAccessor classLoaderResourceAccessor = new ClassLoaderResourceAccessor()) {
             database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(jdbcConnection);
             new CommandScope("update")
@@ -58,26 +52,6 @@ public class LiquibaseInitializer implements ServletContextListener {
                 log.error(e.getMessage());
             }
         }
-    }
-
-    /**
-     * Возвращает объект Connection, представляющий соединение с базой данных PostgresSQL.
-     *
-     * @return объект Connection, представляющий соединение с базой данных PostgresSQL
-     * @throws SQLException если произошла ошибка при работе с базой данных
-     */
-    private Connection getDatabaseConnection() throws SQLException {
-        Map<String, String> postgresqlMap = new YamlUtil().getYamlMap().get("postgresql");
-        String url = postgresqlMap.get("url");
-        String user = postgresqlMap.get("user");
-        String password = postgresqlMap.get("password");
-        try {
-            Class.forName("org.postgresql.Driver").getDeclaredConstructor().newInstance();
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException |
-                 ClassNotFoundException e) {
-            log.error(e.getMessage());
-        }
-        return DriverManager.getConnection(url, user, password);
     }
 
 }

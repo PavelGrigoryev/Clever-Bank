@@ -84,8 +84,3 @@ VALUES ('AS12 ASDG 1200 2132 ASDA 353A 2132', 'RUB', 10000.00, '2020-01-01', NUL
        ('H8CL X6YN G7I7 UWCX JH5S Z5G7 LVQQ', 'EUR', 9000.00, '2023-04-01', NULL, 3, 23),
        ('6RE0 UZ6A 1I3X YK92 MEUR E5GX 13CW', 'BYN', 2555000.00, '2023-05-01', NULL, 2, 24),
        ('MKDH 6FO0 X66Q YMTT BARX E6AT ENKB', 'RUB', 17000.00, '2023-06-01', NULL, 6, 24);
-
-INSERT INTO nb_rb_currency (currency_id, currency, scale, rate, update_date)
-VALUES (456, 'RUB', 100, 3.3817, '2023-09-17'),
-       (431, 'USD', 1, 3.2605, '2023-09-17'),
-       (451, 'EUR', 1, 3.4773, '2023-09-17');
