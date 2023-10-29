@@ -3,6 +3,7 @@ package ru.clevertec.cleverbank.builder.nbrbcurrency;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.With;
+import org.bson.types.ObjectId;
 import ru.clevertec.cleverbank.builder.TestBuilder;
 import ru.clevertec.cleverbank.model.Currency;
 import ru.clevertec.cleverbank.model.NbRBCurrency;
@@ -16,7 +17,7 @@ import java.time.Month;
 @With
 public class NbRBCurrencyTestBuilder implements TestBuilder<NbRBCurrency> {
 
-    private Long id = 1L;
+    private ObjectId id = new ObjectId();
     private Integer currencyId = Currency.EUR.getCode();
     private Currency currency = Currency.EUR;
     private Integer scale = 1;

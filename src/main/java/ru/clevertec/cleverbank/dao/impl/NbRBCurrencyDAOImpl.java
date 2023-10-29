@@ -1,28 +1,31 @@
 package ru.clevertec.cleverbank.dao.impl;
 
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Sorts;
+import com.mongodb.client.result.InsertOneResult;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.bson.BsonObjectId;
+import org.bson.BsonValue;
+import org.bson.codecs.IntegerCodec;
+import org.bson.codecs.configuration.CodecRegistries;
+import org.bson.types.ObjectId;
 import ru.clevertec.cleverbank.dao.NbRBCurrencyDAO;
-import ru.clevertec.cleverbank.exception.internalservererror.JDBCConnectionException;
-import ru.clevertec.cleverbank.model.Currency;
+import ru.clevertec.cleverbank.exception.internalservererror.FailedConnectionException;
 import ru.clevertec.cleverbank.model.NbRBCurrency;
-import ru.clevertec.cleverbank.util.HikariConnectionManager;
+import ru.clevertec.cleverbank.dao.codec.NbRBCurrencyCodec;
+import ru.clevertec.cleverbank.util.MongoConnectionManager;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Optional;
 
-@Slf4j
 @AllArgsConstructor
 public class NbRBCurrencyDAOImpl implements NbRBCurrencyDAO {
 
-    private final Connection connection;
+    private final MongoCollection<NbRBCurrency> mongoCollection;
 
     public NbRBCurrencyDAOImpl() {
-        connection = HikariConnectionManager.getConnection();
+        mongoCollection = MongoConnectionManager.getInstance(NbRBCurrency.class).getMongoCollection()
+                .withCodecRegistry(CodecRegistries.fromCodecs(new NbRBCurrencyCodec(), new IntegerCodec()));
     }
 
     /**
@@ -30,29 +33,13 @@ public class NbRBCurrencyDAOImpl implements NbRBCurrencyDAO {
      *
      * @param currencyId Integer, представляющее идентификатор курса по НБ РБ
      * @return объект Optional, содержащий курс, если он найден, или пустой, если нет
-     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
      */
     @Override
     public Optional<NbRBCurrency> findByCurrencyId(Integer currencyId) {
-        String sql = """
-                SELECT * FROM nb_rb_currency
-                WHERE currency_id = ?
-                ORDER BY update_date DESC
-                LIMIT 1;
-                """;
-        Optional<NbRBCurrency> nbRBCurrency = Optional.empty();
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setInt(1, currencyId);
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                if (resultSet.next()) {
-                    nbRBCurrency = Optional.of(getNbRBCurrencyFromResultSet(resultSet));
-                }
-            }
-        } catch (SQLException e) {
-            log.error(e.getMessage());
-            throw new JDBCConnectionException();
-        }
-        return nbRBCurrency;
+        return Optional.ofNullable(mongoCollection.find(Filters.eq("currency_id", currencyId))
+                .sort(Sorts.descending("update_date"))
+                .limit(1)
+                .first());
     }
 
     /**
@@ -60,47 +47,17 @@ public class NbRBCurrencyDAOImpl implements NbRBCurrencyDAO {
      *
      * @param nbRBCurrency объект NbRBCurrency, представляющий курс для сохранения
      * @return объект NbRBCurrency, представляющий сохраненный курс
-     * @throws JDBCConnectionException если произошла ошибка при работе с базой данных
+     * @throws FailedConnectionException если произошла ошибка при работе с базой данных
      */
     @Override
     public NbRBCurrency save(NbRBCurrency nbRBCurrency) {
-        String sql = """
-                INSERT INTO nb_rb_currency
-                (currency_id, currency, scale, rate, update_date)
-                VALUES (?, ?, ?, ?, ?)
-                """;
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            setNbRBCurrencyValuesInStatement(preparedStatement, nbRBCurrency);
-            preparedStatement.executeUpdate();
-            ResultSet resultSet = preparedStatement.getGeneratedKeys();
-            if (resultSet.next()) {
-                long id = resultSet.getLong(1);
-                nbRBCurrency.setId(id);
-            }
-        } catch (SQLException e) {
-            log.error(e.getMessage());
-            throw new JDBCConnectionException();
-        }
+        ObjectId id = Optional.of(mongoCollection.insertOne(nbRBCurrency))
+                .map(InsertOneResult::getInsertedId)
+                .map(BsonValue::asObjectId)
+                .map(BsonObjectId::getValue)
+                .orElseThrow(() -> new FailedConnectionException("Failed to save " + nbRBCurrency));
+        nbRBCurrency.setId(id);
         return nbRBCurrency;
-    }
-
-    private NbRBCurrency getNbRBCurrencyFromResultSet(ResultSet resultSet) throws SQLException {
-        return NbRBCurrency.builder()
-                .id(resultSet.getLong("id"))
-                .currencyId(resultSet.getInt("currency_id"))
-                .currency(Currency.valueOf(resultSet.getString("currency")))
-                .scale(resultSet.getInt("scale"))
-                .rate(resultSet.getBigDecimal("rate"))
-                .updateDate(resultSet.getTimestamp("update_date").toLocalDateTime())
-                .build();
-    }
-
-    private void setNbRBCurrencyValuesInStatement(PreparedStatement preparedStatement, NbRBCurrency nbRBCurrency) throws SQLException {
-        preparedStatement.setInt(1, nbRBCurrency.getCurrencyId());
-        preparedStatement.setString(2, String.valueOf(nbRBCurrency.getCurrency()));
-        preparedStatement.setInt(3, nbRBCurrency.getScale());
-        preparedStatement.setBigDecimal(4, nbRBCurrency.getRate());
-        preparedStatement.setObject(5, nbRBCurrency.getUpdateDate());
     }
 
 }

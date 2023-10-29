@@ -3,6 +3,10 @@ postgresql:
   user: "pavel"
   password: "pavel"
   maximumPoolSize: "30"
+mongo:
+  client: "mongodb://localhost:27017"
+  db: "currency_db"
+  collection: "nb_rb_currency"
 scheduler:
   monthPercentage: "1.0"
   initialDelay: "10"

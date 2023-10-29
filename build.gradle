@@ -16,6 +16,7 @@ repositories {
 ext {
     servletVersion = '6.0.0'
     postgresqlVersion = '42.6.0'
+    mongoVersion = '4.11.0'
     hikariVersion = '5.0.1'
     gsonVersion = '2.10.1'
     slf4jVersion = '2.0.7'
@@ -41,8 +42,9 @@ dependencies {
 
     runtimeOnly "org.postgresql:postgresql:$postgresqlVersion"
 
-    implementation "com.zaxxer:HikariCP:${hikariVersion}"
-    implementation "org.aspectj:aspectjtools:${aspectjVersion}"
+    implementation "org.mongodb:mongodb-driver-sync:$mongoVersion"
+    implementation "com.zaxxer:HikariCP:$hikariVersion"
+    implementation "org.aspectj:aspectjtools:$aspectjVersion"
     implementation "com.google.code.gson:gson:$gsonVersion"
     implementation "org.slf4j:slf4j-api:$slf4jVersion"
     implementation "ch.qos.logback:logback-core:$logbackVersion"

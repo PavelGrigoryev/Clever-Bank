@@ -38,6 +38,25 @@ class YamlUtilTest {
     }
 
     @Test
+    @DisplayName("test should return Map of Mongo params")
+    void testShouldReturnMapOfMongoParams() {
+        Map<String, String> mongoMap = yamlUtil.getYamlMap().get("mongo");
+        String expectedClient = "mongodb://localhost:27017";
+        String expectedDb = "currency_db";
+        String expectedCollection = "nb_rb_currency";
+
+        String actualClient = mongoMap.get("client");
+        String actualDb = mongoMap.get("db");
+        String actualCollection = mongoMap.get("collection");
+
+        assertAll(
+                () -> assertThat(actualClient).isEqualTo(expectedClient),
+                () -> assertThat(actualDb).isEqualTo(expectedDb),
+                () -> assertThat(actualCollection).isEqualTo(expectedCollection)
+        );
+    }
+
+    @Test
     @DisplayName("test should return Map of scheduler params")
     void testShouldReturnMapOfSchedulerParams() {
         Map<String, String> shedulerMap = new YamlUtil().getYamlMap().get("scheduler");
