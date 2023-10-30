@@ -16,6 +16,8 @@ public interface AccountService {
 
     List<Account> findAll();
 
+    List<Account> findAllWithPositiveBalance();
+
     List<AccountResponse> findAllResponses();
 
     AccountResponse save(AccountRequest request);

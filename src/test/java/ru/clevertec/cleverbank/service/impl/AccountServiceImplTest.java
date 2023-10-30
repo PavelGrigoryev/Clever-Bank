@@ -147,6 +147,52 @@ class AccountServiceImplTest {
     }
 
     @Nested
+    class FindAllWithPositiveBalanceTest {
+
+        @Test
+        @DisplayName("test should return list of size one")
+        void testShouldReturnListOfSizeOne() {
+            Account account = AccountTestBuilder.aAccount().build();
+            int expectedSize = 1;
+
+            doReturn(List.of(account))
+                    .when(accountDAO)
+                    .findAllWithPositiveBalance();
+
+            List<Account> actual = accountService.findAllWithPositiveBalance();
+
+            assertThat(actual).hasSize(expectedSize);
+        }
+
+        @Test
+        @DisplayName("test should return list that contains expected response")
+        void testShouldReturnListThatContainsExpectedResponse() {
+            Account expected = AccountTestBuilder.aAccount().build();
+
+            doReturn(List.of(expected))
+                    .when(accountDAO)
+                    .findAllWithPositiveBalance();
+
+            List<Account> actual = accountService.findAllWithPositiveBalance();
+
+            assertThat(actual.get(0)).isEqualTo(expected);
+        }
+
+        @Test
+        @DisplayName("test should return empty list")
+        void testShouldReturnEmptyList() {
+            doReturn(List.of())
+                    .when(accountDAO)
+                    .findAllWithPositiveBalance();
+
+            List<Account> actual = accountService.findAllWithPositiveBalance();
+
+            assertThat(actual).isEmpty();
+        }
+
+    }
+
+    @Nested
     class SaveTest {
 
         @ParameterizedTest(name = "{arguments} test")

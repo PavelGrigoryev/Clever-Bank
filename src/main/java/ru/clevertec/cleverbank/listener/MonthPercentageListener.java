@@ -13,28 +13,21 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 @Slf4j
 @WebListener
 public class MonthPercentageListener implements ServletContextListener {
 
-    private final ExecutorService executor;
     private final ScheduledExecutorService scheduler;
-    private final Lock lock;
     private final AccountService accountService;
 
     public MonthPercentageListener() {
-        executor = Executors.newCachedThreadPool();
         scheduler = Executors.newSingleThreadScheduledExecutor();
-        lock = new ReentrantLock();
         accountService = new AccountServiceImpl();
     }
 
@@ -59,22 +52,29 @@ public class MonthPercentageListener implements ServletContextListener {
             boolean isInInterval = currentTime.isAfter(lowerBound) && currentTime.isBefore(upperBound);
             log.info("Scheduled task isLastDayOfMonth={} , isInInterval={}", isLastDayOfMonth, isInInterval);
             if (isLastDayOfMonth && isInInterval) {
-                List<Account> accounts = accountService.findAll();
-                accounts.forEach(account -> executor.submit(() -> {
-                    BigDecimal balance = account.getBalance();
-                    BigDecimal rate = new BigDecimal(monthPercentage);
-                    BigDecimal percentage = balance.multiply(rate).multiply(BigDecimal.valueOf(0.01))
-                            .setScale(2, RoundingMode.DOWN);
-                    balance = balance.add(percentage);
-                    lock.lock();
-                    accountService.updateBalance(account, balance);
-                    lock.unlock();
-                    log.info("Account {} has been credited with +{} at the end of month {}",
-                            account.getId(), percentage, currentDate.getMonth());
-                }));
+                accountService.findAllWithPositiveBalance()
+                        .forEach(account -> CompletableFuture
+                                .supplyAsync(() -> addMonthPercentageToBalance(account, monthPercentage))
+                                .thenApplyAsync(balance -> accountService.updateBalance(account, balance))
+                                .thenAcceptAsync(acc ->
+                                        log.info("Account {} has been credited with {} at the end of month {},\nnew balance is {}",
+                                                acc.getId(), monthPercentage, currentDate.getMonth(), acc.getBalance()))
+                                .exceptionallyAsync(e -> {
+                                    log.error(e.getMessage());
+                                    return null;
+                                }));
             }
         };
         scheduler.scheduleAtFixedRate(task, initialDelay, period, TimeUnit.SECONDS);
+    }
+
+    private static BigDecimal addMonthPercentageToBalance(Account account, String monthPercentage) {
+        BigDecimal balance = account.getBalance();
+        BigDecimal rate = new BigDecimal(monthPercentage);
+        BigDecimal percentage = balance.multiply(rate).multiply(BigDecimal.valueOf(0.01))
+                .setScale(2, RoundingMode.DOWN);
+        balance = balance.add(percentage);
+        return balance;
     }
 
     /**
@@ -84,7 +84,6 @@ public class MonthPercentageListener implements ServletContextListener {
      */
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-        executor.shutdown();
         scheduler.shutdown();
     }
 

@@ -71,17 +71,25 @@ public class AccountDAOImpl implements AccountDAO {
                 JOIN banks b ON b.id = a.bank_id
                 JOIN users u ON u.id = a.user_id
                 """;
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                while (resultSet.next()) {
-                    Account account = getAccountFromResultSet(resultSet);
-                    accounts.add(account);
-                }
-            }
-        } catch (SQLException e) {
-            log.error(e.getMessage());
-        }
-        return accounts;
+        return getAccounts(accounts, sql);
+    }
+
+    /**
+     * Находит все счета чей баланс больше 0 и связанные с ним банк и юзера в базе данных и возвращает их в виде
+     * списка объектов Account.
+     *
+     * @return список объектов Account, представляющих счета
+     */
+    @Override
+    public List<Account> findAllWithPositiveBalance() {
+        List<Account> accounts = new ArrayList<>();
+        String sql = """
+                SELECT * FROM accounts a
+                JOIN banks b ON b.id = a.bank_id
+                JOIN users u ON u.id = a.user_id
+                WHERE a.balance > 0
+                """;
+        return getAccounts(accounts, sql);
     }
 
     /**
@@ -164,6 +172,20 @@ public class AccountDAOImpl implements AccountDAO {
             log.error(e.getMessage());
         }
         return account;
+    }
+
+    private List<Account> getAccounts(List<Account> accounts, String sql) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    Account account = getAccountFromResultSet(resultSet);
+                    accounts.add(account);
+                }
+            }
+        } catch (SQLException e) {
+            log.error(e.getMessage());
+        }
+        return accounts;
     }
 
     private Account getAccountFromResultSet(ResultSet resultSet) throws SQLException {

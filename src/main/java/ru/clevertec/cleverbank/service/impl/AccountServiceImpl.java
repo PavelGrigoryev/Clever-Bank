@@ -72,6 +72,16 @@ public class AccountServiceImpl implements AccountService {
     }
 
     /**
+     * Реализует метод findAllWithPositiveBalance, возвращает список всех счетов баланс которых больше 0 из базы данных.
+     *
+     * @return список объектов Account, представляющих все счета из базы данных с ненулевым балансом
+     */
+    @Override
+    public List<Account> findAllWithPositiveBalance() {
+        return accountDAO.findAllWithPositiveBalance();
+    }
+
+    /**
      * Реализует метод findAllResponses, который возвращает список ответов со всеми данными о счетах из базы данных.
      *
      * @return список объектов AccountResponse, представляющих ответы со всеми данными о счетах из базы данных

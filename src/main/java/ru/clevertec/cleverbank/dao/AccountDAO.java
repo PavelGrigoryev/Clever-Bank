@@ -11,6 +11,8 @@ public interface AccountDAO {
 
     List<Account> findAll();
 
+    List<Account> findAllWithPositiveBalance();
+
     Optional<Account> save(Account account);
 
     Optional<Account> update(Account account);

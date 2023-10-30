@@ -209,6 +209,118 @@ class AccountDAOImplTest {
     }
 
     @Nested
+    class FindAllWithPositiveBalanceTest {
+
+        @Test
+        @SneakyThrows
+        @DisplayName("test should throw SQLException with expected message if there is no connection")
+        void testShouldThrowSQLExceptionWithExpectedMessage() {
+            String sql = """
+                    SELECT * FROM accounts a
+                    JOIN banks b ON b.id = a.bank_id
+                    JOIN users u ON u.id = a.user_id
+                    WHERE a.balance > 0
+                    """;
+            String expectedMessage = "Sorry! We got Server database connection problems";
+
+            doThrow(new SQLException(expectedMessage))
+                    .when(connection)
+                    .prepareStatement(sql);
+
+            assertDoesNotThrow(() -> accountDAO.findAllWithPositiveBalance());
+
+            Exception exception = assertThrows(SQLException.class, () -> connection.prepareStatement(sql));
+            String actualMessage = exception.getMessage();
+
+            assertThat(actualMessage).isEqualTo(expectedMessage);
+        }
+
+        @Test
+        @SneakyThrows
+        @DisplayName("test should return list of size one")
+        void testShouldReturnListOfSizeOne() {
+            String sql = """
+                    SELECT * FROM accounts a
+                    JOIN banks b ON b.id = a.bank_id
+                    JOIN users u ON u.id = a.user_id
+                    WHERE a.balance > 0
+                    """;
+            Account account = AccountTestBuilder.aAccount().build();
+            int expectedSize = 1;
+
+            doReturn(preparedStatement)
+                    .when(connection)
+                    .prepareStatement(sql);
+            doReturn(resultSet)
+                    .when(preparedStatement)
+                    .executeQuery();
+            doReturn(true, false)
+                    .when(resultSet)
+                    .next();
+            getMockedAccountFromResultSet(account);
+
+            List<Account> actual = accountDAO.findAllWithPositiveBalance();
+
+            assertThat(actual).hasSize(expectedSize);
+        }
+
+        @Test
+        @SneakyThrows
+        @DisplayName("test should return list that contains expected response")
+        void testShouldReturnListThatContainsExpectedResponse() {
+            String sql = """
+                    SELECT * FROM accounts a
+                    JOIN banks b ON b.id = a.bank_id
+                    JOIN users u ON u.id = a.user_id
+                    WHERE a.balance > 0
+                    """;
+            Account expected = AccountTestBuilder.aAccount().build();
+
+            doReturn(preparedStatement)
+                    .when(connection)
+                    .prepareStatement(sql);
+            doReturn(resultSet)
+                    .when(preparedStatement)
+                    .executeQuery();
+            doReturn(true, false)
+                    .when(resultSet)
+                    .next();
+            getMockedAccountFromResultSet(expected);
+
+            List<Account> actual = accountDAO.findAllWithPositiveBalance();
+
+            assertThat(actual.get(0)).isEqualTo(expected);
+        }
+
+        @Test
+        @SneakyThrows
+        @DisplayName("test should return empty list")
+        void testShouldReturnEmptyList() {
+            String sql = """
+                    SELECT * FROM accounts a
+                    JOIN banks b ON b.id = a.bank_id
+                    JOIN users u ON u.id = a.user_id
+                    WHERE a.balance > 0
+                    """;
+
+            doReturn(preparedStatement)
+                    .when(connection)
+                    .prepareStatement(sql);
+            doReturn(resultSet)
+                    .when(preparedStatement)
+                    .executeQuery();
+            doReturn(false)
+                    .when(resultSet)
+                    .next();
+
+            List<Account> actual = accountDAO.findAllWithPositiveBalance();
+
+            assertThat(actual).isEmpty();
+        }
+
+    }
+
+    @Nested
     class SaveTest {
 
         @Test

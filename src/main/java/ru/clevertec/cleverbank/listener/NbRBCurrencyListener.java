@@ -7,13 +7,10 @@ import jakarta.servlet.annotation.WebListener;
 import lombok.extern.slf4j.Slf4j;
 import ru.clevertec.cleverbank.dto.nbrbcurrency.NbRBCurrencyResponse;
 import ru.clevertec.cleverbank.model.Currency;
-import ru.clevertec.cleverbank.model.NbRBCurrency;
 import ru.clevertec.cleverbank.service.NbRBCurrencyService;
 import ru.clevertec.cleverbank.service.impl.NbRBCurrencyServiceImpl;
 import ru.clevertec.cleverbank.util.YamlUtil;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -24,21 +21,17 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 @Slf4j
 @WebListener
 public class NbRBCurrencyListener implements ServletContextListener {
 
     private final ScheduledExecutorService scheduler;
-    private final Lock lock;
     private final NbRBCurrencyService nbRBCurrencyService;
     private final Gson gson;
 
     public NbRBCurrencyListener() {
         scheduler = Executors.newScheduledThreadPool(3);
-        lock = new ReentrantLock();
         nbRBCurrencyService = new NbRBCurrencyServiceImpl();
         gson = new Gson();
     }
@@ -63,29 +56,21 @@ public class NbRBCurrencyListener implements ServletContextListener {
     }
 
     private void getCurrencyFromNbRB(String apiUrl, Integer code) {
-        try {
-            HttpClient client = HttpClient.newHttpClient();
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(apiUrl + code))
-                    .timeout(Duration.ofSeconds(5))
-                    .GET()
-                    .build();
-            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-            int responseCode = httpResponse.statusCode();
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                String body = httpResponse.body();
-                NbRBCurrencyResponse response = gson.fromJson(body, NbRBCurrencyResponse.class);
-                lock.lock();
-                NbRBCurrency saved = nbRBCurrencyService.save(response);
-                lock.unlock();
-                log.info("Saving currency on schedule:\n{}", saved);
-            } else {
-                log.error("GET request failed: {}", responseCode);
-            }
-        } catch (IOException | InterruptedException e) {
-            log.error(e.getMessage());
-            Thread.currentThread().interrupt();
-        }
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(apiUrl + code))
+                .timeout(Duration.ofSeconds(5))
+                .GET()
+                .build();
+        client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenApply(HttpResponse::body)
+                .thenApply(body -> gson.fromJson(body, NbRBCurrencyResponse.class))
+                .thenApply(nbRBCurrencyService::save)
+                .thenAccept(nbRBCurrency -> log.info("Saving currency on schedule:\n{}", nbRBCurrency))
+                .exceptionally(e -> {
+                    log.error(e.getMessage());
+                    return null;
+                });
     }
 
     /**
