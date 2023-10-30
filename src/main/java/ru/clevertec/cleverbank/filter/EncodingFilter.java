@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-@WebFilter(urlPatterns = "/*", asyncSupported = true)
+@WebFilter(urlPatterns = {"/users", "/transactions", "/banks", "/accounts"}, asyncSupported = true)
 public class EncodingFilter implements Filter {
 
     /**

@@ -1,0 +1,11 @@
+###загрузить txt файл с банковскими чеками
+GET http://localhost:8080/download?file=BankCheck.txt
+Accept: text/plain
+
+###загрузить txt файл с выписками по транзакциям пользователей за период времени
+GET http://localhost:8080/download?file=TransactionStatement.txt
+Accept: text/plain
+
+###загрузить txt файл с выписками о количестве потраченных и полученных средств за период времени
+GET http://localhost:8080/download?file=AmountStatement.txt
+Accept: text/plain
