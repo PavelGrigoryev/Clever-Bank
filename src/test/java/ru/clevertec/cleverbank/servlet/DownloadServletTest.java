@@ -12,6 +12,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.BufferedReader;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.doReturn;
@@ -28,6 +30,8 @@ class DownloadServletTest {
     private HttpServletResponse resp;
     @Mock
     private ServletOutputStream outputStream;
+    @Mock
+    private BufferedReader reader;
 
     @Test
     @SneakyThrows
@@ -43,9 +47,12 @@ class DownloadServletTest {
         String expectedContentType = "text/plain";
         String expectedCharacterEncoding = "UTF-8";
 
-        doReturn(file)
+        doReturn(reader)
                 .when(req)
-                .getParameter("file");
+                .getReader();
+        doReturn(file, (Object) null)
+                .when(reader)
+                .readLine();
         doReturn(outputStream)
                 .when(resp)
                 .getOutputStream();

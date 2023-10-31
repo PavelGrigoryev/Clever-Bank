@@ -6,13 +6,13 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 
 @WebServlet(urlPatterns = "/download")
 public class DownloadServlet extends HttpServlet {
-
 
     /**
      * Переопределяет метод doGet, который обрабатывает GET-запросы к ресурсу /download. Через него можно скачать чеки
@@ -24,8 +24,8 @@ public class DownloadServlet extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String file = req.getParameter("file");
-        if (Objects.nonNull(file)) {
+        String file = extractTextFromBody(req);
+        if (!file.isEmpty()) {
             resp.setHeader("Content-Disposition", "attachment; filename=\"%s\"".formatted(file));
             resp.setContentType("text/plain");
             resp.setCharacterEncoding("UTF-8");
@@ -37,6 +37,16 @@ public class DownloadServlet extends HttpServlet {
                 }
             }
         }
+    }
+
+    private String extractTextFromBody(HttpServletRequest req) throws IOException {
+        BufferedReader reader = req.getReader();
+        StringBuilder result = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            result.append(line);
+        }
+        return result.toString();
     }
 
 }
